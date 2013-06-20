@@ -2,10 +2,11 @@ package com.softanalle.scma;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
+//import android.widget.Button;
 import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
