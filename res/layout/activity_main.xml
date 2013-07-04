@@ -14,13 +14,20 @@
         android:layout_height="wrap_content"
         android:text="@string/hello_world" />
 
+    <com.softanalle.scma.LedIndicator
+        android:id="@+id/ledIndicator1"
+        android:layout_width="wrap_content"
+        android:layout_height="24dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true" />
+
     <ToggleButton
-        android:id="@+id/toggleButton1"
+        android:id="@+id/toggleButton3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/textView1"
-        android:layout_below="@+id/textView1"
-        android:layout_marginTop="46dp"
+        android:layout_alignBaseline="@+id/toggleButton2"
+        android:layout_alignBottom="@+id/toggleButton2"
+        android:layout_alignRight="@+id/ledIndicator1"
         android:text="ToggleButton" />
 
     <ToggleButton
@@ -29,17 +36,25 @@
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/toggleButton1"
         android:layout_alignBottom="@+id/toggleButton1"
-        android:layout_toRightOf="@+id/textView1"
+        android:layout_toLeftOf="@+id/toggleButton3"
         android:text="ToggleButton" />
 
     <ToggleButton
-        android:id="@+id/toggleButton3"
+        android:id="@+id/toggleButton1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/toggleButton2"
-        android:layout_alignBottom="@+id/toggleButton2"
-        android:layout_marginLeft="14dp"
-        android:layout_toRightOf="@+id/toggleButton2"
+        android:layout_below="@+id/textView1"
+        android:layout_marginTop="49dp"
+        android:layout_toLeftOf="@+id/toggleButton2"
+        android:text="ToggleButton" />
+
+    <ToggleButton
+        android:id="@+id/boardOnOffButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/toggleButton1"
+        android:layout_alignBottom="@+id/toggleButton1"
+        android:layout_alignRight="@+id/textView1"
         android:text="ToggleButton" />
 
 </RelativeLayout>
