@@ -1,4 +1,4 @@
-package com.softanalle.scma;
+package com.softanalle.ledtest0;
 
 import android.os.Bundle;
 import android.app.Activity;
@@ -11,7 +11,7 @@ import android.widget.ToggleButton;
 
 public class MainActivity extends Activity {
 
-	private static String APPTAG = "SCMA0_1";
+	private static String APPTAG = "LEDTEST00_1";
 
 	private ToggleButton button1_, button2_, button3_, onOffBtn_;
 	@Override

@@ -1,4 +1,4 @@
-package com.softanalle.scma;
+package com.softanalle.ledtest0;
 
 import android.view.View;
 import android.content.Context;
@@ -18,7 +18,7 @@ public class LedIndicator extends View {
 			Color.WHITE,
 			Color.RED,
 			Color.GREEN,
-			Color.BLUE,                     
+			Color.BLUE,
 			Color.BLACK,
 			Color.MAGENTA,
 			Color.YELLOW,
