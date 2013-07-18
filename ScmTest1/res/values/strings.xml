@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SCM Test App 1</string>
+    <string name="channel1_label">Channel 1 value:</string>
+    <string name="channel2_label">Channel 2 value:</string>
+    <string name="channel3_label">Channel 3 value:</string>
+    <string name="poweron_label">Power on</string>
+    <string name="poweroff_label">Power off</string>
+    <string name="zero_text">0.00</string>
+    <string name="storageBtn_label">CLICK</string>
+</resources>
