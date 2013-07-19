@@ -8,4 +8,6 @@
     <string name="poweroff_label">Power off</string>
     <string name="zero_text">0.00</string>
     <string name="storageBtn_label">CLICK</string>
+    <string name="mn_config_label">Configuration</string>
+    <string name="mn_reset_label">Reset config</string>
 </resources>
