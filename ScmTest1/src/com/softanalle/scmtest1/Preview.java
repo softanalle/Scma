@@ -83,10 +83,12 @@ SurfaceView.OnClickListener {
 	}
 
 	@Override
-	public void draw(Canvas canvas) {
+	public void onDraw(Canvas canvas) {
 		super.draw(canvas);
+		canvas.drawColor(Color.WHITE);
 		
 		Paint p = new Paint(Color.RED);
+		p.setTextSize(canvas.getHeight() / 10);
 		Log.d(TAG, "draw");
 		canvas.drawText("PREVIEW",  canvas.getWidth() / 2,  canvas.getHeight() / 2, p);
 	}

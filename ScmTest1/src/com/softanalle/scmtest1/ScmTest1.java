@@ -194,14 +194,16 @@ public class ScmTest1 extends IOIOActivity {
 			//setNumber( 2, pulseWidth2_ );
 			//setNumber( 3, pulseWidth3_ );
 			
+			powout_.write( powerState_ );
+			
 			pwmOutput1_.setPulseWidth( pulseWidth1_ );
 			pwmOutput2_.setPulseWidth( pulseWidth2_ );
 			pwmOutput3_.setPulseWidth( pulseWidth3_ );
 
 			led_.write( !powerState_ );
-			/*
-			 * powout_.write(toggleButton_.isChecked());
-			 */
+			
+			
+			 
 			//ledIndicator_.setPowerState( powerState_ );
 			Thread.sleep(10);
 		}
