@@ -17,10 +17,12 @@ import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
+import android.annotation.TargetApi;
 import android.app.admin.DevicePolicyManager;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
@@ -46,8 +48,11 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -58,12 +63,19 @@ import android.widget.FrameLayout;
 
 import android.app.admin.DevicePolicyManager;
 
-public class ScmTest1 extends IOIOActivity {
+public class ScmTest1 extends IOIOActivity implements
+OnSharedPreferenceChangeListener {
 
+	private static final String SETTINGS_CHANNEL0 = "CHANNEL0_PWM";
+	private static final String SETTINGS_CHANNEL1 = "CHANNEL1_PWM";
+	private static final String SETTINGS_CHANNEL2 = "CHANNEL2_PWM";
+	private static final String SETTINGS_CHANNEL_WHITE = "CHANNEL_WHITE_PWM";
+	
 	private ToggleButton toggleButton_;
 	private LedIndicator ledIndicator_;
 	private Button pictureButton_;
 
+	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -123,6 +135,19 @@ public class ScmTest1 extends IOIOActivity {
 		mDPM = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 		Log.d(TAG, "  getCameraDisabled(): " + mDPM.getCameraDisabled(null));
 
+		// Display the fragment as the main content.
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsFragment())
+                .commit();
+
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        //String syncConnPref = sharedPref.getString(SettingsActivity.KEY_PREF_SYNC_CONN, "");
+		
+        pulseWidth1_ = sharedPref.getInt(SETTINGS_CHANNEL0, 1000);
+        pulseWidth2_ = sharedPref.getInt(SETTINGS_CHANNEL1, 1000);
+        pulseWidth3_ = sharedPref.getInt(SETTINGS_CHANNEL2, 1000);
+        
+		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
 		enableUi(false);
 	}
@@ -276,7 +301,7 @@ public class ScmTest1 extends IOIOActivity {
 	// camera stuff
 
 
-
+	private static String mImagePrefix = "focus";
 	private static final String TAG = "ScmTest1";
 	Camera mCamera;
 	Preview mPreview;
@@ -319,9 +344,9 @@ public class ScmTest1 extends IOIOActivity {
 		public void onPictureTaken(byte[] data, Camera camera) {
 			FileOutputStream outStream = null;
 			try {
-				outStream = new FileOutputStream(String.format("%s/SCM/%d.jpg",
+				outStream = new FileOutputStream(String.format("%s/SCM/%d_%s.jpg",
 						Environment.getExternalStorageDirectory().getPath(),
-						System.currentTimeMillis()));
+						System.currentTimeMillis(), mImagePrefix));
 				outStream.write(data);
 				outStream.close();
 				Log.d(TAG, "onPictureTaken - wrote bytes: " + data.length);
@@ -351,5 +376,30 @@ public class ScmTest1 extends IOIOActivity {
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+	
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		
+        if (key.equals(SETTINGS_CHANNEL0)) {
+            Preference connectionPref = findPreference(key);
+            // Set summary to be the user-description for the selected value
+            connectionPref.setSummary(sharedPreferences.getString(key, ""));
+        } else if (key.equals(SETTINGS_CHANNEL1)) {
+        	pulseWidth2_ = findPrerefences(key).toInteger();
+        }
+    }
+
+	@Override
+	protected void onResume() {
+	    super.onResume();
+	    getPreferenceScreen().getSharedPreferences()
+	            .registerOnSharedPreferenceChangeListener(this);
+	}
+
+	@Override
+	protected void onPause() {
+	    super.onPause();
+	    getPreferenceScreen().getSharedPreferences()
+	            .unregisterOnSharedPreferenceChangeListener(this);
 	}
 }

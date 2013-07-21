@@ -8,6 +8,16 @@
     <string name="poweroff_label">Power off</string>
     <string name="zero_text">0.00</string>
     <string name="storageBtn_label">CLICK</string>
-    <string name="mn_config_label">Configuration</string>
+    <string name="mn_config_label">Settings</string>
     <string name="mn_reset_label">Reset config</string>
+    <string name="pw_red_label">Red value:</string>
+    <string name="pw_green_label">Green value:</string>
+    <string name="pw_blue_label">Blue value:</string>
+    <string name="pw_white_label">White value:</string>
+    <string name="led_default_pwm">1000</string>
+    <string name="led_powers_label">Led PWM values</string>
+    <string name="channel1_conf_key"></string>
+    <string name="channel2_conf_key"></string>
+    <string name="channel3_conf_key"></string>
+    <string name="channel_white_conf_key"></string>
 </resources>

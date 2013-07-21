@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
-    <group android:id="@+id/mn_config" android:visible="true"></group><item android:id="@+id/menu_config" android:visible="true" android:enabled="true" android:title="@string/mn_config_label"></item>
+    <group android:id="@+id/mn_config" android:visible="true">
+    <item android:id="@+id/menu_config" android:visible="true" android:enabled="true" android:title="@string/mn_config_label"></item>
     <item android:id="@+id/item1" android:visible="true" android:enabled="true" android:title="@string/mn_reset_label"></item>
-    
+    </group>
     
 
 </menu>

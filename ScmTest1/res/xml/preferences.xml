@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    <PreferenceCategory android:title="@string/led_powers_label">
+        <Preference android:title="@string/pw_red_label" android:defaultValue="@string/led_default_pwm" android:key="@string/channel1_conf_key"/>
+        <Preference android:title="@string/pw_green_label" android:defaultValue="@string/led_default_pwm" android:key="@string/channel2_conf_key"/>
+        <Preference android:title="@string/pw_blue_label" android:defaultValue="@string/led_default_pwm" android:key="@string/channel3_conf_key"/>
+        <Preference android:title="@string/pw_white_label" android:defaultValue="@string/led_default_pwm" android:key="@string/channel_white_conf_key"/>
+    </PreferenceCategory>
+    
+
+</PreferenceScreen>
