@@ -9,7 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import ioio.lib.api.AnalogInput;
+//import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.PwmOutput;
@@ -22,13 +22,14 @@ import android.app.admin.DevicePolicyManager;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
+//import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.SeekBar;
-import android.widget.TextView;
+//import android.widget.SeekBar;
+//import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -48,6 +49,8 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.Preference;
+import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.content.Context;
@@ -66,14 +69,26 @@ import android.app.admin.DevicePolicyManager;
 public class ScmTest1 extends IOIOActivity implements
 OnSharedPreferenceChangeListener {
 
-	private static final String SETTINGS_CHANNEL0 = "CHANNEL0_PWM";
-	private static final String SETTINGS_CHANNEL1 = "CHANNEL1_PWM";
-	private static final String SETTINGS_CHANNEL2 = "CHANNEL2_PWM";
-	private static final String SETTINGS_CHANNEL_WHITE = "CHANNEL_WHITE_PWM";
+
+	protected final String FILEMODE_JPG = "jpg";
+	protected final String FILEMODE_RAW = "raw";
+	
+	private String mCurrentFileMode = FILEMODE_JPG;
+	
+	protected String mImageSuffix = "focus";
+	
+	private static final int defaultPulseWidth = 1000;
+	
+	private static final String SETTINGS_CHANNEL0 = "CONF_CHANNEL1_PWM";
+	private static final String SETTINGS_CHANNEL1 = "CONF_CHANNEL2_PWM";
+	private static final String SETTINGS_CHANNEL2 = "CONF_CHANNEL3_PWM";
+	//private static final String SETTINGS_CHANNEL3 = "CONF_CHANNEL4_PWM";
+	private static final String SETTINGS_CHANNEL_FOCUS = "CONF_CHANNEL_FOCUS_PWM";
 	
 	private ToggleButton toggleButton_;
 	private LedIndicator ledIndicator_;
 	private Button pictureButton_;
+	private int pulseWidthFocus_;
 
 	@TargetApi(Build.VERSION_CODES.HONEYCOMB)
 	@Override
@@ -136,28 +151,32 @@ OnSharedPreferenceChangeListener {
 		Log.d(TAG, "  getCameraDisabled(): " + mDPM.getCameraDisabled(null));
 
 		// Display the fragment as the main content.
+		/*
         getFragmentManager().beginTransaction()
                 .replace(android.R.id.content, new SettingsFragment())
                 .commit();
-
+*/
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
         //String syncConnPref = sharedPref.getString(SettingsActivity.KEY_PREF_SYNC_CONN, "");
 		
-        pulseWidth1_ = sharedPref.getInt(SETTINGS_CHANNEL0, 1000);
-        pulseWidth2_ = sharedPref.getInt(SETTINGS_CHANNEL1, 1000);
-        pulseWidth3_ = sharedPref.getInt(SETTINGS_CHANNEL2, 1000);
+        pulseWidthFocus_ = sharedPref.getInt(SETTINGS_CHANNEL_FOCUS, defaultPulseWidth);
         
-		PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-
+        pulseWidth1_ = sharedPref.getInt(SETTINGS_CHANNEL0, defaultPulseWidth);
+        pulseWidth2_ = sharedPref.getInt(SETTINGS_CHANNEL1, defaultPulseWidth);
+        pulseWidth3_ = sharedPref.getInt(SETTINGS_CHANNEL2, defaultPulseWidth);
+        
+		
 		enableUi(false);
 	}
 
 	private boolean powerState_ = false;
 	
 	private void powerLedsOn() {
-		pulseWidth1_ = 1000;
-		pulseWidth2_ = 1000;
-		pulseWidth3_ = 1000;
+		pulseWidth1_ = defaultPulseWidth;
+		pulseWidth2_ = defaultPulseWidth;
+		pulseWidth3_ = defaultPulseWidth;
 		
 		ledIndicator_.turnOn(0);
 		ledIndicator_.turnOn(1);
@@ -318,30 +337,21 @@ OnSharedPreferenceChangeListener {
 
 	PictureCallback rawCallback = new PictureCallback() {
 		public void onPictureTaken(byte[] data, Camera camera) {
+			// writeImageToDisc(FILEMODE_RAW, mImageSuffix, data);
+			
 			Log.d(TAG, "onPictureTaken() - raw");
-			/*
-			FileOutputStream outStream = null;
-			try {
-				outStream = new FileOutputStream(String.format("%s/SCM/%d.raw",
-						Environment.getExternalStorageDirectory().getPath(),
-						System.currentTimeMillis()));
-				outStream.write(data);
-				outStream.close();
-				Log.d(TAG, "onRawPictureTaken - wrote bytes: " + data.length);
-				Toast.makeText(getApplicationContext(), "RAW - wrote bytes: " + data.length, Toast.LENGTH_LONG).show();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-			}
+			
 			Log.d(TAG, "onPictureTaken - raw");
-			*/
+			
 		}
 	};
-
-	PictureCallback jpegCallback = new PictureCallback() {
-		public void onPictureTaken(byte[] data, Camera camera) {
+	/*
+	private class AsyncWriteImageTask extends AsyncTask<String, Void, Boolean> {
+	    / ** The system calls this to perform work in a worker thread and
+	      * delivers it the parameters given to AsyncTask.execute() * /
+	    protected Boolean doInBackground(String urls, byte[] data) {
+	    	Boolean status = false;
+	    	
 			FileOutputStream outStream = null;
 			try {
 				outStream = new FileOutputStream(String.format("%s/SCM/%d_%s.jpg",
@@ -349,18 +359,62 @@ OnSharedPreferenceChangeListener {
 						System.currentTimeMillis(), mImagePrefix));
 				outStream.write(data);
 				outStream.close();
-				Log.d(TAG, "onPictureTaken - wrote bytes: " + data.length);
+				Log.d(TAG, "aSyncWrite - wrote bytes: " + data.length);
 				Toast.makeText(getApplicationContext(), "JPEG - wrote bytes: " + data.length, Toast.LENGTH_LONG).show();
+				status = true;
 			} catch (FileNotFoundException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
 				e.printStackTrace();
 			} finally {
 			}
-			Log.d(TAG, "onPictureTaken - jpeg");
+
+	        return status;
+	    }
+	    
+	    /** The system calls this to perform work in the UI thread and delivers
+	      * the result from doInBackground() * /
+	    protected void onPostExecute(Boolean result) {
+	        // mImageView.setImageBitmap(result);
+	    	// TODO: do we need here some indicator?
+	    	
+	    }
+
+		@Override
+		protected Boolean doInBackground(String... params) {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	}
+*/
+	
+	PictureCallback jpegCallback = new PictureCallback() {
+		public void onPictureTaken(byte[] data, Camera camera) {
+			
+			writeImageToDisc(mCurrentFileMode, mImageSuffix, data);
+			
 		}
 	};
 
+	private void writeImageToDisc(String filemode, String suffix, byte[] data) {
+		Log.d(TAG, "writeImageToDisc - begin");
+		FileOutputStream outStream = null;
+		try {
+			outStream = new FileOutputStream(String.format("%s/SCM/%d_%s.%s",
+					Environment.getExternalStorageDirectory().getPath(),
+					System.currentTimeMillis(), suffix, filemode));
+			outStream.write(data);
+			outStream.close();
+			Log.d(TAG, "writeImageToDisc - wrote bytes: " + data.length);
+			Toast.makeText(getApplicationContext(), "JPEG - wrote bytes: " + data.length, Toast.LENGTH_LONG).show();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+		}		
+		Log.d(TAG, "writeImageToDisc - complete");
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -372,23 +426,34 @@ OnSharedPreferenceChangeListener {
 		switch (item.getItemId()) {
 		case R.id.menu_config:
 			Toast.makeText(getApplicationContext(), "Should show config menu", Toast.LENGTH_LONG).show();
+			
+
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
-	
+	/*
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		
-        if (key.equals(SETTINGS_CHANNEL0)) {
-            Preference connectionPref = findPreference(key);
+		Preference keyPref = findPreference(key);
+        if (key.equalsIgnoreCase(SETTINGS_CHANNEL0) or
+        		key.equalsIgnoreCase(SETTINGS_CHANNEL1) or
+        		key.equalsIgnoreCase(SETTINGS_CHANNEL2) or
+        		key.equalsIgnoreCase(SETTINGS_CHANNEL_FOCUS)) {
+            
             // Set summary to be the user-description for the selected value
-            connectionPref.setSummary(sharedPreferences.getString(key, ""));
+            //keyPref.setSummary(sharedPreferences.getString(key, ""));
         } else if (key.equals(SETTINGS_CHANNEL1)) {
-        	pulseWidth2_ = findPrerefences(key).toInteger();
-        }
+        	pulseWidth2_ = sharedPreferences.getInt(SETTINGS_CHANNEL1, defaultPulseWidth);
+        } 
     }
-
+*/
+	/*
+	private Preference findPreference(String key) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+*/
 	@Override
 	protected void onResume() {
 	    super.onResume();
@@ -396,10 +461,32 @@ OnSharedPreferenceChangeListener {
 	            .registerOnSharedPreferenceChangeListener(this);
 	}
 
+	private Preference getPreferenceScreen() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	@Override
 	protected void onPause() {
 	    super.onPause();
 	    getPreferenceScreen().getSharedPreferences()
 	            .unregisterOnSharedPreferenceChangeListener(this);
+	}
+
+	@Override
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
+			String key) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public static class SettingsFragment extends PreferenceFragment {
+	    @Override
+	    public void onCreate(Bundle savedInstanceState) {
+	        super.onCreate(savedInstanceState);
+
+	        // Load the preferences from an XML resource
+	        addPreferencesFromResource(R.xml.preferences);
+	    }	    
 	}
 }
