@@ -6,11 +6,35 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+    android:orientation="vertical"
     tools:context=".MainActivity" >
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/hello_world" />
+           <LedIndicator
+                android:id="@+id/ledIndicator1"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:layout_gravity="top|left" >
+
+        </LedIndicator>
+
+            <ToggleButton
+                android:id="@+id/ToggleButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|left"
+                android:layout_margin="5dp"
+                android:layout_marginLeft="14dp"
+                android:layout_marginTop="51dp"
+                android:textOff="@string/poweroff_label"
+                android:textOn="@string/poweron_label" />
+
+            <Button
+                android:id="@+id/pictureButton"
+                android:layout_width="120dp"
+                android:layout_height="50dp"
+                android:layout_gravity="bottom|right"
+                android:layout_margin="5dp"
+                android:layout_marginRight="14dp"
+                android:text="@string/storageBtn_label" />
 
 </RelativeLayout>
