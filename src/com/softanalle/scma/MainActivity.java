@@ -28,15 +28,16 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 //import android.widget.SeekBar;
 //import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
-import com.softanalle.scmctrls.LedIndicator;
+//import com.softanalle.scmctrls.LedIndicator;
 //import com.softanalle.previewtest.Preview;
-import com.softanalle.scmtest1.R;
+import com.softanalle.scma.R;
 
 
 // camera stuff
@@ -67,7 +68,8 @@ import android.widget.FrameLayout;
 import android.app.admin.DevicePolicyManager;
 
 
-public class MainActivity extends IOIOActivity {
+public class MainActivity extends IOIOActivity implements
+OnSharedPreferenceChangeListener {
        protected final String FILEMODE_JPG = "jpg";
         protected final String FILEMODE_RAW = "raw";
         
@@ -100,7 +102,8 @@ public class MainActivity extends IOIOActivity {
 
                 // camera stuff
                 mPreview = new Preview(this);
-                FrameLayout tmp = (FrameLayout) findViewById(R.id.RootFrame);
+                //FrameLayout tmp = (FrameLayout) findViewById(R.id.RootFrame);
+                RelativeLayout tmp = (RelativeLayout) findViewById(R.layout.activity_main);
                 tmp.addView(mPreview);
 
                 ledIndicator_.bringToFront();
