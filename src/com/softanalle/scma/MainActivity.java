@@ -68,8 +68,11 @@ import android.widget.FrameLayout;
 import android.app.admin.DevicePolicyManager;
 
 
-public class MainActivity extends IOIOActivity implements
-OnSharedPreferenceChangeListener {
+public class MainActivity extends IOIOActivity 
+/*implements
+OnSharedPreferenceChangeListener 
+*/
+{
        protected final String FILEMODE_JPG = "jpg";
         protected final String FILEMODE_RAW = "raw";
         
@@ -458,21 +461,29 @@ private boolean powerState_ = false;
         @Override
         protected void onResume() {
             super.onResume();
+            /*
             getPreferenceScreen().getSharedPreferences()
                     .registerOnSharedPreferenceChangeListener(this);
+                    */
         }
 
+        /*
         private Preference getPreferenceScreen() {
                 // TODO Auto-generated method stub
                 return null;
         }
+        */
+        
         @Override
         protected void onPause() {
             super.onPause();
+            /*
             getPreferenceScreen().getSharedPreferences()
                     .unregisterOnSharedPreferenceChangeListener(this);
+                    */
         }
 
+        /*
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
                         String key) {
@@ -489,5 +500,5 @@ private boolean powerState_ = false;
                 addPreferencesFromResource(R.xml.preferences);
             }       
         }
-
+*/
 }
