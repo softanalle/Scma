@@ -25,11 +25,12 @@ import android.view.View;
 public class Preview extends SurfaceView implements SurfaceHolder.Callback,
 SurfaceView.OnClickListener {
 	private final static String TAG = "Preview";
-	
+
 	private boolean isReady_ = false;
 
 	SurfaceHolder mHolder;
 	public Camera camera;
+	
 	Preview(Context context) {
 		super(context);
 
@@ -39,9 +40,15 @@ SurfaceView.OnClickListener {
 	}
 
 	public void surfaceCreated(SurfaceHolder holder) {
+		Log.d(TAG, "surfaceCreated(holder)");
+		if ( camera == null ) {
 		camera = Camera.open();
+		}
+		
 		try {
+			
 			camera.setPreviewDisplay(holder);
+			camera.setDisplayOrientation(0);
 			camera.setPreviewCallback(new PreviewCallback() {
 				public void onPreviewFrame(byte[] data, Camera arg1) {
 					/*
@@ -67,33 +74,57 @@ SurfaceView.OnClickListener {
 			e.printStackTrace();
 		}
 	}
+	
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		camera.stopPreview();
-		camera.release();
+		Log.d(TAG, "surfaceDestroyed(holder)");
+		if ( camera != null ) {
+			camera.stopPreview();
+			camera.release();
+		}
 		camera = null;
 		isReady_ = false;
 	}
 
 	public void surfaceChanged(SurfaceHolder holder, int format, int height, int width) {
-		Camera.Parameters params = camera.getParameters();
-		params.setPreviewSize(width,  height);
-		camera.setParameters(params);
-		camera.startPreview();
-		isReady_ = true;
+		Log.d(TAG, "surfaceChanged(holder)");
+		if ( camera == null ) {
+			camera = Camera.open();
+		}
+		if (camera != null) {
+			Camera.Parameters params = camera.getParameters();
+			params.setPreviewSize(width,  height);
+			camera.setParameters(params);
+			camera.startPreview();
+			isReady_ = true;
+		}
 	}
 
+	/*
 	@Override
 	public void onDraw(Canvas canvas) {
 		super.draw(canvas);
-		canvas.drawColor(Color.WHITE);
 		
+		canvas.drawColor(Color.WHITE);
+
 		Paint p = new Paint(Color.RED);
 		p.setTextSize(canvas.getHeight() / 10);
 		Log.d(TAG, "draw");
 		canvas.drawText("PREVIEW",  canvas.getWidth() / 2,  canvas.getHeight() / 2, p);
 	}
+*/
 
+	private String mImageFilenameSuffix = "focus";
+	
+	public String getImageFilenameSuffix() {
+		return mImageFilenameSuffix;
+	}
 
+	public void setImageFilenameSuffix(String imageFilenameSuffix) {
+		mImageFilenameSuffix = imageFilenameSuffix;
+	}
+
+	
+	
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
@@ -106,7 +137,8 @@ SurfaceView.OnClickListener {
 				// TODO Auto-generated method stub
 				FileOutputStream outStream = null;
 				try {
-					outStream = new FileOutputStream(String.format("%s/SCM/%d.jpg", Environment.getExternalStorageDirectory().getPath(), System.currentTimeMillis()));
+					outStream = new FileOutputStream(String.format("%s/SCM/P_%d_%s.jpg", 
+							Environment.getExternalStorageDirectory().getPath(), System.currentTimeMillis(), mImageFilenameSuffix));
 					outStream.write(data);
 					outStream.close();
 					Log.d(TAG, "saveJpegCallback - wrote bytes: " + data.length);
@@ -121,7 +153,7 @@ SurfaceView.OnClickListener {
 		});
 
 	}
-	
+
 	public boolean isReady() {
 		return isReady_;
 	}

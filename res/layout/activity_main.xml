@@ -9,32 +9,31 @@
     android:orientation="vertical"
     tools:context=".MainActivity" >
 
-           <LedIndicator
+           <com.softanalle.scma.LedIndicator
                 android:id="@+id/ledIndicator1"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:layout_gravity="top|left" >
 
-        </LedIndicator>
-
-            <ToggleButton
-                android:id="@+id/ToggleButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|left"
-                android:layout_margin="5dp"
-                android:layout_marginLeft="14dp"
-                android:layout_marginTop="51dp"
-                android:textOff="@string/poweroff_label"
-                android:textOn="@string/poweron_label" />
+        </com.softanalle.scma.LedIndicator>
 
             <Button
                 android:id="@+id/pictureButton"
                 android:layout_width="120dp"
                 android:layout_height="50dp"
-                android:layout_gravity="bottom|right"
+                android:layout_alignParentBottom="true"
+                android:layout_alignRight="@+id/ledIndicator1"
                 android:layout_margin="5dp"
-                android:layout_marginRight="14dp"
                 android:text="@string/storageBtn_label" />
+
+            <ToggleButton
+                android:id="@+id/powerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBottom="@+id/pictureButton"
+                android:layout_alignLeft="@+id/ledIndicator1"
+                android:layout_margin="5dp"
+                android:textOff="@string/poweroff_label"
+                android:textOn="@string/poweron_label" />
 
 </RelativeLayout>

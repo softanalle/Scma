@@ -95,8 +95,10 @@ public class LedIndicator extends View {
 				mLeds[i].getPaint().setColor(mOffColor);
 				int x = mLeft + 2 + i * mWidth;
 				int y = mTop + 2 ;
-				mLeds[i].setBounds(x, y, x + mWidth, y + mHeight);
+				
 				mLedArea[i] = new Rect( mRight - mWidth, y, mRight, y + mHeight );
+				mLeds[i].setBounds(mLedArea[i]);
+				// mLeds[i].setBounds(x, y, x + mWidth, y + mHeight);
 			}
 			mPowerLed = new ShapeDrawable(new RectShape());
 			mPowerLed.getPaint().setColor(mOffColor);
@@ -108,6 +110,7 @@ public class LedIndicator extends View {
 		} finally {
 			isReady = true;
 		}
+		Log.d(TAG, "initializeFirstTime(): success");
 	}
 
 	@Override
@@ -191,6 +194,24 @@ public class LedIndicator extends View {
 		// invalidate led area
 		invalidate(mLedArea[index]);
 	}
+    
+    
+    public void setLedState(int index, boolean onoff) {
+    	if ( index >= 0 && index < mLedCount) {
+    		Log.d(TAG, "ledState(" + index + " => " + onoff + ")");
+    		mActivity[index] = onoff;
+    		if ( onoff ) {
+    			mLeds[index].getPaint().setColor(mRectColors[index]);
+    		} else {
+    			mLeds[index].getPaint().setColor(mOffColor);
+    		}
+    	}
+    	invalidate(mLedArea[index]);
+    }
+    
+    public int getLedCount() {
+    	return mLedCount;
+    }
 }
 
 
