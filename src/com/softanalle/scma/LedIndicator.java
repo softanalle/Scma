@@ -20,22 +20,27 @@ public class LedIndicator extends View {
 	private boolean isInitialized = false;
 	private static String TAG = "LedIndicator";
 	private int[] mRectColors = {
-			Color.WHITE,
-			Color.RED,
 			Color.GREEN,
 			Color.BLUE,
+			Color.RED,
+			
+			Color.WHITE,
 			Color.BLACK,
-			Color.MAGENTA,
 			Color.YELLOW,
+						
+			Color.MAGENTA,			
 			Color.CYAN
 	};
-	public static final int LED_WHITE = 0;
-	public static final int LED_RED = 1;
-	public static final int LED_GREEN = 2;
-	public static final int LED_BLUE = 3;
+	
+	public static final int LED_WHITE = 3;
+	public static final int LED_RED = 2;
+	public static final int LED_GREEN = 0;
+	public static final int LED_BLUE = 1;
 	public static final int LED_NIR = 4;
-	public static final int LED_MAGENTA = 5;
-
+	public static final int LED_YELLOW = 5;
+	public static final int LED_MAGENTA = 6;
+	public static final int LED_CYAN = 7;
+	
 	protected static final int LED_FOCUS = 6;
 	protected static final int LED_CALIBRATE = 7;
 	

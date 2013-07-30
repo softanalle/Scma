@@ -74,6 +74,17 @@ public class MainActivity extends IOIOActivity
 OnSharedPreferenceChangeListener 
  */
 {
+	// IOIO pin settings
+	private static final int IOIO_PIN_BOARD1_UP = 6;
+	private static final int IOIO_PIN_BOARD2_UP = 5;
+	
+	private static final int IOIO_PIN_LED_WHITE  = 2;
+	private static final int IOIO_PIN_LED_YELLOW = 3;
+	private static final int IOIO_PIN_LED_NIR    = 4;
+	private static final int IOIO_PIN_LED_GREEN  = 10;
+	private static final int IOIO_PIN_LED_BLUE   = 11;
+	private static final int IOIO_PIN_LED_RED    = 12;
+	// 
 	protected final String FILEMODE_JPG = "jpg";
 	protected final String FILEMODE_RAW = "raw";
 
@@ -82,15 +93,16 @@ OnSharedPreferenceChangeListener
 	private static int mCurrentLedIndex = 0;
 	protected static final String[] mImageSuffix = { "blue", "green", "red", "white", "yellow", "nir" };
 
-	private static int defaultPulseWidth = 500; // PWM pulse width	
+	private static final int defaultPulseWidth = 500; // PWM pulse width
 	private static final int mLedFlashTime = 1000; // milliseconds the flash leds are on
 	private static final int mLedCount = 6; // how many leds actually there are!
 
 	private static final int mFocusLedIndex = 3; // index of IOIO PIN 2 
-	private static int defaultFocusPulseWidth = 500; // PWM pulse width for focus 
+	private static int defaultFocusPulseWidth = 300; // PWM pulse width for focus 
 	
-	private int mPulseWidth[];   // PWM pulse width array for leds
-	private boolean[] mLedState; // led status (on/off)
+	private int mPulseWidth[];      // PWM pulse width array for leds
+	private boolean[] mLedState;    // led status (on/off)
+	private int[] mDefaultPulseWidth; // default pulse width for leds 
 	
 	private static final String SETTINGS_CHANNEL0 = "CONF_CHANNEL1_PWM";
 	private static final String SETTINGS_CHANNEL1 = "CONF_CHANNEL2_PWM";
@@ -113,6 +125,7 @@ OnSharedPreferenceChangeListener
 		ledIndicator_ = (LedIndicator) findViewById(R.id.ledIndicator1);
 
 		toggleButton_.setEnabled(false);
+		toggleButton_.setChecked(false);
 		
 		// camera stuff
 		mPreview = new Preview(this);
@@ -149,9 +162,13 @@ OnSharedPreferenceChangeListener
 
 		mPulseWidth = new int[mLedCount];
 		mLedState = new boolean[mLedCount];
+		mDefaultPulseWidth = new int[mLedCount];
 		for (int index=0;index<mLedCount;index++) {
 			mLedState[index] = false;
-			mPulseWidth[index] = defaultPulseWidth;
+			
+			mDefaultPulseWidth[index] = defaultPulseWidth;
+			mPulseWidth[index] = mDefaultPulseWidth[index];
+			
 		}
 		//buttonClick = (Button) findViewById(R.id.button1);
 
@@ -240,36 +257,21 @@ OnSharedPreferenceChangeListener
 	// private Thread waitThread;
 
 	private void takeColorSeries() {
-		
+		mLedState[mFocusLedIndex] = false;
+		mPulseWidth[mFocusLedIndex] = mDefaultPulseWidth[mFocusLedIndex];
 		
 		try {
 			for (int index = 0; index < mLedCount; index++) {
+				
 				mCurrentLedIndex = index;
 				mLedState[index] = true;
-				mPulseWidth[index] = defaultPulseWidth;
+				mPulseWidth[index] = mDefaultPulseWidth[index];
 				
-				/*
-			    waitThread=  new Thread(){
-			        @Override
-			        public void run(){
-			            try {
-			                synchronized(this){
-			                    wait(mLedFlashTime);
-			                }
-			            }
-			            catch(InterruptedException ex){                    
-			            }
-
-			            // TODO              
-			        }
-			    };
-
-			    waitThread.start();
-			    */
 				Thread.sleep(mLedFlashTime);
 				mPulseWidth[index] = 0;
 				mLedState[index] = false;
 			}
+			
 			synchronized (MainActivity.class) {
 				mShutdown = true;
 				
@@ -354,32 +356,34 @@ OnSharedPreferenceChangeListener
 		private DigitalOutput powout1_;
 		private DigitalOutput powout2_;
 
-		
+
 		
 		@Override
 		public void setup() throws ConnectionLostException {
 			led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
-			powout1_ = ioio_.openDigitalOutput(6, true);
-			powout2_ = ioio_.openDigitalOutput(5, true);
+			powout1_ = ioio_.openDigitalOutput(IOIO_PIN_BOARD1_UP, true);
+			powout2_ = ioio_.openDigitalOutput(IOIO_PIN_BOARD2_UP, true);
 			//input_ = ioio_.openAnalogInput(40);
 
-			pwmOutput1_ = ioio_.openPwmOutput(10, 100);
-			pwmOutput2_ = ioio_.openPwmOutput(11, 100);
-			pwmOutput3_ = ioio_.openPwmOutput(12, 100);
+			pwmOutput1_ = ioio_.openPwmOutput(IOIO_PIN_LED_GREEN, 100);
+			pwmOutput2_ = ioio_.openPwmOutput(IOIO_PIN_LED_BLUE, 100);
+			pwmOutput3_ = ioio_.openPwmOutput(IOIO_PIN_LED_RED, 100);
 
-			pwmOutput4_ = ioio_.openPwmOutput(2, 100);
-			pwmOutput5_ = ioio_.openPwmOutput(3, 100);
-			pwmOutput6_ = ioio_.openPwmOutput(4, 100);
+			pwmOutput4_ = ioio_.openPwmOutput(IOIO_PIN_LED_WHITE, 100);
+			pwmOutput5_ = ioio_.openPwmOutput(IOIO_PIN_LED_YELLOW, 100);
+			pwmOutput6_ = ioio_.openPwmOutput(IOIO_PIN_LED_NIR, 100);
 
+
+			powout1_.write( false );
+			powout2_.write( false );
 			
 			pwmOutput1_.setPulseWidth( 0 );
 			pwmOutput2_.setPulseWidth( 0 );
 			pwmOutput3_.setPulseWidth( 0 );
-
-			
-			
-			powout1_.write( false );
-			powout2_.write( false );
+			pwmOutput4_.setPulseWidth( 0 );
+			pwmOutput5_.setPulseWidth( 0 );
+			pwmOutput6_.setPulseWidth( 0 );
+						
 
 			try {
 				File saveDir = new File(String.format("%s/SCM", Environment.getExternalStorageDirectory().getPath()));
@@ -399,12 +403,8 @@ OnSharedPreferenceChangeListener
 		@Override
 		public void loop() throws ConnectionLostException, InterruptedException {
 
-			visualize();
 
-			//setNumber( 1, pulseWidth1_ );
-			//setNumber( 2, pulseWidth2_ );
-			//setNumber( 3, pulseWidth3_ );
-
+			
 			synchronized (MainActivity.class) {
 				if (!mShutdown) {
 					powout1_.write( powerState_ );
@@ -434,7 +434,8 @@ OnSharedPreferenceChangeListener
 			}
 						
 			led_.write( !powerState_ );
-			
+
+			visualize();
 
 			// Log.d(TAG, "IOIO-output: " );
 
@@ -518,7 +519,7 @@ OnSharedPreferenceChangeListener
 
 	private static String mImagePrefix = "focus";
 	public static final String TAG = "SCMA";
-	protected Camera mCamera;
+	// protected Camera mCamera;
 	protected Preview mPreview;
 	protected Button buttonClick;
 
