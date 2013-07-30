@@ -42,7 +42,8 @@ SurfaceView.OnClickListener {
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.d(TAG, "surfaceCreated(holder)");
 		if ( camera == null ) {
-		camera = Camera.open();
+			Log.d(TAG, "-camera was null, opening");
+			camera = Camera.open();
 		}
 		
 		try {
@@ -66,7 +67,8 @@ SurfaceView.OnClickListener {
 					}
 					 */
 					Log.d(TAG, "onPreviewFrame() - updated preview screen");
-					Preview.this.invalidate();
+					// TODO: commented this out, should it be like this?
+					// Preview.this.invalidate();
 				}
 			});
 			isReady_ = true;
@@ -78,6 +80,7 @@ SurfaceView.OnClickListener {
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		Log.d(TAG, "surfaceDestroyed(holder)");
 		if ( camera != null ) {
+			Log.d(TAG, "-camera was not null, releasing");
 			camera.stopPreview();
 			camera.release();
 		}
@@ -88,14 +91,18 @@ SurfaceView.OnClickListener {
 	public void surfaceChanged(SurfaceHolder holder, int format, int height, int width) {
 		Log.d(TAG, "surfaceChanged(holder)");
 		if ( camera == null ) {
+			Log.d(TAG, "-camera was null, opening");
 			camera = Camera.open();
 		}
+		
 		if (camera != null) {
 			Camera.Parameters params = camera.getParameters();
 			params.setPreviewSize(width,  height);
 			camera.setParameters(params);
 			camera.startPreview();
 			isReady_ = true;
+		} else {
+			Log.d(TAG, "-camera is still null, failed to retrieve");
 		}
 	}
 

@@ -79,14 +79,18 @@ OnSharedPreferenceChangeListener
 
 	volatile static boolean mShutdown = false;
 	private String mCurrentFileMode = FILEMODE_JPG;
+	private static int mCurrentLedIndex = 0;
+	protected static final String[] mImageSuffix = { "blue", "green", "red", "white", "yellow", "nir" };
 
-	protected String mImageSuffix = "focus";
-
-	private static final int defaultPulseWidth = 500; // PWM pulse width
+	private static int defaultPulseWidth = 500; // PWM pulse width	
 	private static final int mLedFlashTime = 1000; // milliseconds the flash leds are on
 	private static final int mLedCount = 6; // how many leds actually there are!
 
-	private int mPulseWidth[];
+	private static final int mFocusLedIndex = 3; // index of IOIO PIN 2 
+	private static int defaultFocusPulseWidth = 500; // PWM pulse width for focus 
+	
+	private int mPulseWidth[];   // PWM pulse width array for leds
+	private boolean[] mLedState; // led status (on/off)
 	
 	private static final String SETTINGS_CHANNEL0 = "CONF_CHANNEL1_PWM";
 	private static final String SETTINGS_CHANNEL1 = "CONF_CHANNEL2_PWM";
@@ -180,10 +184,14 @@ OnSharedPreferenceChangeListener
 				if ( ((ToggleButton) v).isChecked()) {
 					powerState_ = true;
 					pictureButton_.setEnabled(true);
+					mLedState[mFocusLedIndex] = true;
+					mPulseWidth[mFocusLedIndex] = defaultFocusPulseWidth;
+					mCurrentLedIndex = mFocusLedIndex;
 				} else {
 					powerState_ = false;
 					pictureButton_.setEnabled(false);
 					mShutdown = true;
+					mLedState[mFocusLedIndex] = false;
 				}                                               
 			}
 		});
@@ -236,6 +244,7 @@ OnSharedPreferenceChangeListener
 		
 		try {
 			for (int index = 0; index < mLedCount; index++) {
+				mCurrentLedIndex = index;
 				mLedState[index] = true;
 				mPulseWidth[index] = defaultPulseWidth;
 				
@@ -265,59 +274,6 @@ OnSharedPreferenceChangeListener
 				mShutdown = true;
 				
 			}
-/*
-			ledIndicator_.turnOn(0);
-			pulseWidth1_ = defaultPulseWidth;
-			pulseWidth2_ = 0;
-			pulseWidth3_ = 0;
-
-			Thread.sleep(mLedFlashTime);
-			ledIndicator_.turnOff(0);
-			
-			ledIndicator_.turnOn(1);
-			pulseWidth1_ = 0;
-			pulseWidth2_ = defaultPulseWidth;
-			pulseWidth3_ = 0;
-			Thread.sleep(mLedFlashTime);
-			ledIndicator_.turnOff(1);
-			
-			ledIndicator_.turnOn(2);
-			pulseWidth1_ = 0;
-			pulseWidth2_ = 0;
-			pulseWidth3_ = defaultPulseWidth;
-			Thread.sleep(mLedFlashTime);
-			ledIndicator_.turnOff(2);
-			pulseWidth3_ = 0;
-			
-			ledIndicator_.turnOn(3);
-			pulseWidth4_ = defaultPulseWidth;
-			pulseWidth5_ = 0;
-			pulseWidth6_ = 0;
-			Thread.sleep(mLedFlashTime);
-			ledIndicator_.turnOff(3);
-
-			ledIndicator_.turnOn(4);
-			pulseWidth4_ = 0;
-			pulseWidth5_ = defaultPulseWidth;
-			pulseWidth6_ = 0;
-			Thread.sleep(mLedFlashTime);
-			ledIndicator_.turnOff(4);
-
-			ledIndicator_.turnOn(5);
-			pulseWidth4_ = 0;
-			pulseWidth5_ = 0;
-			pulseWidth6_ = defaultPulseWidth;
-			Thread.sleep(mLedFlashTime);
-			ledIndicator_.turnOff(5);
-
-			
-			pulseWidth1_ = 0;
-			pulseWidth2_ = 0;
-			pulseWidth3_ = 0;
-			pulseWidth4_ = 0;
-			pulseWidth5_ = 0;
-			pulseWidth6_ = 0;
-	*/		
 			
 			powerState_ = false;
 			ledIndicator_.setPowerState(false);
@@ -387,12 +343,12 @@ OnSharedPreferenceChangeListener
 
 	class Looper extends BaseIOIOLooper {
 		// private AnalogInput input_;
-		private PwmOutput pwmOutput1_;  // board-1-1
-		private PwmOutput pwmOutput2_;  // board-1-2
-		private PwmOutput pwmOutput3_;  // board-1-3
-		private PwmOutput pwmOutput4_;  // board-2-1
-		private PwmOutput pwmOutput5_;  // board-2-2
-		private PwmOutput pwmOutput6_;  // board-2-3
+		private PwmOutput pwmOutput1_;  // board-1-1 = pin 10
+		private PwmOutput pwmOutput2_;  // board-1-2 = pin 11
+		private PwmOutput pwmOutput3_;  // board-1-3 = pin 12
+		private PwmOutput pwmOutput4_;  // board-2-1 = pin 2
+		private PwmOutput pwmOutput5_;  // board-2-2 = pin 3
+		private PwmOutput pwmOutput6_;  // board-2-3 = pin 4
 		
 		private DigitalOutput led_;
 		private DigitalOutput powout1_;
@@ -512,14 +468,14 @@ OnSharedPreferenceChangeListener
 			}
 		});
 	}
-
+/*
 	private void setNumber(int channel, float f) {
 		final String str = String.format("%.2f", f);
 		final int ch = channel;
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				/*
+				
                                 switch(ch) {
                                 case 1:
                                         textView1_.setText(str);
@@ -533,13 +489,14 @@ OnSharedPreferenceChangeListener
                                 default:
                                         // no action
                                 }
-				 */
+				 
 				ledIndicator_.setPowerState( powerState_ );                             
 			}
 		});
 	}
-
-	private boolean[] mLedState;
+*/
+	
+	
 	
 	private void visualize() {
 		runOnUiThread(new Runnable() {
@@ -630,7 +587,7 @@ OnSharedPreferenceChangeListener
 	PictureCallback jpegCallback = new PictureCallback() {
 		public void onPictureTaken(byte[] data, Camera camera) {
 
-			writeImageToDisc(mCurrentFileMode, mImageSuffix, data);
+			writeImageToDisc(mCurrentFileMode, mImageSuffix[mCurrentLedIndex], data);
 
 		}
 	};
