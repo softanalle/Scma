@@ -56,6 +56,7 @@ import android.os.Environment;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SyncResult;
+import android.content.pm.PackageManager;
 //import android.content.SharedPreferences;
 //import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.util.Log;
@@ -97,7 +98,7 @@ OnSharedPreferenceChangeListener
 	private static final int mLedFlashTime = 1000; // milliseconds the flash leds are on
 	private static final int mLedCount = 6; // how many leds actually there are!
 
-	private static final int mFocusLedIndex = 3; // index of IOIO PIN 2 
+	private static final int mFocusLedIndex = 2; // led INDEX of focus color; default=3  
 	private static int defaultFocusPulseWidth = 300; // PWM pulse width for focus 
 	
 	private int mPulseWidth[];      // PWM pulse width array for leds
@@ -128,12 +129,31 @@ OnSharedPreferenceChangeListener
 		toggleButton_.setChecked(false);
 		
 		// camera stuff
+		
+		if (checkCameraHardware(getApplicationContext())) {
+			// ok, we have camera
+			Log.i(TAG, "Device has camera");
+		} else {
+			Toast.makeText(getApplicationContext(), "Camera is missing!", Toast.LENGTH_LONG).show();
+		}
+		
 		mPreview = new Preview(this);
 		//mPreview = new Preview(getApplicationContext());
 		Log.d(TAG, "Preview created");
+		/*
+		Camera camera = mPreview.getCameraInstance();
+		if ( camera == null ) {
+			Toast.makeText(getApplicationContext(), "Camera is missing!", Toast.LENGTH_LONG).show();
+		} else {
+			Toast.makeText(getApplicationContext(), "We got camera instance...", Toast.LENGTH_LONG).show();
+			camera.release();
+		}
+		*/
+		mPreview.startPreview();
 		
 		//FrameLayout tmp = (FrameLayout) findViewById(R.id.RootFrame);
 		//RelativeLayout tmp = (RelativeLayout) findViewById(R.layout.activity_main);
+		
 		RelativeLayout tmp = (RelativeLayout) findViewById(R.layout.activity_main);
 		
 		if ( tmp != null ) {
@@ -145,15 +165,15 @@ OnSharedPreferenceChangeListener
 		if ( mPreview != null ) {
 			Log.d(TAG, "Will add preview");
 			try {
-			tmp.addView(mPreview);
+				tmp.addView(mPreview);
 			} catch (Exception e) {
 				Toast.makeText(getApplicationContext(),"Got exception: " + e.toString(), Toast.LENGTH_LONG).show();
 			}
-			
+
 		} else {
 			Log.d(TAG, "Preview creation FAILED");
 		}
-		
+
 		Log.d(TAG, "Added preview");
 		
 		ledIndicator_.bringToFront();
@@ -688,4 +708,15 @@ OnSharedPreferenceChangeListener
             }       
         }
 	 */
+	
+	/** Check if this device has a camera */
+	private boolean checkCameraHardware(Context context) {
+	    if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
+	        // this device has a camera
+	        return true;
+	    } else {
+	        // no camera on this device
+	        return false;
+	    }
+	}
 }

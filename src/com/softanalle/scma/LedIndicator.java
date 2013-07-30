@@ -203,7 +203,7 @@ public class LedIndicator extends View {
     
     public void setLedState(int index, boolean onoff) {
     	if ( index >= 0 && index < mLedCount) {
-    		Log.d(TAG, "ledState(" + index + " => " + onoff + ")");
+    		// Log.d(TAG, "ledState(" + index + " => " + onoff + ")");
     		mActivity[index] = onoff;
     		if ( onoff ) {
     			mLeds[index].getPaint().setColor(mRectColors[index]);
@@ -211,7 +211,8 @@ public class LedIndicator extends View {
     			mLeds[index].getPaint().setColor(mOffColor);
     		}
     	}
-    	invalidate(mLedArea[index]);
+    	// invalidate(mLedArea[index]);
+    	this.invalidate();
     }
     
     public int getLedCount() {
