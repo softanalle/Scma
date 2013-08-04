@@ -115,7 +115,7 @@ OnSharedPreferenceChangeListener
 
 	private ToggleButton toggleButton_;
 	private LedIndicator ledIndicator_;
-	private Button pictureButton_;
+	private Button pictureButton_, focusButton_;
 	private int pulseWidthFocus_;
 
 	@Override
@@ -127,10 +127,13 @@ OnSharedPreferenceChangeListener
 		pictureButton_  = (Button) findViewById(R.id.pictureButton);
 		toggleButton_ = (ToggleButton) findViewById(R.id.powerButton);
 		ledIndicator_ = (LedIndicator) findViewById(R.id.ledIndicator1);
+		focusButton_ = (Button) findViewById(R.id.focusButton);
 
 		toggleButton_.setEnabled(false);
 		toggleButton_.setChecked(false);
-
+		
+		//focusButton_.setEnabled(false);
+	
 		
 		
 		// camera stuff
@@ -190,7 +193,8 @@ OnSharedPreferenceChangeListener
 		ledIndicator_.bringToFront();
 		toggleButton_.bringToFront();
 		pictureButton_.bringToFront();
-
+		focusButton_.bringToFront();
+		
 		mPulseWidth = new int[mLedCount];
 		mLedState = new boolean[mLedCount];
 		mDefaultPulseWidth = new int[mLedCount];
@@ -244,6 +248,13 @@ OnSharedPreferenceChangeListener
 			}
 		});
 
+		focusButton_.setOnClickListener(new OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				focusCamera();
+			}
+		});
+		
 		pictureButton_.setEnabled(false);
 
 		Log.d(TAG, "onCreate'd");
@@ -287,6 +298,11 @@ OnSharedPreferenceChangeListener
 	
 	// private Thread waitThread;
 
+	private void focusCamera() {
+		// do focusing stuff
+		// mPreview.camera
+	}
+	
 	private void takeColorSeries() {
 		mLedState[mFocusLedIndex] = false;
 		mPulseWidth[mFocusLedIndex] = mDefaultPulseWidth[mFocusLedIndex];
@@ -550,6 +566,13 @@ OnSharedPreferenceChangeListener
 
 	private static String mImagePrefix = "focus";
 	public static final String TAG = "SCMA";
+	
+	public static final String KEY_PREF_FOCUSCOLOR = "pref_focuscolor";
+	public static final String KEY_PREF_DEF_PULSEWIDTH = "pref_pulsewidth_default";
+	public static final String KEY_PREF_RED_PULSEWIDTH = "pref_pulsewidth_red";
+	public static final String KEY_PREF_GREEN_PULSEWIDTH = "pref_pulsewidth_green";
+	public static final String KEY_PREF_BLUE_PULSEWIDTH = "pref_pulsewidth_blue";
+
 	// protected Camera mCamera;
 	protected Preview mPreview;
 	protected Button buttonClick;

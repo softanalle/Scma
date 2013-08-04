@@ -24,5 +24,6 @@
     <string name="channel2_conf_key">CONF_CHANNEL2</string>
     <string name="channel3_conf_key">CONF_CHANNEL3</string>
     <string name="channel_white_conf_key">CONF_CHANNEL_WHITE</string>
+    <string name="focusbtn_label">Focus</string>
 
 </resources>

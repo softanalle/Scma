@@ -15,15 +15,20 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.hardware.Camera;
+import android.hardware.Camera.Parameters;
+import android.media.audiofx.BassBoost.Settings;
 //import android.hardware.Camera.PictureCallback;
 //import android.hardware.Camera.PreviewCallback;
 //import android.os.Environment;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder;
+import android.widget.Toast;
 //import android.view.View;
 
-public class Preview extends SurfaceView implements SurfaceHolder.Callback /*,
+public class Preview extends SurfaceView 
+implements SurfaceHolder.Callback 
+/*,
 SurfaceView.OnClickListener */ {
 	private final static String TAG = "Preview";
 
@@ -37,6 +42,9 @@ SurfaceView.OnClickListener */ {
 
 		mHolder = getHolder();
 		mHolder.addCallback(this);
+		
+		mPreviewRectPaint.setColor(Color.RED);
+		
 		//mHolder.setType(SurfaceHolder.)
 		Log.d(TAG, "create OK");
 	}
@@ -113,10 +121,33 @@ SurfaceView.OnClickListener */ {
           // ignore: tried to stop a non-existent preview
         }
 
+        
+        
 		try {
 		if (camera != null) {
 			Camera.Parameters params = camera.getParameters();
 			params.setPreviewSize(width,  height);
+			
+			// turn autofocus off
+			params.setFocusMode(Parameters.FOCUS_MODE_FIXED);
+			
+			
+			// turn flash off
+			params.setFlashMode(Parameters.FLASH_MODE_OFF);
+			
+			if ( params.isAutoWhiteBalanceLockSupported()) {
+				params.setAutoWhiteBalanceLock(true);
+			} else {
+				Toast.makeText(getContext(), "Unable to lock AutoWhiteBalance", Toast.LENGTH_LONG).show();
+			}
+			
+			if ( params. isAutoExposureLockSupported() ) {
+				params.setAutoExposureLock(true);
+			} else {
+				Toast.makeText(getContext(), "Unable to lock AutoExposure", Toast.LENGTH_LONG).show();
+			}
+			
+			
 			camera.setParameters(params);
 			camera.startPreview();
 			isReady_ = true;
@@ -128,6 +159,7 @@ SurfaceView.OnClickListener */ {
 		}
 	}
 
+	private Paint mPreviewRectPaint = new Paint();
 	
 	@Override
 	public void onDraw(Canvas canvas) {
@@ -135,10 +167,11 @@ SurfaceView.OnClickListener */ {
 		
 		canvas.drawColor(Color.WHITE);
 
-		Paint p = new Paint(Color.RED);
-		p.setTextSize(canvas.getHeight() / 10);
-		Log.d(TAG, "draw");
-		canvas.drawText("PREVIEW",  canvas.getWidth() / 2,  canvas.getHeight() / 2, p);
+		canvas.drawRect(100,  100,  canvas.getWidth() - 100, canvas.getHeight() - 100, mPreviewRectPaint);
+		//Paint p = new Paint(Color.RED);
+		//p.setTextSize(canvas.getHeight() / 10);
+		//Log.d(TAG, "draw");
+		//canvas.drawText("PREVIEW",  canvas.getWidth() / 2,  canvas.getHeight() / 2, p);
 	}
 
 
@@ -203,5 +236,15 @@ SurfaceView.OnClickListener */ {
 		if ( camera != null ) {
 			camera.startPreview();
 		}
+	}
+	
+	public void doFocus() {
+				
+		camera.autoFocus(null);
+		
+	}
+	
+	public void onAutoFocus(boolean success, Camera camera) {
+		Toast.makeText(getContext(), "Focus complete", Toast.LENGTH_LONG).show();
 	}
 }
