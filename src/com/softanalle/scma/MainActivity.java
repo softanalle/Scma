@@ -2,6 +2,7 @@ package com.softanalle.scma;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.app.Application;
 import android.view.Menu;
 
 import java.io.File;
@@ -26,6 +27,7 @@ import android.hardware.Camera.ShutterCallback;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.text.Layout;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.RelativeLayout;
@@ -119,6 +121,7 @@ OnSharedPreferenceChangeListener
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		setTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 		setContentView(R.layout.activity_main);
 
 		pictureButton_  = (Button) findViewById(R.id.pictureButton);
@@ -127,6 +130,8 @@ OnSharedPreferenceChangeListener
 
 		toggleButton_.setEnabled(false);
 		toggleButton_.setChecked(false);
+
+		
 		
 		// camera stuff
 		
@@ -136,6 +141,10 @@ OnSharedPreferenceChangeListener
 		} else {
 			Toast.makeText(getApplicationContext(), "Camera is missing!", Toast.LENGTH_LONG).show();
 		}
+		
+		FrameLayout tmp = (FrameLayout) findViewById(R.id.camera_preview);
+		
+
 		
 		mPreview = new Preview(this);
 		//mPreview = new Preview(getApplicationContext());
@@ -149,23 +158,25 @@ OnSharedPreferenceChangeListener
 			camera.release();
 		}
 		*/
+		
+		
+		
 		mPreview.startPreview();
 		
-		//FrameLayout tmp = (FrameLayout) findViewById(R.id.RootFrame);
-		//RelativeLayout tmp = (RelativeLayout) findViewById(R.layout.activity_main);
+		if ( tmp == null ) {
+			Log.d(TAG, "Layout IS NULL");
+			Toast.makeText(getApplicationContext(),"Layout is NULL: ", Toast.LENGTH_LONG).show();
+		} else {
 		
-		RelativeLayout tmp = (RelativeLayout) findViewById(R.layout.activity_main);
-		
-		if ( tmp != null ) {
 			Log.d(TAG, "Layout found");
-		} else {		
-			Log.d(TAG, "Not found layout");
-		}
+		} 		
+			
 		
 		if ( mPreview != null ) {
 			Log.d(TAG, "Will add preview");
 			try {
 				tmp.addView(mPreview);
+				//tmp.addView(mPreview);
 			} catch (Exception e) {
 				Toast.makeText(getApplicationContext(),"Got exception: " + e.toString(), Toast.LENGTH_LONG).show();
 			}
