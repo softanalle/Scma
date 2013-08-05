@@ -129,8 +129,9 @@ SurfaceView.OnClickListener */ {
 			params.setPreviewSize(width,  height);
 			
 			// turn autofocus off
-			params.setFocusMode(Parameters.FOCUS_MODE_FIXED);
+			//params.setFocusMode(Parameters.FOCUS_MODE_FIXED);
 			
+			params.setFocusMode(Parameters.FOCUS_MODE_MACRO);
 			
 			// turn flash off
 			params.setFlashMode(Parameters.FLASH_MODE_OFF);
@@ -147,6 +148,8 @@ SurfaceView.OnClickListener */ {
 				Toast.makeText(getContext(), "Unable to lock AutoExposure", Toast.LENGTH_LONG).show();
 			}
 			
+			// we don't work with GPS data
+			params.removeGpsData();
 			
 			camera.setParameters(params);
 			camera.startPreview();

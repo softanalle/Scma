@@ -57,6 +57,7 @@ import android.os.Environment;
 //import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SyncResult;
 import android.content.pm.PackageManager;
 //import android.content.SharedPreferences;
@@ -669,15 +670,28 @@ OnSharedPreferenceChangeListener
 
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.menu_config:
-			Toast.makeText(getApplicationContext(), "Should show config menu", Toast.LENGTH_LONG).show();
-
+		case R.id.pwm_settings:
+			Toast.makeText(getApplicationContext(), "PWM Settings menu", Toast.LENGTH_LONG).show();
 
 			return true;
+		case R.id.reset_settings:
+			Toast.makeText(getApplicationContext(), "Reset settings", Toast.LENGTH_LONG).show();
+			resetSettings();
+			return true;
+		case R.id.about_info:
+			
+            
+            Intent i = new Intent(getApplicationContext(), SplashActivity.class);
+			startActivity(i);
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
+	
+	private void resetSettings() {
+		
+	}
+	
 	/*
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 Preference keyPref = findPreference(key);
