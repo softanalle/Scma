@@ -314,7 +314,7 @@ OnSharedPreferenceChangeListener
 		
 		try {
 			// stop preview for taking pictures
-			mPreview.stopPreview();
+			//mPreview.stopPreview();
 			
 			for (int index = 0; index < mLedCount; index++) {
 				
@@ -342,7 +342,7 @@ OnSharedPreferenceChangeListener
 				
 			}
 			// enable preview again
-			mPreview.startPreview();
+			//mPreview.startPreview();
 			powerState_ = false;
 			ledIndicator_.setPowerState(false);
 			toggleButton_.setChecked(false);
@@ -481,9 +481,6 @@ OnSharedPreferenceChangeListener
 			led_.write( !powerState_ );
 			Thread.sleep(5);
 			
-			
-			
-			
 			pwmOutput1_.setPulseWidth( mLedState[0] == false ? 0 : mPulseWidth[0] );
 			pwmOutput2_.setPulseWidth( mLedState[1] == false ? 0 : mPulseWidth[1] );
 			pwmOutput3_.setPulseWidth( mLedState[2] == false ? 0 : mPulseWidth[2] );
@@ -501,7 +498,7 @@ OnSharedPreferenceChangeListener
 						
 			led_.write( !powerState_ );
 
-			visualize();
+			visualize(powerState_, mLedState);
 
 			// Log.d(TAG, "IOIO-output: " );
 
@@ -519,6 +516,7 @@ OnSharedPreferenceChangeListener
 	protected IOIOLooper createIOIOLooper() {
 		return new Looper();
 	}
+	
 	private void enableUi(final boolean enable) {
 		runOnUiThread(new Runnable() {
 			@Override
@@ -565,14 +563,16 @@ OnSharedPreferenceChangeListener
 	
 	
 	
-	private void visualize() {
+	private void visualize(boolean powerState, boolean[] ledstates) {
+		final boolean power_ = powerState;
+		final boolean[] leds_ = ledstates.clone();
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				ledIndicator_.setPowerState(powerState_);
+				ledIndicator_.setPowerState(power_);
 				
-				for (int index=0;index<mLedCount;index++) {
-					ledIndicator_.setLedState(index, mLedState[index]);
+				for (int index=0;index<leds_.length;index++) {
+					ledIndicator_.setLedState(index, leds_[index]);
 				}
 				
 			}
