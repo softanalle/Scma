@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+     <string-array name="led_colors">
+        <item >Red</item>
+        <item >Green</item>
+        <item >Blue</item>
+        <item >White</item>
+        <item>NIR</item>
+        <item>Yellow</item>
+    </string-array>
+    <string-array name="led_indexes">
+        <item >pref_pulsewidth_red</item>
+        <item >pref_pulsewidth_green</item>
+        <item >pref_pulsewidth_blue</item>
+        <item >pref_pulsewidth_white</item>
+        <item>pref_pulsewidth_nir</item>
+        <item>pref_pulsewidth_yellow</item>
+    </string-array>
+    
+    <item format="integer" name="pref_pulsewidth_default" type="integer">500</item>
+    
+    <item format="integer" name="pref_focusled_color" type="integer">0</item>
+    
+    
+</resources>
