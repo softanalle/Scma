@@ -16,6 +16,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.hardware.Camera;
 import android.hardware.Camera.Parameters;
+import android.hardware.Camera.PictureCallback;
+import android.hardware.Camera.ShutterCallback;
 import android.media.audiofx.BassBoost.Settings;
 //import android.hardware.Camera.PictureCallback;
 //import android.hardware.Camera.PreviewCallback;
@@ -240,12 +242,20 @@ SurfaceView.OnClickListener */ {
 			camera.startPreview();
 		}
 	}
+
+	public void stopPreview() {
+		if ( camera != null ) {
+			camera.stopPreview();
+		}
+	}
 	
 	public void doFocus() {
 				
 		camera.autoFocus(null);
 		
 	}
+
+	
 	
 	public void onAutoFocus(boolean success, Camera camera) {
 		Toast.makeText(getContext(), "Focus complete", Toast.LENGTH_LONG).show();

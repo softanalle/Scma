@@ -93,7 +93,8 @@ OnSharedPreferenceChangeListener
 	protected final String FILEMODE_RAW = "raw";
 
 	volatile static boolean mShutdown = false;
-	private String mCurrentFileMode = FILEMODE_JPG;
+	private boolean saveModeJPEG = false;
+	private boolean saveModeRAW = false;
 	private static int mCurrentLedIndex = 0;
 	protected static final String[] mImageSuffix = { "blue", "green", "red", "white", "yellow", "nir" };
 
@@ -125,6 +126,8 @@ OnSharedPreferenceChangeListener
 		setTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 		setContentView(R.layout.activity_main);
 
+		
+		
 		pictureButton_  = (Button) findViewById(R.id.pictureButton);
 		toggleButton_ = (ToggleButton) findViewById(R.id.powerButton);
 		ledIndicator_ = (LedIndicator) findViewById(R.id.ledIndicator1);
@@ -296,6 +299,7 @@ OnSharedPreferenceChangeListener
 	}
 
 	private boolean powerState_ = false;
+	private String mImagePrefix = "";
 	
 	// private Thread waitThread;
 
@@ -309,13 +313,26 @@ OnSharedPreferenceChangeListener
 		mPulseWidth[mFocusLedIndex] = mDefaultPulseWidth[mFocusLedIndex];
 		
 		try {
+			// stop preview for taking pictures
+			mPreview.stopPreview();
+			
 			for (int index = 0; index < mLedCount; index++) {
 				
 				mCurrentLedIndex = index;
 				mLedState[index] = true;
 				mPulseWidth[index] = mDefaultPulseWidth[index];
+			
+				mImagePrefix = Long.toString(System.currentTimeMillis());
+				/*
+						String.format("%d_%s", 
+						System.currentTimeMillis(),
+						mLedColor[index]);
+				*/
+				mPreview.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
+				
 				
 				Thread.sleep(mLedFlashTime);
+				
 				mPulseWidth[index] = 0;
 				mLedState[index] = false;
 			}
@@ -324,7 +341,8 @@ OnSharedPreferenceChangeListener
 				mShutdown = true;
 				
 			}
-			
+			// enable preview again
+			mPreview.startPreview();
 			powerState_ = false;
 			ledIndicator_.setPowerState(false);
 			toggleButton_.setChecked(false);
@@ -565,7 +583,7 @@ OnSharedPreferenceChangeListener
 	// camera stuff
 
 
-	private static String mImagePrefix = "focus";
+	// private static String mImagePrefix = "focus";
 	public static final String TAG = "SCMA";
 	
 	public static final String KEY_PREF_FOCUSCOLOR = "pref_focuscolor";
@@ -590,11 +608,11 @@ OnSharedPreferenceChangeListener
 	PictureCallback rawCallback = new PictureCallback() {
 		public void onPictureTaken(byte[] data, Camera camera) {
 			// writeImageToDisc(FILEMODE_RAW, mImageSuffix, data);
-
-			Log.d(TAG, "onPictureTaken() - raw");
-
-			Log.d(TAG, "onPictureTaken - raw");
-
+			if ( saveModeRAW ) {
+				Log.d(TAG, "onPictureTaken() - raw");
+				writeImageToDisc("jpg", mImageSuffix[mCurrentLedIndex], data);
+				Log.d(TAG, "onPictureTaken - raw");
+			}
 		}
 	};
 	/*
@@ -642,9 +660,9 @@ OnSharedPreferenceChangeListener
 
 	PictureCallback jpegCallback = new PictureCallback() {
 		public void onPictureTaken(byte[] data, Camera camera) {
-
-			writeImageToDisc(mCurrentFileMode, mImageSuffix[mCurrentLedIndex], data);
-
+			if ( saveModeJPEG ) {
+				writeImageToDisc("jpg", mImageSuffix[mCurrentLedIndex], data);
+			}
 		}
 	};
 
@@ -652,9 +670,14 @@ OnSharedPreferenceChangeListener
 		Log.d(TAG, "writeImageToDisc - begin");
 		FileOutputStream outStream = null;
 		try {
-			outStream = new FileOutputStream(String.format("%s/SCM/%d_%s.%s",
+			outStream = new FileOutputStream(
+					Environment.getExternalStorageDirectory().getPath() + "/" +
+							mImagePrefix + "_" + 
+							suffix + "." + filemode);
+					/*String.format("%s/SCM/%s_%s.%s",
 					Environment.getExternalStorageDirectory().getPath(),
-					System.currentTimeMillis(), suffix, filemode));
+					mImagePrefix, suffix, filemode));
+					*/
 			outStream.write(data);
 			outStream.close();
 			Log.d(TAG, "writeImageToDisc - wrote bytes: " + data.length);
@@ -669,20 +692,24 @@ OnSharedPreferenceChangeListener
 	}
 
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
+		Intent intent = null;
 		switch (item.getItemId()) {
-		case R.id.pwm_settings:
-			Toast.makeText(getApplicationContext(), "PWM Settings menu", Toast.LENGTH_LONG).show();
-
+		case R.id.scma_settings:
+			// Toast.makeText(getApplicationContext(), "SCMA Settings menu", Toast.LENGTH_LONG).show();
+			intent = new Intent(getApplicationContext(), AppPreferenceActivity.class);
+			startActivity(intent);
 			return true;
+			
 		case R.id.reset_settings:
 			Toast.makeText(getApplicationContext(), "Reset settings", Toast.LENGTH_LONG).show();
 			resetSettings();
 			return true;
+			
 		case R.id.about_info:
 			
             
-            Intent i = new Intent(getApplicationContext(), SplashActivity.class);
-			startActivity(i);
+            intent = new Intent(getApplicationContext(), SplashActivity.class);
+			startActivity(intent);
 		default:
 			return super.onOptionsItemSelected(item);
 		}
