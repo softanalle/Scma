@@ -179,40 +179,49 @@ public class LedIndicator extends View {
 	 */
 	public void turnOn(int index) {
 		if (index >= 0 && index < mLedCount) {
-			Log.d(TAG, "turnOn(" + index + ")");
-			mActivity[index] = true;
-			mLeds[index].getPaint().setColor(mRectColors[index]);
+			if ( mActivity[index] == false ) {
+				Log.d(TAG, "turnOn(" + index + ")");
+				mActivity[index] = true;
+				mLeds[index].getPaint().setColor(mRectColors[index]);
+
+				// invalidate led area
+				invalidate(mLedArea[index]);
+			}
 		}
-		// invalidate led area
-		invalidate(mLedArea[index]);
 	}
 
 	/**
 	 * @param index
 	 */
-    public void turnOff(int index) {
+	public void turnOff(int index) {
 		if ( index >= 0 && index < mLedCount) {
-			Log.d(TAG, "turnOff(" + index + ")");
-			mActivity[index] = false;
-			mLeds[index].getPaint().setColor(mOffColor);
+			if ( mActivity[index] ) {
+				Log.d(TAG, "turnOff(" + index + ")");
+				mActivity[index] = false;
+				mLeds[index].getPaint().setColor(mOffColor);
+
+				// invalidate led area
+				invalidate(mLedArea[index]);
+			}
 		}
-		// invalidate led area
-		invalidate(mLedArea[index]);
 	}
     
     
     public void setLedState(int index, boolean onoff) {
     	if ( index >= 0 && index < mLedCount) {
-    		// Log.d(TAG, "ledState(" + index + " => " + onoff + ")");
-    		mActivity[index] = onoff;
-    		if ( onoff ) {
-    			mLeds[index].getPaint().setColor(mRectColors[index]);
-    		} else {
-    			mLeds[index].getPaint().setColor(mOffColor);
+    		if ( onoff != mActivity[index] ) {
+    			// Log.d(TAG, "ledState(" + index + " => " + onoff + ")");
+    			mActivity[index] = onoff;
+    			if ( onoff ) {
+    				mLeds[index].getPaint().setColor(mRectColors[index]);
+    			} else {
+    				mLeds[index].getPaint().setColor(mOffColor);
+    			}
+
+    			// invalidate(mLedArea[index]);
+    			this.invalidate();
     		}
     	}
-    	// invalidate(mLedArea[index]);
-    	this.invalidate();
     }
     
     public int getLedCount() {
