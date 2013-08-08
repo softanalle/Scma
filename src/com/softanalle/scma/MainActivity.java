@@ -32,6 +32,7 @@ import android.text.Layout;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 //import android.widget.SeekBar;
 //import android.widget.TextView;
 import android.widget.Toast;
@@ -53,12 +54,15 @@ import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 //import android.preference.Preference;
 //import android.preference.PreferenceFragment;
 //import android.preference.PreferenceManager;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.SyncResult;
 import android.content.pm.PackageManager;
 //import android.content.SharedPreferences;
@@ -75,9 +79,8 @@ import android.app.admin.DevicePolicyManager;
 
 
 public class MainActivity extends IOIOActivity 
-/*implements
-OnSharedPreferenceChangeListener 
- */
+implements OnSharedPreferenceChangeListener 
+ 
 {
 	// IOIO pin settings
 	private static final int IOIO_PIN_BOARD1_UP = 6;
@@ -89,41 +92,71 @@ OnSharedPreferenceChangeListener
 	private static final int IOIO_PIN_LED_GREEN  = 10;
 	private static final int IOIO_PIN_LED_BLUE   = 11;
 	private static final int IOIO_PIN_LED_RED    = 12;
-	// 
-	protected final String FILEMODE_JPG = "jpg";
-	protected final String FILEMODE_RAW = "raw";
 
-	volatile static boolean mShutdown = false;
+
+	private static final int LED_INDEX_BLUE = 0;
+	private static final int LED_INDEX_GREEN = 1;
+	private static final int LED_INDEX_RED = 2;
+	private static final int LED_INDEX_WHITE = 3;
+	private static final int LED_INDEX_YELLOW = 4;
+	private static final int LED_INDEX_NIR = 5;
+	// 
+	//protected final String FILEMODE_JPG = "jpg";
+	//protected final String FILEMODE_RAW = "raw";
+
+	volatile boolean mShutdown = false;
 	private boolean saveModeJPEG = false;
 	private boolean saveModeRAW = false;
-	private static int mCurrentLedIndex = 0;
-	protected static final String[] mImageSuffix = { "blue", "green", "red", "white", "yellow", "nir" };
+	private int mCurrentLedIndex = 0;
+	public final String[] mImageSuffix = { "blue", "green", "red", "white", "yellow", "nir", "other" };
 
-	private static final int defaultPulseWidth = 500; // PWM pulse width
-	private static final int mLedFlashTime = 10; // milliseconds the led takes to raise/shutdown
-	private static final int mLedCount = 6; // how many leds actually there are!
+	private final int defaultPulseWidth = 500; // PWM pulse width
+	private final int mLedFlashTime = 10; // milliseconds the led takes to raise/shutdown
+	private final int mLedCount = 6; // how many leds actually there are!
 
-	private static final int mFocusLedIndex = 2; // led INDEX of focus color; default=3  
-	private static int defaultFocusPulseWidth = 300; // PWM pulse width for focus 
+	private int mFocusLedIndex = 2; // led INDEX of focus color; default=3  
+	private int defaultFocusPulseWidth = 300; // PWM pulse width for focus 
 	
 	private int mPulseWidth[];      // PWM pulse width array for leds
 	private boolean[] mLedState;    // led status (on/off)
 	private int[] mDefaultPulseWidth; // default pulse width for leds 
 	
-	private static final String SETTINGS_CHANNEL0 = "CONF_CHANNEL1_PWM";
-	private static final String SETTINGS_CHANNEL1 = "CONF_CHANNEL2_PWM";
-	private static final String SETTINGS_CHANNEL2 = "CONF_CHANNEL3_PWM";
-	//private static final String SETTINGS_CHANNEL3 = "CONF_CHANNEL4_PWM";
-	private static final String SETTINGS_CHANNEL_FOCUS = "CONF_CHANNEL_FOCUS_PWM";
-
+	
 	private ToggleButton toggleButton_;
 	private LedIndicator ledIndicator_;
 	private Button pictureButton_, focusButton_;
 	private int pulseWidthFocus_;
 
     // Splash screen timer
-    private static int SPLASH_TIME_OUT = 3000;
-    
+    private static final int SPLASH_TIME_OUT = 3000;
+
+	// private static String mImagePrefix = "focus";
+	public static final String TAG = "SCMA";
+	
+	public static final String KEY_PREF_FOCUSCOLOR = "pref_focuscolor";
+	public static final String KEY_PREF_DEF_PULSEWIDTH = "pref_pulsewidth_default";
+	public static final String KEY_PREF_RED_PULSEWIDTH = "conf_red_pwm";
+	public static final String KEY_PREF_GREEN_PULSEWIDTH = "conf_green_pwm";
+	public static final String KEY_PREF_BLUE_PULSEWIDTH = "conf_blue_pwm";
+	public static final String KEY_PREF_YELLOW_PULSEWIDTH = "conf_yellow_pwm";
+	public static final String KEY_PREF_WHITE_PULSEWIDTH = "conf_white_pwm";
+	public static final String KEY_PREF_NIR_PULSEWIDTH = "conf_nir_pwm";
+	
+	public static final String KEY_PREF_FOCUS_PULSEWIDTH = "conf_focus_pwm";
+	public static final String KEY_PREF_SAVE_JPEG = "conf_write_jpeg";
+	public static final String KEY_PREF_SAVE_RAW = "conf_write_raw";
+
+	private boolean powerState_ = false;
+	private String mImagePrefix = "";
+	
+	// protected Camera mCamera;
+	protected Preview mPreview;
+	protected Button buttonClick;
+
+	DevicePolicyManager mDPM;
+
+    private TextView messageView_;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -137,6 +170,8 @@ OnSharedPreferenceChangeListener
 		ledIndicator_ = (LedIndicator) findViewById(R.id.ledIndicator1);
 		focusButton_ = (Button) findViewById(R.id.focusButton);
 
+		messageView_ = (TextView) findViewById(R.id.messageView);
+		
 		toggleButton_.setEnabled(false);
 		toggleButton_.setChecked(false);
 		
@@ -222,6 +257,8 @@ OnSharedPreferenceChangeListener
 		pictureButton_.bringToFront();
 		focusButton_.bringToFront();
 		
+		messageView_.bringToFront();
+		
 		mPulseWidth = new int[mLedCount];
 		mLedState = new boolean[mLedCount];
 		mDefaultPulseWidth = new int[mLedCount];
@@ -296,9 +333,15 @@ OnSharedPreferenceChangeListener
                 .commit();
 		 */
 		/* Preferences
+		 * 
+		 */
+		
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-		 */
+		
+        saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
+        saveModeRAW = sharedPref.getBoolean(KEY_PREF_SAVE_RAW, false);
+        
 		//String syncConnPref = sharedPref.getString(SettingsActivity.KEY_PREF_SYNC_CONN, "");
 		/*
         pulseWidthFocus_ = sharedPref.getInt(SETTINGS_CHANNEL_FOCUS, defaultPulseWidth);
@@ -319,55 +362,74 @@ OnSharedPreferenceChangeListener
 
 		enableUi(false);
 		Log.d(TAG, "onCreate - done");
+
 	}
 
-	private boolean powerState_ = false;
-	private String mImagePrefix = "";
+
 	
 	// private Thread waitThread;
 
 	private void focusCamera() {
 		// do focusing stuff
+		mPreview.camera.autoFocus(null);
 		// mPreview.camera
+		messageView_.setText("Currently supported WhiteBalance modes: " + mPreview.getWhiteBalanceModes().toString()+
+				"Currently supported modes: ");
 	}
 	
 	private void takeColorSeries() {
 		mLedState[mFocusLedIndex] = false;
 		mPulseWidth[mFocusLedIndex] = mDefaultPulseWidth[mFocusLedIndex];
 		
-		try {
-			// stop preview for taking pictures
-			//mPreview.stopPreview();
+		try {			
+			mImagePrefix = Long.toString(System.currentTimeMillis());
 			
 			for (int index = 0; index < mLedCount; index++) {
-				
-				
+								
 				mCurrentLedIndex = index;
 				mLedState[index] = true;
 				mPulseWidth[index] = mDefaultPulseWidth[index];
-			
-				mImagePrefix = Long.toString(System.currentTimeMillis());
 				
 				Thread.sleep(mLedFlashTime);
-				
+								
 				/*
-						String.format("%d_%s", 
-						System.currentTimeMillis(),
-						mLedColor[index]);
-				*/
 				Thread runner = new Thread(new Runnable() {
 					public void run() {
-						mPreview.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
-					}
-				});
+					*/
+				
+						// Preview have to be active when picture is taken
+				mPreview.startPreview();
+				Thread.sleep(50);
+		//		mPreview.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
+			
+				if (saveModeJPEG) {
+					String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
+							mImagePrefix + "_" + 
+							mImageSuffix[index] + ".jpg";
+					mPreview.takeJPEGPicture(filename);
+				}
+				if ( saveModeRAW ) {
+					String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
+							mImagePrefix + "_" + 
+							mImageSuffix[index] + ".raw";
+					mPreview.takeRAWPicture(filename);
+				}
+				//notifyAll();
+					//}
+				//});
 
-				runner.start();
-				runner.wait();
+				//runner.start();
+				// runner.run();
+				// runner.wait();
 				
-				Thread.sleep(mLedFlashTime);
-				
+				// we need some pause to allow camera to retry
+				Thread.sleep(4000);
+								
 				mPulseWidth[index] = 0;
 				mLedState[index] = false;
+				
+				// sleep till leds are really turned off
+				Thread.sleep(mLedFlashTime);
 			}
 			
 			synchronized (MainActivity.class) {
@@ -381,6 +443,7 @@ OnSharedPreferenceChangeListener
 			toggleButton_.setChecked(false);
 			pictureButton_.setEnabled(false);
 			
+			mPreview.startPreview();
 			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -400,9 +463,7 @@ OnSharedPreferenceChangeListener
 			mPulseWidth[index] = 0;
 			ledIndicator_.setLedState(index, mLedState[index]);
 		}
-		powerState_ = false;
-		
-		            		
+		powerState_ = false;				            		
 	}
 
 	
@@ -508,7 +569,8 @@ OnSharedPreferenceChangeListener
 			// Log.d(TAG, "IOIO-output: " );
 
 			//ledIndicator_.setPowerState( powerState_ );
-			Thread.sleep(10);
+			// default 10ms
+			Thread.sleep(100);
 		}
 
 		@Override
@@ -588,114 +650,56 @@ OnSharedPreferenceChangeListener
 	// camera stuff
 
 
-	// private static String mImagePrefix = "focus";
-	public static final String TAG = "SCMA";
-	
-	public static final String KEY_PREF_FOCUSCOLOR = "pref_focuscolor";
-	public static final String KEY_PREF_DEF_PULSEWIDTH = "pref_pulsewidth_default";
-	public static final String KEY_PREF_RED_PULSEWIDTH = "pref_pulsewidth_red";
-	public static final String KEY_PREF_GREEN_PULSEWIDTH = "pref_pulsewidth_green";
-	public static final String KEY_PREF_BLUE_PULSEWIDTH = "pref_pulsewidth_blue";
-
-	// protected Camera mCamera;
-	protected Preview mPreview;
-	protected Button buttonClick;
-
-	DevicePolicyManager mDPM;
 
 
-	ShutterCallback shutterCallback = new ShutterCallback() {
+	public ShutterCallback shutterCallback = new ShutterCallback() {
 		public void onShutter() {
-			Log.d(TAG, "onShutter");
+			//Log.d(TAG, "onShutter");
 		}
 	};
-
-	PictureCallback rawCallback = new PictureCallback() {
+/*
+	public PictureCallback rawCallback = new PictureCallback() {
 		public void onPictureTaken(byte[] data, Camera camera) {
 			// writeImageToDisc(FILEMODE_RAW, mImageSuffix, data);
-			if ( saveModeRAW ) {
-				Log.d(TAG, "onPictureTaken() - raw");
-				writeImageToDisc("jpg", mImageSuffix[mCurrentLedIndex], data);
-				Log.d(TAG, "onPictureTaken - raw");
+			if ( saveModeRAW ) {			
+				String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
+						mImagePrefix + "_" + 
+						mImageSuffix[mCurrentLedIndex] + ".raw";
+				writeImageToDisc(filename, data);				
 			}
 		}
 	};
-	/*
-        private class AsyncWriteImageTask extends AsyncTask<String, Void, Boolean> {
-            / ** The system calls this to perform work in a worker thread and
-	 * delivers it the parameters given to AsyncTask.execute() * /
-            protected Boolean doInBackground(String urls, byte[] data) {
-                Boolean status = false;
 
-                        FileOutputStream outStream = null;
-                        try {
-                                outStream = new FileOutputStream(String.format("%s/SCM/%d_%s.jpg",
-                                                Environment.getExternalStorageDirectory().getPath(),
-                                                System.currentTimeMillis(), mImagePrefix));
-                                outStream.write(data);
-                                outStream.close();
-                                Log.d(TAG, "aSyncWrite - wrote bytes: " + data.length);
-                                Toast.makeText(getApplicationContext(), "JPEG - wrote bytes: " + data.length, Toast.LENGTH_LONG).show();
-                                status = true;
-                        } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                        } catch (IOException e) {
-                                e.printStackTrace();
-                        } finally {
-                        }
-
-                return status;
-            }
-
-            /** The system calls this to perform work in the UI thread and delivers
-	 * the result from doInBackground() * /
-            protected void onPostExecute(Boolean result) {
-                // mImageView.setImageBitmap(result);
-                // TODO: do we need here some indicator?
-
-            }
-
-                @Override
-                protected Boolean doInBackground(String... params) {
-                        // TODO Auto-generated method stub
-                        return null;
-                }
-        }
-	 */
-
-	PictureCallback jpegCallback = new PictureCallback() {
+	public PictureCallback jpegCallback = new PictureCallback() {
 		public void onPictureTaken(byte[] data, Camera camera) {
 			if ( saveModeJPEG ) {
-				writeImageToDisc("jpg", mImageSuffix[mCurrentLedIndex], data);
+				String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
+						mImagePrefix + "_" + 
+						mImageSuffix[mCurrentLedIndex] + ".jpg";
+				writeImageToDisc(filename, data);
 			}
 		}
 	};
-
-	private void writeImageToDisc(String filemode, String suffix, byte[] data) {
-		Log.d(TAG, "writeImageToDisc - begin");
+	*/
+/*
+	private void writeImageToDisc(String filename, byte[] data) {
+		//Log.d(TAG, "writeImageToDisc - begin");
 		FileOutputStream outStream = null;
-		try {
-			outStream = new FileOutputStream(
-					Environment.getExternalStorageDirectory().getPath() + "/" +
-							mImagePrefix + "_" + 
-							suffix + "." + filemode);
-					/*String.format("%s/SCM/%s_%s.%s",
-					Environment.getExternalStorageDirectory().getPath(),
-					mImagePrefix, suffix, filemode));
-					*/
+		try {			
+			outStream = new FileOutputStream( filename );			
 			outStream.write(data);
 			outStream.close();
-			Log.d(TAG, "writeImageToDisc - wrote bytes: " + data.length);
-			Toast.makeText(getApplicationContext(), "JPEG - wrote bytes: " + data.length, Toast.LENGTH_LONG).show();
+			//Log.d(TAG, "writeImageToDisc - wrote bytes: " + data.length);
+			Toast.makeText(getApplicationContext(), filename + " - wrote bytes: " + data.length, Toast.LENGTH_SHORT).show();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
 		}               
-		Log.d(TAG, "writeImageToDisc - complete");
+		//Log.d(TAG, "writeImageToDisc - complete");
 	}
-
+*/
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
 		Intent intent = null;
 		switch (item.getItemId()) {
@@ -724,21 +728,35 @@ OnSharedPreferenceChangeListener
 		
 	}
 	
-	/*
+	private void getSettings() {
+		
+	}
+	
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                Preference keyPref = findPreference(key);
-        if (key.equalsIgnoreCase(SETTINGS_CHANNEL0) or
-                        key.equalsIgnoreCase(SETTINGS_CHANNEL1) or
-                        key.equalsIgnoreCase(SETTINGS_CHANNEL2) or
-                        key.equalsIgnoreCase(SETTINGS_CHANNEL_FOCUS)) {
-
-            // Set summary to be the user-description for the selected value
-            //keyPref.setSummary(sharedPreferences.getString(key, ""));
-        } else if (key.equals(SETTINGS_CHANNEL1)) {
-                pulseWidth2_ = sharedPreferences.getInt(SETTINGS_CHANNEL1, defaultPulseWidth);
-        } 
+                //Preference keyPref = findPreference(key);
+        	if ( key.equalsIgnoreCase(KEY_PREF_FOCUSCOLOR)) {
+        		mFocusLedIndex = sharedPreferences.getInt(KEY_PREF_FOCUSCOLOR, 3);
+        	}
+        	if ( key.equalsIgnoreCase(KEY_PREF_RED_PULSEWIDTH)) {
+        		mPulseWidth[LED_INDEX_RED] = sharedPreferences.getInt(KEY_PREF_RED_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_RED]);
+        	}
+        	if ( key.equalsIgnoreCase(KEY_PREF_BLUE_PULSEWIDTH)) {
+        		mPulseWidth[LED_INDEX_BLUE] = sharedPreferences.getInt(KEY_PREF_BLUE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_BLUE]);
+        	}
+        	if ( key.equalsIgnoreCase(KEY_PREF_GREEN_PULSEWIDTH)) {
+        		mPulseWidth[LED_INDEX_GREEN] = sharedPreferences.getInt(KEY_PREF_GREEN_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_GREEN]);
+        	}
+        	if ( key.equalsIgnoreCase(KEY_PREF_GREEN_PULSEWIDTH)) {
+        		mPulseWidth[LED_INDEX_YELLOW] = sharedPreferences.getInt(KEY_PREF_YELLOW_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_YELLOW]);
+        	}
+        	if ( key.equalsIgnoreCase(KEY_PREF_WHITE_PULSEWIDTH)) {
+        		mPulseWidth[LED_INDEX_WHITE] = sharedPreferences.getInt(KEY_PREF_WHITE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_WHITE]);
+        	}
+        	if ( key.equalsIgnoreCase(KEY_PREF_NIR_PULSEWIDTH)) {
+        		mPulseWidth[LED_INDEX_NIR] = sharedPreferences.getInt(KEY_PREF_NIR_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_NIR]);
+        	}        	        
     }
-	 */
+	 
 	/*
         private Preference findPreference(String key) {
                 // TODO Auto-generated method stub

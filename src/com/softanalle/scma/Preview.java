@@ -8,13 +8,17 @@ package com.softanalle.scma;
 
 //import java.io.FileNotFoundException;
 //import java.io.FileOutputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.hardware.Camera;
+import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
@@ -103,6 +107,8 @@ SurfaceView.OnClickListener */ {
 		isReady_ = false;
 	}
 
+	private List<String> whiteBalanceModes_ = null;
+	
 	public void surfaceChanged(SurfaceHolder holder, int format, int height, int width) {
 
 		if (mHolder.getSurface() == null){
@@ -127,8 +133,13 @@ SurfaceView.OnClickListener */ {
         
 		try {
 		if (camera != null) {
+			
+			
 			Camera.Parameters params = camera.getParameters();
 			params.setPreviewSize(width,  height);
+			
+			whiteBalanceModes_ = params.getSupportedWhiteBalance();
+			
 			
 			// turn autofocus off
 			//params.setFocusMode(Parameters.FOCUS_MODE_FIXED);
@@ -259,5 +270,58 @@ SurfaceView.OnClickListener */ {
 	
 	public void onAutoFocus(boolean success, Camera camera) {
 		Toast.makeText(getContext(), "Focus complete", Toast.LENGTH_LONG).show();
+	}
+
+	/**
+	 * @return the whiteBalanceModes_
+	 */
+	public List<String> getWhiteBalanceModes() {
+		return whiteBalanceModes_;
+	}
+	
+	private void writeImageToDisc(String filename, byte[] data) {
+		//Log.d(TAG, "writeImageToDisc - begin");
+		FileOutputStream outStream = null;
+		try {			
+			outStream = new FileOutputStream( filename );			
+			outStream.write(data);
+			outStream.close();
+			//Log.d(TAG, "writeImageToDisc - wrote bytes: " + data.length);
+			Toast.makeText(getContext(), filename + " - wrote bytes: " + data.length, Toast.LENGTH_SHORT).show();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+		}               
+		//Log.d(TAG, "writeImageToDisc - complete");
+	}
+	
+	public void takeJPEGPicture(final String fileName) {
+	    Log.i(TAG, "Tacking picture");
+	    PictureCallback callback = new PictureCallback() {
+
+	        private String mPictureFileName = fileName;
+
+	        @Override
+	        public void onPictureTaken(byte[] data, Camera camera) {
+	        	writeImageToDisc(mPictureFileName, data);
+	        }
+	    };
+	    camera.takePicture(null, null, callback);
+	}
+	
+	public void takeRAWPicture(final String fileName) {
+	    PictureCallback callback = new PictureCallback() {
+
+	        private String mPictureFileName = fileName;
+
+	        @Override
+	        public void onPictureTaken(byte[] data, Camera camera) {
+	        	writeImageToDisc(mPictureFileName, data);
+	        }
+	    };
+	    camera.takePicture(null, callback, null);
+		
 	}
 }

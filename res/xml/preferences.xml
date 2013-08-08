@@ -10,7 +10,7 @@
         <EditTextPreference 
             android:title="@string/pw_red_label" 
             android:defaultValue="@string/led_default_pwm" 
-            android:key="CONF_CHANNEL1_PWM" 
+            android:key="conf_red_pwm" 
             android:enabled="true" 
             android:order="210"
             android:inputType="number"            
@@ -22,7 +22,7 @@
         <EditTextPreference 
             android:title="@string/pw_green_label" 
             android:defaultValue="@string/led_default_pwm" 
-            android:key="CONF_CHANNEL2_PWM" 
+            android:key="conf_green_pwm" 
             android:enabled="true" 
             android:order="220" 
             android:inputType="number"
@@ -34,7 +34,7 @@
         <EditTextPreference 
             android:title="@string/pw_blue_label" 
             android:defaultValue="@string/led_default_pwm" 
-            android:key="CONF_CHANNEL3_PWM" 
+            android:key="conf_blue_pwm" 
             android:enabled="true" 
             android:order="230" 
             android:inputType="number"
@@ -47,7 +47,7 @@
         <EditTextPreference 
             android:title="@string/pw_yellow_label" 
             android:defaultValue="@string/led_default_pwm" 
-            android:key="CONF_CHANNEL4_PWM" 
+            android:key="conf_yellow_pwm" 
             android:enabled="true" 
             android:order="240" 
             android:inputType="number"
@@ -57,9 +57,21 @@
             android:singleLine="true" 
             android:summary="Pulsewidth for yellow label"/>
         <EditTextPreference 
+            android:title="@string/pw_white_label" 
+            android:defaultValue="@string/led_default_pwm" 
+            android:key="conf_white_pwm" 
+            android:enabled="true" 
+            android:order="230" 
+            android:inputType="number"
+            android:lines="1"
+            android:maxLength="4"
+            android:maxLines="1"
+            android:singleLine="true" 
+            android:summary="Pulsewidth for White label"/>
+        <EditTextPreference 
             android:title="@string/pw_nir_label" 
             android:defaultValue="@string/led_default_pwm" 
-            android:key="CONF_CHANNEL5_PWM" 
+            android:key="conf_nir_pwm" 
             android:enabled="true" 
             android:order="230" 
             android:inputType="number"
@@ -72,7 +84,7 @@
         <EditTextPreference 
             android:title="@string/pw_focus_label" 
             android:defaultValue="@string/led_default_pwm" 
-            android:key="CONF_CHANNEL_FOCUS_PWM" 
+            android:key="conf_focus_pwm" 
             android:enabled="true" 
             android:inputType="number"
             android:lines="1"
@@ -82,6 +94,7 @@
             android:order="205"/>
         
     </PreferenceCategory>
+    
     <PreferenceCategory android:title="@string/conf_focuscolor_label" android:order="300">
         <ListPreference 
             android:title="Focus color" 
@@ -93,10 +106,6 @@
             android:summary="Seleted focus color" 
             android:order="310" 
             android:defaultValue="@integer/pref_focusled_color"/>
-        <EditTextPreference 
-            android:summary="Testing value" 
-            android:title="Testing" 
-            android:key="conf_testing_key"/>
         
     </PreferenceCategory>
     

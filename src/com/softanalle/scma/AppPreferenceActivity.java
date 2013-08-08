@@ -51,13 +51,13 @@ implements OnSharedPreferenceChangeListener
 	}
 
 
+	@SuppressWarnings("deprecation")
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(MainActivity.KEY_PREF_FOCUSCOLOR)) {
             Preference connectionPref = findPreference(key);
             // Set summary to be the user-description for the selected value
-            connectionPref.setSummary(sharedPreferences.getString(key, ""));
+            connectionPref.setSummary(sharedPreferences.getString(key, "Selected color"));
         }
     }
-
 
 }
