@@ -27,6 +27,7 @@ import android.hardware.Camera.ShutterCallback;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Handler;
 import android.text.Layout;
 import android.util.Log;
 import android.widget.Button;
@@ -99,7 +100,7 @@ OnSharedPreferenceChangeListener
 	protected static final String[] mImageSuffix = { "blue", "green", "red", "white", "yellow", "nir" };
 
 	private static final int defaultPulseWidth = 500; // PWM pulse width
-	private static final int mLedFlashTime = 1000; // milliseconds the flash leds are on
+	private static final int mLedFlashTime = 10; // milliseconds the led takes to raise/shutdown
 	private static final int mLedCount = 6; // how many leds actually there are!
 
 	private static final int mFocusLedIndex = 2; // led INDEX of focus color; default=3  
@@ -120,6 +121,9 @@ OnSharedPreferenceChangeListener
 	private Button pictureButton_, focusButton_;
 	private int pulseWidthFocus_;
 
+    // Splash screen timer
+    private static int SPLASH_TIME_OUT = 3000;
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -137,8 +141,27 @@ OnSharedPreferenceChangeListener
 		toggleButton_.setChecked(false);
 		
 		//focusButton_.setEnabled(false);
-	
+	/*
+		new Handler().postDelayed(new Runnable() {
+			 
+            / *
+             * Showing splash screen with a timer. This will be useful when you
+             * want to show case your app logo / company
+             * /
+ 
+            @Override
+            public void run() {
+                // This method will be executed once the timer is over
+                // Start your app main activity
+                Intent i = new Intent(getApplicationContext(), SplashActivity.class);
+                startActivity(i);
+ 
+                // close this activity
+                finish();
+            }
+        }, SPLASH_TIME_OUT);
 		
+		*/
 		
 		// camera stuff
 		
@@ -318,18 +341,28 @@ OnSharedPreferenceChangeListener
 			
 			for (int index = 0; index < mLedCount; index++) {
 				
+				
 				mCurrentLedIndex = index;
 				mLedState[index] = true;
 				mPulseWidth[index] = mDefaultPulseWidth[index];
 			
 				mImagePrefix = Long.toString(System.currentTimeMillis());
+				
+				Thread.sleep(mLedFlashTime);
+				
 				/*
 						String.format("%d_%s", 
 						System.currentTimeMillis(),
 						mLedColor[index]);
 				*/
-				mPreview.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
-				
+				Thread runner = new Thread(new Runnable() {
+					public void run() {
+						mPreview.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
+					}
+				});
+
+				runner.start();
+				runner.wait();
 				
 				Thread.sleep(mLedFlashTime);
 				
@@ -355,17 +388,7 @@ OnSharedPreferenceChangeListener
 		}
 		
 	}
-	/*
-	private void powerLedsOn() {
-		pulseWidth1_ = defaultPulseWidth;
-		pulseWidth2_ = defaultPulseWidth;
-		pulseWidth3_ = defaultPulseWidth;
-
-		ledIndicator_.turnOn(0);
-		ledIndicator_.turnOn(1);
-		ledIndicator_.turnOn(2);
-	}
-*/
+	
 	
 	private void powerLedsOff() {
 		synchronized (MainActivity.class) {
@@ -379,28 +402,10 @@ OnSharedPreferenceChangeListener
 		}
 		powerState_ = false;
 		
-		/*
-		pulseWidth1_ = 0;
-		pulseWidth2_ = 0;
-		pulseWidth3_ = 0;
-
-		pulseWidth4_ = 0;
-		pulseWidth5_ = 0;
-		pulseWidth6_ = 0;
-		
-		ledIndicator_.turnOff(0);
-		ledIndicator_.turnOff(1);
-		ledIndicator_.turnOff(2);
-		
-		ledIndicator_.turnOff(3);
-		ledIndicator_.turnOff(4);
-		ledIndicator_.turnOff(5);
-		*/               		
+		            		
 	}
 
-	//private int pulseWidth1_, pulseWidth2_, pulseWidth3_, pulseWidth4_, pulseWidth5_, pulseWidth6_;
-
-
+	
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {

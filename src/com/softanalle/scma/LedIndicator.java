@@ -160,7 +160,7 @@ public class LedIndicator extends View {
 		invalidate();
 	}
 
-	public void setPowerState(boolean on) {
+	public void setPowerState(boolean on) {		
 		if ( on ) {
 			mPowerLed.getPaint().setColor(POWER_COLOR);
 		} else {
