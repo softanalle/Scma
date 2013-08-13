@@ -17,7 +17,24 @@ import com.softanalle.scma.R;
 
 /**
  * @author t2r
- *
+ * @license GNU GPL 3.0
+ * 
+    Preference activity for SCMA
+ 
+    Copyright (C) 2013  Tommi Rintala <t2r@iki.fi>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 public class AppPreferenceActivity extends PreferenceActivity 
 implements OnSharedPreferenceChangeListener

@@ -3,6 +3,24 @@ package com.softanalle.scma;
 
 /**
  * @author Tommi Rintala <t2r@iki.fi>
+ * @license GNU GPL 3.0
+ * 
+    Camera Preview controller for SCMA
+ 
+    Copyright (C) 2013  Tommi Rintala <t2r@iki.fi>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 
@@ -59,7 +77,8 @@ SurfaceView.OnClickListener */ {
 		Log.d(TAG, "surfaceCreated(holder)");
 		if ( camera == null ) {
 			Log.d(TAG, "-camera was null, opening");
-			camera = getCameraInstance();
+			// camera = getCameraInstance();
+			reclaimCamera();
 		}
 		
 		try {
@@ -297,6 +316,10 @@ SurfaceView.OnClickListener */ {
 		//Log.d(TAG, "writeImageToDisc - complete");
 	}
 	
+	/*
+	 * Take a picture and write JPEG image
+	 * @param filename full filename with folder structure
+	 */
 	public void takeJPEGPicture(final String fileName) {
 	    Log.i(TAG, "Tacking picture");
 	    PictureCallback callback = new PictureCallback() {
@@ -311,6 +334,10 @@ SurfaceView.OnClickListener */ {
 	    camera.takePicture(null, null, callback);
 	}
 	
+	/*
+	 * Take a picture and write RAW image
+	 * @param filename full filename with folder structure
+	 */
 	public void takeRAWPicture(final String fileName) {
 	    PictureCallback callback = new PictureCallback() {
 
@@ -323,5 +350,23 @@ SurfaceView.OnClickListener */ {
 	    };
 	    camera.takePicture(null, callback, null);
 		
+	}
+	
+	/*
+	 * release camera handler, called on application onResume()
+	 */
+	public void releaseCamera() {
+		if ( camera != null ) {
+			camera.release();
+			camera = null;
+		}
+	}
+	/*
+	 * reclaim camera, used usually on application onPause()
+	 */
+	public void reclaimCamera() {
+		if ( camera == null ) {
+			camera = getCameraInstance();
+		}
 	}
 }
