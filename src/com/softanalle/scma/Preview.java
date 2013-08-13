@@ -316,10 +316,51 @@ SurfaceView.OnClickListener */ {
 		//Log.d(TAG, "writeImageToDisc - complete");
 	}
 	
+	public void takePicture(final boolean doJPEG, final boolean doRAW, final String filename) {
+		PictureCallback jpegCallback = null;
+		PictureCallback rawCallback = null;		
+		if ( doJPEG ) {
+			//startPreview();
+			jpegCallback = new PictureCallback() {
+
+				private String mJpegFilename = filename;
+				@Override public void onPictureTaken(byte[] data, Camera camera) {
+					writeImageToDisc(mJpegFilename + ".jpg", data);
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			};
+		}
+		
+		if ( doRAW ) {
+			if ( doJPEG) { startPreview(); }
+			rawCallback = new PictureCallback() {
+				private String mRawFilename = filename;
+				@Override public void onPictureTaken(byte[] data, Camera camera) {
+					writeImageToDisc(mRawFilename + ".raw", data);
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			};
+		}
+		Log.i(TAG, "Take JPEG (" + doJPEG + ") and RAW (" + doRAW + ")");
+		camera.takePicture(null,  rawCallback, jpegCallback);
+		Log.i(TAG, "done: " + filename);
+	}
+	
 	/*
 	 * Take a picture and write JPEG image
 	 * @param filename full filename with folder structure
 	 */
+	/*
 	public void takeJPEGPicture(final String fileName) {
 	    Log.i(TAG, "Tacking picture");
 	    PictureCallback callback = new PictureCallback() {
@@ -333,11 +374,12 @@ SurfaceView.OnClickListener */ {
 	    };
 	    camera.takePicture(null, null, callback);
 	}
-	
+	*/
 	/*
 	 * Take a picture and write RAW image
 	 * @param filename full filename with folder structure
 	 */
+	/*
 	public void takeRAWPicture(final String fileName) {
 	    PictureCallback callback = new PictureCallback() {
 
@@ -351,6 +393,7 @@ SurfaceView.OnClickListener */ {
 	    camera.takePicture(null, callback, null);
 		
 	}
+	*/
 	
 	/*
 	 * release camera handler, called on application onResume()

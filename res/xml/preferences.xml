@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
     <PreferenceCategory android:title="@string/conf_filemode_label" android:order="100">
-        <CheckBoxPreference android:key="conf_write_jpeg" android:title="@string/conf_writejpeg_label" android:defaultValue="true" android:summaryOn="Write JPEG image files" android:summaryOff="Write JPEG image files"/>
-        <CheckBoxPreference android:key="conf_write_raw" android:title="@string/conf_writeraw_label" android:summaryOn="Write RAW image files" android:defaultValue="false" android:summaryOff="Write RAW image files"/>
+        <CheckBoxPreference android:key="conf_write_jpeg" 
+            android:title="@string/conf_writejpeg_label" 
+            android:defaultValue="true" 
+            android:summaryOn="Save JPEG image files" 
+            android:summaryOff="Don't save JPEG image files"/>
+        <CheckBoxPreference android:key="conf_write_raw" 
+            android:title="@string/conf_writeraw_label" 
+            android:summaryOn="Save RAW image files" 
+            android:defaultValue="false" 
+            android:summaryOff="Don't save RAW image files"/>
     </PreferenceCategory>
+    
     <PreferenceCategory 
         android:title="@string/led_powers_label" 
         android:order="200">

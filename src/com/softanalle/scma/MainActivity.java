@@ -132,15 +132,16 @@ implements OnSharedPreferenceChangeListener
 	public final String[] mImageSuffix = { "green", "blue",  "red", "white", "yellow", "nir", "other" };
 
 	private final int defaultPulseWidth = 500; // PWM pulse width
-	private final int mLedFlashTime = 10; // milliseconds the led takes to raise/shutdown
+	private final int mLedFlashTime = 30; // milliseconds the led takes to raise/shutdown
 	private final int mLedCount = 6; // how many leds actually there are!
 
 	private int mFocusLedIndex = 2; // led INDEX of focus color; default=3  
 	private int defaultFocusPulseWidth = 300; // PWM pulse width for focus 
 	
-	/// Camera delay before next image
-    private static final int mCameraRetryDelay = 4000;
-    private static final int mLedWaitDelay = 50;
+	/// Delays for application
+    private static final int mCameraRetryDelay = 4000; // delay before opening camera preview
+    private static final int mLedWaitDelay = 50;       // delay for waiting led's to lit
+    private static final int mRawPictureDelay = 1000;  // delay for RAW image write operation
     
 	
 	private int mPulseWidth[];      // PWM pulse width array for leds
@@ -151,11 +152,18 @@ implements OnSharedPreferenceChangeListener
 	private ToggleButton toggleButton_;
 	private LedIndicator ledIndicator_;
 	private Button pictureButton_, focusButton_;
-	private int pulseWidthFocus_;
+	private int focusPulseWidth_ = defaultFocusPulseWidth;
+
+	
 
     // Splash screen timer
     private static final int SPLASH_TIME_OUT = 3000;
-    
+
+    /*
+     * TODO: Focus ledille oma pulsewidth asetus:
+     * - muuttuja joka kertoo onko focus led nyt päällä vaiko ei
+     * - kun focus väri ledi ajetaan päälle, käytetään sitten focus PWM:ää eikä ledin normaalia voimakkuutta
+     */
     
     
 	// private static String mImagePrefix = "focus";
@@ -182,8 +190,7 @@ implements OnSharedPreferenceChangeListener
 	protected Button buttonClick;
 
 	DevicePolicyManager mDPM;
-
-    private TextView messageView_;
+    
 	
 
     private Object lock_ = new Object();
@@ -256,7 +263,7 @@ implements OnSharedPreferenceChangeListener
 		pictureButton_.bringToFront();
 		focusButton_.bringToFront();
 		
-		messageView_.bringToFront();
+		
 		
 		mPulseWidth = new int[mLedCount];
 		mLedState = new boolean[mLedCount];
@@ -266,7 +273,7 @@ implements OnSharedPreferenceChangeListener
 				mLedState[index] = false;
 
 				mDefaultPulseWidth[index] = defaultPulseWidth;
-				mPulseWidth[index] = mDefaultPulseWidth[index];
+				//mPulseWidth[index] = mDefaultPulseWidth[index];
 			}	
 		}
 
@@ -342,9 +349,31 @@ implements OnSharedPreferenceChangeListener
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		
-        saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
-        saveModeRAW = sharedPref.getBoolean(KEY_PREF_SAVE_RAW, false);
-                
+        try {
+        	saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
+        	saveModeRAW = sharedPref.getBoolean(KEY_PREF_SAVE_RAW, false);
+
+        	mPulseWidth[LED_INDEX_GREEN] = sharedPref.getInt(KEY_PREF_GREEN_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_GREEN]);
+        	mPulseWidth[LED_INDEX_BLUE] = sharedPref.getInt(KEY_PREF_BLUE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_BLUE]);
+        	mPulseWidth[LED_INDEX_RED] = sharedPref.getInt(KEY_PREF_RED_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_RED]);
+        	mPulseWidth[LED_INDEX_YELLOW] = sharedPref.getInt(KEY_PREF_YELLOW_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_YELLOW]);
+        	mPulseWidth[LED_INDEX_WHITE] = sharedPref.getInt(KEY_PREF_WHITE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_WHITE]);
+        	mPulseWidth[LED_INDEX_NIR] = sharedPref.getInt(KEY_PREF_NIR_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_NIR]);
+
+        	String focusColor = sharedPref.getString(KEY_PREF_FOCUSCOLOR, "white");
+        	int index = 0;
+        	for (String opt : mImageSuffix) {
+        		if (opt.equalsIgnoreCase(focusColor)) {
+        			mFocusLedIndex = index;
+        		}
+        		index++;
+        	}
+
+        } catch (ClassCastException cce) {
+        	Toast.makeText(getApplicationContext(), "Invalid setting: " + cce, Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+        	Toast.makeText(getApplicationContext(), "Exeption: " + e, Toast.LENGTH_LONG).show();        	
+        }
         
 		enableUi(false);
 		Log.d(TAG, "onCreate - done");
@@ -378,8 +407,21 @@ implements OnSharedPreferenceChangeListener
 					mPulseWidth[index] = mDefaultPulseWidth[index];
 				}
 				
-				Thread.sleep(mLedFlashTime);
+				Thread.sleep(mLedWaitDelay);
 										
+				String imageNamePrefix = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
+						mImagePrefix + "_" + mImageSuffix[index];
+	
+				mPreview.startPreview();
+				mPreview.takePicture(saveModeJPEG, saveModeRAW, imageNamePrefix);
+				if ( saveModeJPEG ) {
+					Thread.sleep(mRawPictureDelay);
+				}
+				// Thread.sleep(mLedWaitDelay);
+				if ( saveModeRAW ) {
+					Thread.sleep(mRawPictureDelay);
+				}
+				/*
 				if (saveModeJPEG) {
 					mPreview.startPreview();
 					Thread.sleep(mLedWaitDelay);
@@ -390,7 +432,10 @@ implements OnSharedPreferenceChangeListener
 					mPreview.takeJPEGPicture(filename);
 				}
 				// we need some pause to allow camera to retry
-				Thread.sleep(mCameraRetryDelay);
+				
+				if ( saveModeJPEG && saveModeRAW ) {
+					Thread.sleep(mCameraRetryDelay);
+				}
 				
 				if ( saveModeRAW ) {
 					mPreview.startPreview();
@@ -400,8 +445,9 @@ implements OnSharedPreferenceChangeListener
 							mImageSuffix[index] + ".raw";
 					
 					mPreview.takeRAWPicture(filename);
+					Thread.sleep(mRawPictureDelay);
 				}
-
+*/
 								
 				mPulseWidth[index] = 0;
 				mLedState[index] = false;
@@ -658,31 +704,38 @@ implements OnSharedPreferenceChangeListener
 	
 	
 	
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                //Preference keyPref = findPreference(key);
-        	if ( key.equalsIgnoreCase(KEY_PREF_FOCUSCOLOR)) {
-        		mFocusLedIndex = sharedPreferences.getInt(KEY_PREF_FOCUSCOLOR, 3);
-        	}
-        	if ( key.equalsIgnoreCase(KEY_PREF_RED_PULSEWIDTH)) {
-        		mPulseWidth[LED_INDEX_RED] = sharedPreferences.getInt(KEY_PREF_RED_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_RED]);
-        	}
-        	if ( key.equalsIgnoreCase(KEY_PREF_BLUE_PULSEWIDTH)) {
-        		mPulseWidth[LED_INDEX_BLUE] = sharedPreferences.getInt(KEY_PREF_BLUE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_BLUE]);
-        	}
-        	if ( key.equalsIgnoreCase(KEY_PREF_GREEN_PULSEWIDTH)) {
-        		mPulseWidth[LED_INDEX_GREEN] = sharedPreferences.getInt(KEY_PREF_GREEN_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_GREEN]);
-        	}
-        	if ( key.equalsIgnoreCase(KEY_PREF_GREEN_PULSEWIDTH)) {
-        		mPulseWidth[LED_INDEX_YELLOW] = sharedPreferences.getInt(KEY_PREF_YELLOW_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_YELLOW]);
-        	}
-        	if ( key.equalsIgnoreCase(KEY_PREF_WHITE_PULSEWIDTH)) {
-        		mPulseWidth[LED_INDEX_WHITE] = sharedPreferences.getInt(KEY_PREF_WHITE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_WHITE]);
-        	}
-        	if ( key.equalsIgnoreCase(KEY_PREF_NIR_PULSEWIDTH)) {
-        		mPulseWidth[LED_INDEX_NIR] = sharedPreferences.getInt(KEY_PREF_NIR_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_NIR]);
-        	}        	        
-    }
-	 
+	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		//Preference keyPref = findPreference(key);
+		if ( key.equalsIgnoreCase(KEY_PREF_FOCUSCOLOR)) {
+			mFocusLedIndex = sharedPreferences.getInt(KEY_PREF_FOCUSCOLOR, 3);
+		}
+		if ( key.equalsIgnoreCase(KEY_PREF_RED_PULSEWIDTH)) {
+			mPulseWidth[LED_INDEX_RED] = sharedPreferences.getInt(KEY_PREF_RED_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_RED]);
+		}
+		if ( key.equalsIgnoreCase(KEY_PREF_BLUE_PULSEWIDTH)) {
+			mPulseWidth[LED_INDEX_BLUE] = sharedPreferences.getInt(KEY_PREF_BLUE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_BLUE]);
+		}
+		if ( key.equalsIgnoreCase(KEY_PREF_GREEN_PULSEWIDTH)) {
+			mPulseWidth[LED_INDEX_GREEN] = sharedPreferences.getInt(KEY_PREF_GREEN_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_GREEN]);
+		}
+		if ( key.equalsIgnoreCase(KEY_PREF_GREEN_PULSEWIDTH)) {
+			mPulseWidth[LED_INDEX_YELLOW] = sharedPreferences.getInt(KEY_PREF_YELLOW_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_YELLOW]);
+		}
+		if ( key.equalsIgnoreCase(KEY_PREF_WHITE_PULSEWIDTH)) {
+			mPulseWidth[LED_INDEX_WHITE] = sharedPreferences.getInt(KEY_PREF_WHITE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_WHITE]);
+		}
+		if ( key.equalsIgnoreCase(KEY_PREF_NIR_PULSEWIDTH)) {
+			mPulseWidth[LED_INDEX_NIR] = sharedPreferences.getInt(KEY_PREF_NIR_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_NIR]);
+		}
+		
+		if (key.equalsIgnoreCase(KEY_PREF_SAVE_JPEG)) {
+			saveModeJPEG = sharedPreferences.getBoolean(KEY_PREF_SAVE_JPEG, true);
+		}
+		if (key.equalsIgnoreCase(KEY_PREF_SAVE_RAW)) {
+			saveModeRAW = sharedPreferences.getBoolean(KEY_PREF_SAVE_RAW, false);
+		}		
+	}
+
 	/*
         private Preference findPreference(String key) {
                 // TODO Auto-generated method stub
