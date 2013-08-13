@@ -329,8 +329,15 @@ implements OnSharedPreferenceChangeListener
 		focusButton_.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				ledIndicator_.setLedState(LED_INDEX_FOCUS, true);
-				focusCamera();
+				try {
+					ledIndicator_.setLedState(LED_INDEX_FOCUS, true);
+					Thread.sleep(10);
+					focusCamera();
+					Thread.sleep(10);
+					ledIndicator_.setLedState(LED_INDEX_FOCUS, false);
+				} catch (Exception e) {
+
+				}
 			}
 		});
 		
@@ -343,7 +350,7 @@ implements OnSharedPreferenceChangeListener
 		
 
 		getSettings();
-		
+		/*
 		List<Integer> modes = mPreview.getSupportedPictureFormats();
 		String lista = "";
 		if ( modes != null && modes.size() > 0) {
@@ -354,7 +361,7 @@ implements OnSharedPreferenceChangeListener
 			lista = "List query failed";
 		}
 		Toast.makeText(getApplicationContext(), "Supported Picture formats: " + lista, Toast.LENGTH_LONG).show();
-		
+		*/
 		enableUi(false);
 		Log.d(TAG, "onCreate - done");
 
@@ -638,7 +645,9 @@ implements OnSharedPreferenceChangeListener
 			return true;
 			
 		case R.id.calibration:
+			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, true);
 			mPreview.takeCalibrationPicture(saveModeJPEG, saveModeRAW, Environment.getExternalStorageDirectory().getPath() + "/SCM/");
+			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, false);
 			return true;
 		case R.id.about_info:
 			            
@@ -820,8 +829,15 @@ implements OnSharedPreferenceChangeListener
 		if ( mPreview != null ) {
 			mPreview.reclaimCamera();
 		}
+		getSettings();
 	}
 	
+	/*
+	public void focusComplete() {
+		ledIndicator_.setLedState(LED_INDEX_FOCUS, false);
+	}
+	*/
+	/*
 	public static final int MSG_FOCUS_ON = 1;
 	public static final int MSG_FOCUS_OFF = 2;
 	public static final int MSG_CALIBRATE_ON = 3;
@@ -851,6 +867,9 @@ implements OnSharedPreferenceChangeListener
 		}
 
 	};
+	
+	*/
+	
 /*
 	(new Thread(new Runnable() {
 

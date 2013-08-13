@@ -29,17 +29,21 @@ package com.softanalle.scma;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.security.acl.LastOwnerException;
 import java.util.List;
 
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.ImageFormat;
 import android.graphics.Paint;
 import android.hardware.Camera;
+import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
+import android.hardware.Camera.Size;
 import android.media.audiofx.BassBoost.Settings;
 //import android.hardware.Camera.PictureCallback;
 //import android.hardware.Camera.PreviewCallback;
@@ -51,12 +55,15 @@ import android.widget.Toast;
 //import android.view.View;
 
 public class Preview extends SurfaceView 
-implements SurfaceHolder.Callback,
+implements SurfaceHolder.Callback
+/* ,
 Camera.AutoFocusCallback
+*/
 /*,
 SurfaceView.OnClickListener */ {
 	private final static String TAG = "Preview";
 
+	private boolean isPreview_ = false;
 	private boolean isReady_ = false;
 
 	// support option arrays
@@ -125,8 +132,9 @@ SurfaceView.OnClickListener */ {
 		Log.d(TAG, "surfaceDestroyed(holder)");
 		if ( camera != null ) {
 			Log.d(TAG, "-camera was not null, releasing");
-			camera.stopPreview();
+			stopPreview();
 			camera.release();
+			isPreview_ = false;
 		}
 		camera = null;
 		isReady_ = false;
@@ -149,7 +157,8 @@ SurfaceView.OnClickListener */ {
 		
 		// stop preview before making changes
         try {
-            camera.stopPreview();
+            stopPreview();
+            isPreview_ = false;
         } catch (Exception e){
           // ignore: tried to stop a non-existent preview
         }
@@ -168,10 +177,32 @@ SurfaceView.OnClickListener */ {
 			
 			params.set("rawsave-mode", "1");
 			
+			// no compression!
+			params.setJpegQuality(100);
+			
+			List<Camera.Size> previewSizes = params.getSupportedPreviewSizes();
+			
+			for (Size p : previewSizes) {
+				if ( p.width == 640 ) {
+					params.setPreviewSize(p.width,  p.height);
+					break;
+				}
+			}
+			
 			// turn autofocus off
 			//params.setFocusMode(Parameters.FOCUS_MODE_FIXED);
 			
 			params.setFocusMode(Parameters.FOCUS_MODE_MACRO);
+			
+			if (supportedPictureFormats_.contains(ImageFormat.RGB_565)) {			
+			params.setPictureFormat(ImageFormat.RGB_565);
+			} else if ( supportedPictureFormats_.contains(ImageFormat.YV12)) {
+				params.setPictureFormat(ImageFormat.YV12);
+			} else {
+				params.setPictureFormat(ImageFormat.NV21);
+			}
+			
+			
 			
 			// turn flash off
 			params.setFlashMode(Parameters.FLASH_MODE_OFF);
@@ -192,7 +223,7 @@ SurfaceView.OnClickListener */ {
 			params.removeGpsData();
 			
 			camera.setParameters(params);
-			camera.startPreview();
+			startPreview();
 			isReady_ = true;
 		} else {
 			Log.d(TAG, "-camera is still null, failed to retrieve");
@@ -284,30 +315,34 @@ SurfaceView.OnClickListener */ {
 	}
 	
 	public void startPreview() {
-		if ( camera != null ) {
+		if ( camera != null && !isPreview_) {
 			camera.startPreview();
+			isPreview_ = true;
 		}
 	}
 
 	public void stopPreview() {
 		if ( camera != null ) {
 			camera.stopPreview();
+			isPreview_ = false;
 		}
 	}
 	
 	public void doFocus() {
-				
+		
+		//camera.cancelAutoFocus();
 		camera.autoFocus(null);
 		
 	}
 
-	
+	/*
 	@Override
 	public void onAutoFocus(boolean success, Camera camera) {
 		Toast.makeText(getContext(), "Focus complete", Toast.LENGTH_LONG).show();
-		MainActivity.ledHandler.sendEmptyMessage(MainActivity.MSG_FOCUS_OFF);
+		//
+		
 	}
-
+*/
 	/**
 	 * @return the whiteBalanceModes_
 	 */
@@ -315,9 +350,9 @@ SurfaceView.OnClickListener */ {
 		return whiteBalanceModes_;
 	}
 	
-	public List<Integer> getSupportedPictureFormats () {
-		return supportedPictureFormats_;
-	}
+	//public List<Integer> getSupportedPictureFormats () {
+	//	return supportedPictureFormats_;
+	//}
 	
 	private boolean writeImageToDisc(String filename, byte[] data) {
 		//Log.d(TAG, "writeImageToDisc - begin");
@@ -344,6 +379,7 @@ SurfaceView.OnClickListener */ {
 		PictureCallback jpegCallback = null;
 		PictureCallback rawCallback = null;
 		final String filename = storagePath + "/whiteref";
+		startPreview();
 		if ( jpg ) {
 			jpegCallback = new PictureCallback() {
 
@@ -360,7 +396,8 @@ SurfaceView.OnClickListener */ {
 				}
 			};
 		}
-		if ( raw ) {
+		
+		if ( raw ) {			
 			rawCallback = new PictureCallback() {
 				private String mRawFilename = filename;
 				@Override public void onPictureTaken(byte[] data, Camera camera) {
@@ -384,12 +421,14 @@ SurfaceView.OnClickListener */ {
 
 		}
 		camera.takePicture(null,  rawCallback, null, jpegCallback);
+		isPreview_ = false;
 		try {
 			Thread.sleep(1000);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		startPreview();
 	}
 	
 	/*
@@ -446,7 +485,7 @@ SurfaceView.OnClickListener */ {
 		//Log.i(TAG, "Take JPEG (" + doJPEG + ") and RAW (" + doRAW + ")");
 		
 		camera.takePicture(null,  rawCallback, jpegCallback);
-		
+		isPreview_ = false;
 		//Log.i(TAG, "done: " + filename);
 	}
 	
@@ -480,4 +519,5 @@ SurfaceView.OnClickListener */ {
 			camera = getCameraInstance();
 		}
 	}
+	
 }
