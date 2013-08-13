@@ -54,13 +54,6 @@
                 android:layout_margin="5dp"
                 android:textOff="@string/poweroff_label"
                 android:textOn="@string/poweron_label" />
-    
-            
-        <TextView
-            android:id="@+id/messageView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Medium Text"
-            android:textAppearance="?android:attr/textAppearanceMedium" />
+                       
         
 </RelativeLayout>

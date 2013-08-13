@@ -115,8 +115,8 @@ implements OnSharedPreferenceChangeListener
 	private static final int IOIO_PIN_LED_RED    = 12;
 
 
-	private static final int LED_INDEX_BLUE = 0;
-	private static final int LED_INDEX_GREEN = 1;
+	private static final int LED_INDEX_GREEN = 0;
+	private static final int LED_INDEX_BLUE = 1;	
 	private static final int LED_INDEX_RED = 2;
 	private static final int LED_INDEX_WHITE = 3;
 	private static final int LED_INDEX_YELLOW = 4;
@@ -129,7 +129,7 @@ implements OnSharedPreferenceChangeListener
 	private boolean saveModeJPEG = false;
 	private boolean saveModeRAW = false;
 	private int mCurrentLedIndex = 0;
-	public final String[] mImageSuffix = { "blue", "green", "red", "white", "yellow", "nir", "other" };
+	public final String[] mImageSuffix = { "green", "blue",  "red", "white", "yellow", "nir", "other" };
 
 	private final int defaultPulseWidth = 500; // PWM pulse width
 	private final int mLedFlashTime = 10; // milliseconds the led takes to raise/shutdown
@@ -137,6 +137,11 @@ implements OnSharedPreferenceChangeListener
 
 	private int mFocusLedIndex = 2; // led INDEX of focus color; default=3  
 	private int defaultFocusPulseWidth = 300; // PWM pulse width for focus 
+	
+	/// Camera delay before next image
+    private static final int mCameraRetryDelay = 4000;
+    private static final int mLedWaitDelay = 50;
+    
 	
 	private int mPulseWidth[];      // PWM pulse width array for leds
 	private boolean[] mLedState;    // led status (on/off)
@@ -150,7 +155,9 @@ implements OnSharedPreferenceChangeListener
 
     // Splash screen timer
     private static final int SPLASH_TIME_OUT = 3000;
-
+    
+    
+    
 	// private static String mImagePrefix = "focus";
 	public static final String TAG = "SCMA";
 	
@@ -178,6 +185,9 @@ implements OnSharedPreferenceChangeListener
 
     private TextView messageView_;
 	
+
+    private Object lock_ = new Object();
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -191,33 +201,10 @@ implements OnSharedPreferenceChangeListener
 		ledIndicator_ = (LedIndicator) findViewById(R.id.ledIndicator1);
 		focusButton_ = (Button) findViewById(R.id.focusButton);
 
-		messageView_ = (TextView) findViewById(R.id.messageView);
 		
 		toggleButton_.setEnabled(false);
 		toggleButton_.setChecked(false);
 		
-		//focusButton_.setEnabled(false);
-	/*
-		new Handler().postDelayed(new Runnable() {
-			 
-            / *
-             * Showing splash screen with a timer. This will be useful when you
-             * want to show case your app logo / company
-             * /
- 
-            @Override
-            public void run() {
-                // This method will be executed once the timer is over
-                // Start your app main activity
-                Intent i = new Intent(getApplicationContext(), SplashActivity.class);
-                startActivity(i);
- 
-                // close this activity
-                finish();
-            }
-        }, SPLASH_TIME_OUT);
-		
-		*/
 		
 		// camera stuff
 		
@@ -233,17 +220,8 @@ implements OnSharedPreferenceChangeListener
 
 		
 		mPreview = new Preview(this);
-		//mPreview = new Preview(getApplicationContext());
+
 		Log.d(TAG, "Preview created");
-		/*
-		Camera camera = mPreview.getCameraInstance();
-		if ( camera == null ) {
-			Toast.makeText(getApplicationContext(), "Camera is missing!", Toast.LENGTH_LONG).show();
-		} else {
-			Toast.makeText(getApplicationContext(), "We got camera instance...", Toast.LENGTH_LONG).show();
-			camera.release();
-		}
-		*/
 		
 		
 		
@@ -283,30 +261,34 @@ implements OnSharedPreferenceChangeListener
 		mPulseWidth = new int[mLedCount];
 		mLedState = new boolean[mLedCount];
 		mDefaultPulseWidth = new int[mLedCount];
-		for (int index=0;index<mLedCount;index++) {
-			mLedState[index] = false;
-			
-			mDefaultPulseWidth[index] = defaultPulseWidth;
-			mPulseWidth[index] = mDefaultPulseWidth[index];
-			
+		synchronized (lock_) {
+			for (int index=0;index<mLedCount;index++) {
+				mLedState[index] = false;
+
+				mDefaultPulseWidth[index] = defaultPulseWidth;
+				mPulseWidth[index] = mDefaultPulseWidth[index];
+			}	
 		}
-		//buttonClick = (Button) findViewById(R.id.button1);
+
 
 		pictureButton_.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				/*
-				if ( powerState_ && mPreview.isReady() ) {
-					powerLedsOn();
-					mPreview.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
-					powerLedsOff();
-				}
-				*/
+			public void onClick(View v) {				
 				if ( powerState_ ) {
-					takeColorSeries();
-					powerLedsOff();
+					// disable buttons -> no error clicks
+					pictureButton_.setEnabled(false);
+					toggleButton_.setEnabled(false);
+					focusButton_.setEnabled(false);
+				    Runnable runnable = new Runnable() {
+				      @Override
+				      public void run() {
+				    	  // run the picture sequence
+				    	  takeColorSeries();
+				      }				      
+				    };
+				
+				    new Thread(runnable).start();
 				}
 			}
 		});
@@ -362,26 +344,7 @@ implements OnSharedPreferenceChangeListener
 		
         saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
         saveModeRAW = sharedPref.getBoolean(KEY_PREF_SAVE_RAW, false);
-        
-		//String syncConnPref = sharedPref.getString(SettingsActivity.KEY_PREF_SYNC_CONN, "");
-		/*
-        pulseWidthFocus_ = sharedPref.getInt(SETTINGS_CHANNEL_FOCUS, defaultPulseWidth);
-
-        pulseWidth1_ = sharedPref.getInt(SETTINGS_CHANNEL0, defaultPulseWidth);
-        pulseWidth2_ = sharedPref.getInt(SETTINGS_CHANNEL1, defaultPulseWidth);
-        pulseWidth3_ = sharedPref.getInt(SETTINGS_CHANNEL2, defaultPulseWidth);
-		 */
-		/*
-		pulseWidth1_ = 0;
-		pulseWidth2_ = 0;
-		pulseWidth3_ = 0;
-
-		pulseWidth4_ = 0;
-		pulseWidth5_ = 0;
-		pulseWidth6_ = 0;
-		*/
-
-        
+                
         
 		enableUi(false);
 		Log.d(TAG, "onCreate - done");
@@ -395,14 +358,10 @@ implements OnSharedPreferenceChangeListener
 		// do focusing stuff
 		mPreview.camera.autoFocus(null);
 		// mPreview.camera
-		messageView_.setText("Currently supported WhiteBalance modes: " + mPreview.getWhiteBalanceModes().toString()+
-				"Currently supported modes: ");
+		//messageView_.setText("Currently supported WhiteBalance modes: " + mPreview.getWhiteBalanceModes().toString()+
+			//	"Currently supported modes: ");
 	}
-	
-	private void showDebugMessage(String message) {
-		messageView_.setText(message);
-	}
-	
+		
 
 	private void takeColorSeries() {
 		mLedState[mFocusLedIndex] = false;
@@ -412,73 +371,65 @@ implements OnSharedPreferenceChangeListener
 			mImagePrefix = Long.toString(System.currentTimeMillis());
 			
 			for (int index = 0; index < mLedCount; index++) {
-								
-				mCurrentLedIndex = index;
-				mLedState[index] = true;
-				mPulseWidth[index] = mDefaultPulseWidth[index];
+			
+				synchronized (lock_) {
+					mCurrentLedIndex = index;
+					mLedState[index] = true;
+					mPulseWidth[index] = mDefaultPulseWidth[index];
+				}
 				
 				Thread.sleep(mLedFlashTime);
-								
-				/*
-				Thread runner = new Thread(new Runnable() {
-					public void run() {
-					*/
-				
-						// Preview have to be active when picture is taken
-				
-				
-		//		mPreview.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
-			
+										
 				if (saveModeJPEG) {
 					mPreview.startPreview();
-					Thread.sleep(10);
+					Thread.sleep(mLedWaitDelay);
 					String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
 							mImagePrefix + "_" + 
-							mImageSuffix[index] + ".jpg";
-					Toast.makeText(getApplicationContext(), "JPEG picture: " + filename,Toast.LENGTH_LONG).show();
+							mImageSuffix[index] + ".jpg";					
 					
 					mPreview.takeJPEGPicture(filename);
 				}
+				// we need some pause to allow camera to retry
+				Thread.sleep(mCameraRetryDelay);
 				
 				if ( saveModeRAW ) {
 					mPreview.startPreview();
-					Thread.sleep(10);
+					Thread.sleep(mLedWaitDelay);
 					String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
 							mImagePrefix + "_" + 
 							mImageSuffix[index] + ".raw";
-					Toast.makeText(getApplicationContext(), "RAW picture: " + filename,Toast.LENGTH_LONG).show();
+					
 					mPreview.takeRAWPicture(filename);
 				}
-				//notifyAll();
-					//}
-				//});
 
-				//runner.start();
-				// runner.run();
-				// runner.wait();
-				
-				// we need some pause to allow camera to retry
-				Thread.sleep(4000);
 								
 				mPulseWidth[index] = 0;
 				mLedState[index] = false;
 				
 				// sleep till leds are really turned off
-				Thread.sleep(mLedFlashTime);
+				Thread.sleep(mLedWaitDelay);
 			}
 			
-			synchronized (MainActivity.class) {
+			synchronized (lock_) {
 				mShutdown = true;
 				
 			}
 			// enable preview again
 			//mPreview.startPreview();
 			powerState_ = false;
-			ledIndicator_.setPowerState(false);
-			toggleButton_.setChecked(false);
-			pictureButton_.setEnabled(false);
+			runOnUiThread(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					ledIndicator_.setPowerState(false);
+					toggleButton_.setChecked(false);
+					pictureButton_.setEnabled(false);
+					powerLedsOff();
+					mPreview.startPreview();					
+				}
+			});
 			
-			mPreview.startPreview();
 			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -569,10 +520,8 @@ implements OnSharedPreferenceChangeListener
 		
 		@Override
 		public void loop() throws ConnectionLostException, InterruptedException {
-
-
-			
-			synchronized (MainActivity.class) {
+		
+			synchronized (lock_) {
 				if (!mShutdown) {
 					powout1_.write( powerState_ );
 					powout2_.write( powerState_ );			
@@ -580,17 +529,20 @@ implements OnSharedPreferenceChangeListener
 				}
 			}
 			led_.write( !powerState_ );
-			Thread.sleep(5);
 			
-			pwmOutput1_.setPulseWidth( mLedState[0] == false ? 0 : mPulseWidth[0] );
-			pwmOutput2_.setPulseWidth( mLedState[1] == false ? 0 : mPulseWidth[1] );
-			pwmOutput3_.setPulseWidth( mLedState[2] == false ? 0 : mPulseWidth[2] );
-			pwmOutput4_.setPulseWidth( mLedState[3] == false ? 0 : mPulseWidth[3] );
-			pwmOutput5_.setPulseWidth( mLedState[4] == false ? 0 : mPulseWidth[4] );
-			pwmOutput6_.setPulseWidth( mLedState[5] == false ? 0 : mPulseWidth[5] );
+			//Thread.sleep(5);
+			
+			synchronized ( lock_ ) {
+				pwmOutput1_.setPulseWidth( mLedState[0] == false ? 0 : mPulseWidth[0] );
+				pwmOutput2_.setPulseWidth( mLedState[1] == false ? 0 : mPulseWidth[1] );
+				pwmOutput3_.setPulseWidth( mLedState[2] == false ? 0 : mPulseWidth[2] );
+				pwmOutput4_.setPulseWidth( mLedState[3] == false ? 0 : mPulseWidth[3] );
+				pwmOutput5_.setPulseWidth( mLedState[4] == false ? 0 : mPulseWidth[4] );
+				pwmOutput6_.setPulseWidth( mLedState[5] == false ? 0 : mPulseWidth[5] );
 
-			synchronized (MainActivity.class) {
+
 				if ( mShutdown) {
+					// wait-time, required for making sure IOIO has turned power off from the (led)controller board
 					Thread.sleep(50);
 					powout1_.write( powerState_ );
 					powout2_.write( powerState_ );
@@ -601,33 +553,36 @@ implements OnSharedPreferenceChangeListener
 
 			visualize(powerState_, mLedState);
 
-			// Log.d(TAG, "IOIO-output: " );
-
-			//ledIndicator_.setPowerState( powerState_ );
 			// default 10ms
-			Thread.sleep(100);
+			Thread.sleep(10);
 		}
 
+		/*
+		 * Actions what we wish to do, when (if) IOIO is disconnected, eg. due to battery failure or something else
+		 * @see ioio.lib.util.BaseIOIOLooper#disconnected()
+		 */
 		@Override
 		public void disconnected() {
 			enableUi(false);
 		}
 	}
 
+	/*
+	 * Create the IOIO looper.
+	 * @see ioio.lib.util.android.IOIOActivity#createIOIOLooper()
+	 */
 	@Override
 	protected IOIOLooper createIOIOLooper() {
 		return new Looper();
 	}
 	
+	/*
+	 * enable/disable the UI components. This is called by IOIO looper!!
+	 */
 	private void enableUi(final boolean enable) {
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
-				/*
-                                seekBar1_.setEnabled(enable);
-                                seekBar2_.setEnabled(enable);
-                                seekBar3_.setEnabled(enable);
-				 */
 
 				toggleButton_.setEnabled(enable);
 				mPreview.setEnabled(enable);
@@ -635,36 +590,13 @@ implements OnSharedPreferenceChangeListener
 			}
 		});
 	}
-/*
-	private void setNumber(int channel, float f) {
-		final String str = String.format("%.2f", f);
-		final int ch = channel;
-		runOnUiThread(new Runnable() {
-			@Override
-			public void run() {
-				
-                                switch(ch) {
-                                case 1:
-                                        textView1_.setText(str);
-                                        break;
-                                case 2:
-                                        textView2_.setText(str);
-                                        break;
-                                case 3:
-                                        textView3_.setText(str);
-                                        break;
-                                default:
-                                        // no action
-                                }
-				 
-				ledIndicator_.setPowerState( powerState_ );                             
-			}
-		});
-	}
-*/
 	
 	
-	
+	/*
+	 * visualize, ie. turn led indicators on/off at the UI screen
+	 * @param powerState the power status of IOIO board
+	 * @param ledstates[] the led states (on/off)
+	 */
 	private void visualize(boolean powerState, boolean[] ledstates) {
 		final boolean power_ = powerState;
 		final boolean[] leds_ = ledstates.clone();
@@ -681,60 +613,18 @@ implements OnSharedPreferenceChangeListener
 		});
 	}
 
-	// --------------------------------------------------------------------------------
-	// camera stuff
+	
 
 
-
-
+	/*
+	 * ShutterCallback - if we wish to accomplish something on shutter click, we do it here
+	 */
 	public ShutterCallback shutterCallback = new ShutterCallback() {
 		public void onShutter() {
 			//Log.d(TAG, "onShutter");
 		}
 	};
-/*
-	public PictureCallback rawCallback = new PictureCallback() {
-		public void onPictureTaken(byte[] data, Camera camera) {
-			// writeImageToDisc(FILEMODE_RAW, mImageSuffix, data);
-			if ( saveModeRAW ) {			
-				String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
-						mImagePrefix + "_" + 
-						mImageSuffix[mCurrentLedIndex] + ".raw";
-				writeImageToDisc(filename, data);				
-			}
-		}
-	};
 
-	public PictureCallback jpegCallback = new PictureCallback() {
-		public void onPictureTaken(byte[] data, Camera camera) {
-			if ( saveModeJPEG ) {
-				String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
-						mImagePrefix + "_" + 
-						mImageSuffix[mCurrentLedIndex] + ".jpg";
-				writeImageToDisc(filename, data);
-			}
-		}
-	};
-	*/
-/*
-	private void writeImageToDisc(String filename, byte[] data) {
-		//Log.d(TAG, "writeImageToDisc - begin");
-		FileOutputStream outStream = null;
-		try {			
-			outStream = new FileOutputStream( filename );			
-			outStream.write(data);
-			outStream.close();
-			//Log.d(TAG, "writeImageToDisc - wrote bytes: " + data.length);
-			Toast.makeText(getApplicationContext(), filename + " - wrote bytes: " + data.length, Toast.LENGTH_SHORT).show();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-		}               
-		//Log.d(TAG, "writeImageToDisc - complete");
-	}
-*/
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
 		Intent intent = null;
 		switch (item.getItemId()) {
@@ -759,13 +649,14 @@ implements OnSharedPreferenceChangeListener
 		}
 	}
 	
+	/*
+	 * reset the settings to default values. They are defined in preferences.xml -file.
+	 */
 	private void resetSettings() {
-		
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 	}
 	
-	private void getSettings() {
-		
-	}
+	
 	
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
                 //Preference keyPref = findPreference(key);
@@ -842,7 +733,10 @@ implements OnSharedPreferenceChangeListener
         }
 	 */
 	
-	/** Check if this device has a camera */
+	/** 
+	 * Check if this device has a camera
+	 * @param context The application context to be used
+	 */
 	private boolean checkCameraHardware(Context context) {
 	    if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
 	        // this device has a camera
@@ -852,6 +746,10 @@ implements OnSharedPreferenceChangeListener
 	        return false;
 	    }
 	}
+	/*
+	 * Actions required when application is paused
+	 * @see android.app.Activity#onPause()
+	 */
 	@Override
 	protected void onPause () {
 		super.onPause();
@@ -860,6 +758,10 @@ implements OnSharedPreferenceChangeListener
 		}		
 	}
 	
+	/*
+	 * Actions required when application is resumed.
+	 * @see android.app.Activity#onResume()
+	 */
 	@Override
 	protected void onResume() {
 		super.onResume();
