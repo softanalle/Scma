@@ -71,6 +71,7 @@ import com.softanalle.scma.R;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -342,6 +343,15 @@ implements OnSharedPreferenceChangeListener
 		
 
 		getSettings();
+		
+		List<Integer> modes = mPreview.getSupportedPictureFormats();
+		String lista = "";
+		if ( modes.size() > 0) {
+			for (Integer i : modes) {
+				lista += Integer.toString(i) + " ";
+			}
+		}
+		Toast.makeText(getApplicationContext(), "Supported Picture formats: " + lista, Toast.LENGTH_LONG).show();
 		
 		enableUi(false);
 		Log.d(TAG, "onCreate - done");

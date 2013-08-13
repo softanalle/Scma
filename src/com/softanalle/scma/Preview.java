@@ -59,6 +59,11 @@ SurfaceView.OnClickListener */ {
 
 	private boolean isReady_ = false;
 
+	// support option arrays
+	private List<String> whiteBalanceModes_ = null;
+	private List<Integer> supportedPictureFormats_ = null;
+
+	
 	SurfaceHolder mHolder;
 	public Camera camera;
 	
@@ -127,7 +132,7 @@ SurfaceView.OnClickListener */ {
 		isReady_ = false;
 	}
 
-	private List<String> whiteBalanceModes_ = null;
+	
 	
 	public void surfaceChanged(SurfaceHolder holder, int format, int height, int width) {
 
@@ -159,6 +164,7 @@ SurfaceView.OnClickListener */ {
 			params.setPreviewSize(width,  height);
 			
 			whiteBalanceModes_ = params.getSupportedWhiteBalance();
+			supportedPictureFormats_ = params.getSupportedPictureFormats();
 			
 			params.set("rawsave-mode", "1");
 			
@@ -307,6 +313,10 @@ SurfaceView.OnClickListener */ {
 	 */
 	public List<String> getWhiteBalanceModes() {
 		return whiteBalanceModes_;
+	}
+	
+	public List<Integer> getSupportedPictureFormats () {
+		return supportedPictureFormats_;
 	}
 	
 	private boolean writeImageToDisc(String filename, byte[] data) {
