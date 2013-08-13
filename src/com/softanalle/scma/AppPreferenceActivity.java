@@ -7,6 +7,7 @@ import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.softanalle.scma.MainActivity;
 import com.softanalle.scma.R;
@@ -62,6 +63,8 @@ implements OnSharedPreferenceChangeListener
 		case 0:
 			// startActivity(new Intent(this, MainActivity.class));
 			return true;
+			default:
+				Toast.makeText(getApplicationContext(), "onOptionsItemSelected: " + item.getItemId(), Toast.LENGTH_LONG).show();
 		
 		}
 		return false;

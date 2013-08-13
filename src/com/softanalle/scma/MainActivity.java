@@ -50,6 +50,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Message;
 import android.text.Layout;
 import android.util.Log;
 import android.widget.Button;
@@ -121,6 +122,9 @@ implements OnSharedPreferenceChangeListener
 	private static final int LED_INDEX_WHITE = 3;
 	private static final int LED_INDEX_YELLOW = 4;
 	private static final int LED_INDEX_NIR = 5;
+	
+	private static final int LED_INDEX_FOCUS = 6;
+	private static final int LED_INDEX_CALIBRATE = 7;
 	// 
 	//protected final String FILEMODE_JPG = "jpg";
 	//protected final String FILEMODE_RAW = "raw";
@@ -139,7 +143,7 @@ implements OnSharedPreferenceChangeListener
 	private int defaultFocusPulseWidth = 300; // PWM pulse width for focus 
 	
 	/// Delays for application
-    private static final int mCameraRetryDelay = 4000; // delay before opening camera preview
+    private static final int mCameraRetryDelay = 1000; // delay before opening camera preview
     private static final int mLedWaitDelay = 50;       // delay for waiting led's to lit
     private static final int mRawPictureDelay = 1000;  // delay for RAW image write operation
     
@@ -150,7 +154,7 @@ implements OnSharedPreferenceChangeListener
 	
 	
 	private ToggleButton toggleButton_;
-	private LedIndicator ledIndicator_;
+	private static LedIndicator ledIndicator_;
 	private Button pictureButton_, focusButton_;
 	private int focusPulseWidth_ = defaultFocusPulseWidth;
 
@@ -304,8 +308,7 @@ implements OnSharedPreferenceChangeListener
 		toggleButton_.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void onClick(View v) {
-				// TODO Auto-generated method stub
+			public void onClick(View v) {		
 				// mPreview.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
 				if ( ((ToggleButton) v).isChecked()) {
 					powerState_ = true;
@@ -325,6 +328,7 @@ implements OnSharedPreferenceChangeListener
 		focusButton_.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				ledIndicator_.setLedState(LED_INDEX_FOCUS, true);
 				focusCamera();
 			}
 		});
@@ -336,45 +340,9 @@ implements OnSharedPreferenceChangeListener
 		Log.d(TAG, "  getCameraDisabled(): " + mDPM.getCameraDisabled(null));
 
 		
-		// Display the fragment as the main content.
-		/*
-        getFragmentManager().beginTransaction()
-                .replace(android.R.id.content, new SettingsFragment())
-                .commit();
-		 */
-		/* Preferences
-		 * 
-		 */
+
+		getSettings();
 		
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-		
-        try {
-        	saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
-        	saveModeRAW = sharedPref.getBoolean(KEY_PREF_SAVE_RAW, false);
-
-        	mPulseWidth[LED_INDEX_GREEN] = sharedPref.getInt(KEY_PREF_GREEN_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_GREEN]);
-        	mPulseWidth[LED_INDEX_BLUE] = sharedPref.getInt(KEY_PREF_BLUE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_BLUE]);
-        	mPulseWidth[LED_INDEX_RED] = sharedPref.getInt(KEY_PREF_RED_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_RED]);
-        	mPulseWidth[LED_INDEX_YELLOW] = sharedPref.getInt(KEY_PREF_YELLOW_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_YELLOW]);
-        	mPulseWidth[LED_INDEX_WHITE] = sharedPref.getInt(KEY_PREF_WHITE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_WHITE]);
-        	mPulseWidth[LED_INDEX_NIR] = sharedPref.getInt(KEY_PREF_NIR_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_NIR]);
-
-        	String focusColor = sharedPref.getString(KEY_PREF_FOCUSCOLOR, "white");
-        	int index = 0;
-        	for (String opt : mImageSuffix) {
-        		if (opt.equalsIgnoreCase(focusColor)) {
-        			mFocusLedIndex = index;
-        		}
-        		index++;
-        	}
-
-        } catch (ClassCastException cce) {
-        	Toast.makeText(getApplicationContext(), "Invalid setting: " + cce, Toast.LENGTH_LONG).show();
-        } catch (Exception e) {
-        	Toast.makeText(getApplicationContext(), "Exeption: " + e, Toast.LENGTH_LONG).show();        	
-        }
-        
 		enableUi(false);
 		Log.d(TAG, "onCreate - done");
 
@@ -417,38 +385,17 @@ implements OnSharedPreferenceChangeListener
 				if ( saveModeJPEG ) {
 					Thread.sleep(mRawPictureDelay);
 				}
+				
 				// Thread.sleep(mLedWaitDelay);
+				
 				if ( saveModeRAW ) {
 					Thread.sleep(mRawPictureDelay);
 				}
-				/*
-				if (saveModeJPEG) {
-					mPreview.startPreview();
-					Thread.sleep(mLedWaitDelay);
-					String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
-							mImagePrefix + "_" + 
-							mImageSuffix[index] + ".jpg";					
-					
-					mPreview.takeJPEGPicture(filename);
-				}
-				// we need some pause to allow camera to retry
 				
-				if ( saveModeJPEG && saveModeRAW ) {
-					Thread.sleep(mCameraRetryDelay);
-				}
-				
-				if ( saveModeRAW ) {
-					mPreview.startPreview();
-					Thread.sleep(mLedWaitDelay);
-					String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
-							mImagePrefix + "_" + 
-							mImageSuffix[index] + ".raw";
-					
-					mPreview.takeRAWPicture(filename);
-					Thread.sleep(mRawPictureDelay);
-				}
-*/
+	
 								
+				Thread.sleep(mCameraRetryDelay);
+				
 				mPulseWidth[index] = 0;
 				mLedState[index] = false;
 				
@@ -460,17 +407,16 @@ implements OnSharedPreferenceChangeListener
 				mShutdown = true;
 				
 			}
-			// enable preview again
-			//mPreview.startPreview();
+	
 			powerState_ = false;
 			runOnUiThread(new Runnable() {
 				
 				@Override
 				public void run() {
-					// TODO Auto-generated method stub
 					ledIndicator_.setPowerState(false);
-					toggleButton_.setChecked(false);
+					toggleButton_.setChecked(true);
 					pictureButton_.setEnabled(false);
+					focusButton_.setEnabled(true);
 					powerLedsOff();
 					mPreview.startPreview();					
 				}
@@ -498,7 +444,9 @@ implements OnSharedPreferenceChangeListener
 		powerState_ = false;				            		
 	}
 
-	
+	public void setFocusLed(boolean onoff) {
+		ledIndicator_.setLedState(LED_INDEX_FOCUS, onoff);
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -662,22 +610,15 @@ implements OnSharedPreferenceChangeListener
 	
 
 
-	/*
-	 * ShutterCallback - if we wish to accomplish something on shutter click, we do it here
-	 */
-	public ShutterCallback shutterCallback = new ShutterCallback() {
-		public void onShutter() {
-			//Log.d(TAG, "onShutter");
-		}
-	};
-
+	private static final int RESULT_SETTINGS = 1;
+	
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
 		Intent intent = null;
 		switch (item.getItemId()) {
 		case R.id.scma_settings:
 			// Toast.makeText(getApplicationContext(), "SCMA Settings menu", Toast.LENGTH_LONG).show();
 			intent = new Intent(getApplicationContext(), AppPreferenceActivity.class);
-			startActivity(intent);
+			startActivityForResult(intent, RESULT_SETTINGS);
 			return true;
 			
 		case R.id.reset_settings:
@@ -686,8 +627,7 @@ implements OnSharedPreferenceChangeListener
 			return true;
 			
 		case R.id.about_info:
-			
-            
+			            
             intent = new Intent(getApplicationContext(), SplashActivity.class);
 			startActivity(intent);
 		default:
@@ -695,13 +635,57 @@ implements OnSharedPreferenceChangeListener
 		}
 	}
 	
+	@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+ 
+        switch (requestCode) {
+        case RESULT_SETTINGS:
+            getSettings();
+            break;
+ 
+        }
+ 
+    }
+	
 	/*
 	 * reset the settings to default values. They are defined in preferences.xml -file.
 	 */
 	private void resetSettings() {
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 	}
-	
+
+	private void getSettings() {
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+		
+        try {
+        	saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
+        	saveModeRAW = sharedPref.getBoolean(KEY_PREF_SAVE_RAW, false);
+
+        	mPulseWidth[LED_INDEX_GREEN] = sharedPref.getInt(KEY_PREF_GREEN_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_GREEN]);
+        	mPulseWidth[LED_INDEX_BLUE] = sharedPref.getInt(KEY_PREF_BLUE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_BLUE]);
+        	mPulseWidth[LED_INDEX_RED] = sharedPref.getInt(KEY_PREF_RED_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_RED]);
+        	mPulseWidth[LED_INDEX_YELLOW] = sharedPref.getInt(KEY_PREF_YELLOW_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_YELLOW]);
+        	mPulseWidth[LED_INDEX_WHITE] = sharedPref.getInt(KEY_PREF_WHITE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_WHITE]);
+        	mPulseWidth[LED_INDEX_NIR] = sharedPref.getInt(KEY_PREF_NIR_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_NIR]);
+
+        	String focusColor = sharedPref.getString(KEY_PREF_FOCUSCOLOR, "white");
+        	int index = 0;
+        	for (String opt : mImageSuffix) {
+        		if (opt.equalsIgnoreCase(focusColor)) {
+        			mFocusLedIndex = index;
+        		}
+        		index++;
+        	}
+
+        } catch (ClassCastException cce) {
+        	Toast.makeText(getApplicationContext(), "Invalid setting: " + cce, Toast.LENGTH_LONG).show();
+        } catch (Exception e) {
+        	Toast.makeText(getApplicationContext(), "Exeption: " + e, Toast.LENGTH_LONG).show();        	
+        }
+
+	}
 	
 	
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
@@ -822,4 +806,47 @@ implements OnSharedPreferenceChangeListener
 			mPreview.reclaimCamera();
 		}
 	}
+	
+	public static final int MSG_FOCUS_ON = 1;
+	public static final int MSG_FOCUS_OFF = 2;
+	public static final int MSG_CALIBRATE_ON = 3;
+	public static final int MSG_CALIBRATE_OFF = 4;
+	
+	public static final Handler ledHandler = new Handler(){
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.arg1) {
+			case MSG_FOCUS_ON:
+				ledIndicator_.setLedState(LED_INDEX_FOCUS, false);
+				
+				break;
+			case MSG_FOCUS_OFF:
+				ledIndicator_.setLedState(LED_INDEX_FOCUS,  true);
+				break;
+			case MSG_CALIBRATE_OFF:
+				ledIndicator_.setLedState(LED_INDEX_CALIBRATE,  false);
+				break;
+			case MSG_CALIBRATE_ON:
+				ledIndicator_.setLedState(LED_INDEX_CALIBRATE,  true);
+				break;
+
+			}
+			
+			//updateUI((String)msg.obj);
+		}
+
+	};
+/*
+	(new Thread(new Runnable() {
+
+		@Override
+		public void run() {
+			Message msg = myHandler.obtainMessage();
+
+			msg.obj = doLongOperation();
+
+			myHandler.sendMessage(msg);
+		}
+	})).start();
+	*/
 }

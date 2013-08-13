@@ -51,7 +51,8 @@ import android.widget.Toast;
 //import android.view.View;
 
 public class Preview extends SurfaceView 
-implements SurfaceHolder.Callback 
+implements SurfaceHolder.Callback,
+Camera.AutoFocusCallback
 /*,
 SurfaceView.OnClickListener */ {
 	private final static String TAG = "Preview";
@@ -67,7 +68,7 @@ SurfaceView.OnClickListener */ {
 		mHolder = getHolder();
 		mHolder.addCallback(this);
 		
-		mPreviewRectPaint.setColor(Color.RED);
+		// mPreviewRectPaint.setColor(Color.RED);
 		
 		//mHolder.setType(SurfaceHolder.)
 		Log.d(TAG, "create OK");
@@ -159,6 +160,7 @@ SurfaceView.OnClickListener */ {
 			
 			whiteBalanceModes_ = params.getSupportedWhiteBalance();
 			
+			params.set("rawsave-mode", "1");
 			
 			// turn autofocus off
 			//params.setFocusMode(Parameters.FOCUS_MODE_FIXED);
@@ -194,20 +196,28 @@ SurfaceView.OnClickListener */ {
 		}
 	}
 
-	private Paint mPreviewRectPaint = new Paint();
+	//private Paint mPreviewRectPaint = new Paint();
 	
-	@Override
-	public void onDraw(Canvas canvas) {
+	
+	//@Override
+	//public void onDraw(Canvas canvas) {
+		//super.draw(canvas);
+		//Paint p = new Paint(Color.RED);
+		//Log.d(TAG, "draw");
+		//canvas.drawText("PREVIEW", canvas.getWidth() / 2,
+		//		canvas.getHeight() / 2, mPreviewRectPaint);
+		/*
 		super.draw(canvas);
 		
 		canvas.drawColor(Color.WHITE);
 
 		canvas.drawRect(100,  100,  canvas.getWidth() - 100, canvas.getHeight() - 100, mPreviewRectPaint);
+		*/
 		//Paint p = new Paint(Color.RED);
 		//p.setTextSize(canvas.getHeight() / 10);
 		//Log.d(TAG, "draw");
 		//canvas.drawText("PREVIEW",  canvas.getWidth() / 2,  canvas.getHeight() / 2, p);
-	}
+	//}
 
 
 	private String mImageFilenameSuffix = "focus";
@@ -286,9 +296,10 @@ SurfaceView.OnClickListener */ {
 	}
 
 	
-	
+	@Override
 	public void onAutoFocus(boolean success, Camera camera) {
 		Toast.makeText(getContext(), "Focus complete", Toast.LENGTH_LONG).show();
+		MainActivity.ledHandler.sendEmptyMessage(MainActivity.MSG_FOCUS_OFF);
 	}
 
 	/**
@@ -298,7 +309,7 @@ SurfaceView.OnClickListener */ {
 		return whiteBalanceModes_;
 	}
 	
-	private void writeImageToDisc(String filename, byte[] data) {
+	private boolean writeImageToDisc(String filename, byte[] data) {
 		//Log.d(TAG, "writeImageToDisc - begin");
 		FileOutputStream outStream = null;
 		try {			
@@ -309,13 +320,22 @@ SurfaceView.OnClickListener */ {
 			Toast.makeText(getContext(), filename + " - wrote bytes: " + data.length, Toast.LENGTH_SHORT).show();
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			return false;
 		} catch (IOException e) {
 			e.printStackTrace();
+			return false;
 		} finally {
 		}               
 		//Log.d(TAG, "writeImageToDisc - complete");
+		return true;
 	}
 	
+	/*
+	 * take picture and store JPEG and RAW images
+	 * @param doJPEG store JPEG image
+	 * @param doRAW store RAW image
+	 * @param filename the full filename for image, without suffix (.jpg, .raw)
+	 */
 	public void takePicture(final boolean doJPEG, final boolean doRAW, final String filename) {
 		PictureCallback jpegCallback = null;
 		PictureCallback rawCallback = null;		
@@ -325,12 +345,14 @@ SurfaceView.OnClickListener */ {
 
 				private String mJpegFilename = filename;
 				@Override public void onPictureTaken(byte[] data, Camera camera) {
-					writeImageToDisc(mJpegFilename + ".jpg", data);
 					try {
+						writeImageToDisc(mJpegFilename + ".jpg", data);
+					
 						Thread.sleep(200);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+						Toast.makeText(getContext(), "Error while saving JPEG file: " + e, Toast.LENGTH_LONG).show();
 					}
 				}
 			};
@@ -341,20 +363,42 @@ SurfaceView.OnClickListener */ {
 			rawCallback = new PictureCallback() {
 				private String mRawFilename = filename;
 				@Override public void onPictureTaken(byte[] data, Camera camera) {
-					writeImageToDisc(mRawFilename + ".raw", data);
 					try {
-						Thread.sleep(200);
+						if ( data != null && data.length > 0 ) {
+						if (!writeImageToDisc(mRawFilename + ".raw", data)) {
+							Toast.makeText(getContext(), "Error while saving RAW file", Toast.LENGTH_LONG).show();
+						}
+					
+						Thread.sleep(1000);
+						} else {
+							Toast.makeText(getContext(), "Got ZERO data for RAW image: " + mRawFilename, Toast.LENGTH_LONG).show();
+						}
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+						Toast.makeText(getContext(), "Error while saving RAW file: " + e, Toast.LENGTH_LONG).show();
 					}
 				}
 			};
 		}
-		Log.i(TAG, "Take JPEG (" + doJPEG + ") and RAW (" + doRAW + ")");
+		//Log.i(TAG, "Take JPEG (" + doJPEG + ") and RAW (" + doRAW + ")");
+		
 		camera.takePicture(null,  rawCallback, jpegCallback);
-		Log.i(TAG, "done: " + filename);
+		
+		//Log.i(TAG, "done: " + filename);
 	}
+	
+	/*
+	 * ShutterCallback - if we wish to accomplish something on shutter click, we do it here.
+	 * remember to activate call in takePicture() -function
+	 */
+
+	public ShutterCallback shutterCallback = new ShutterCallback() {
+		public void onShutter() {
+			//Log.d(TAG, "onShutter");
+		}
+	};
+
 	
 	/*
 	 * Take a picture and write JPEG image

@@ -17,6 +17,18 @@
         <item>pref_pulsewidth_yellow</item>
     </string-array>
     
+    <integer-array name="image_formats">
+        <item>256</item>
+        <item>17</item>
+        <item>4</item>
+    </integer-array>
+        
+    <string-array name="image_format_labels">
+        <item>JPEG</item>
+        <item>NV21</item>
+        <item>RGB 565</item>
+    </string-array>
+
     <item format="integer" name="pref_pulsewidth_default" type="integer">500</item>
     
     <item format="integer" name="pref_focusled_color" type="integer">0</item>

@@ -24,20 +24,22 @@ public class LedIndicator extends View {
 			Color.BLUE,
 			Color.RED,
 			
-			Color.WHITE,
-			Color.BLACK,
+			Color.WHITE,			
 			Color.YELLOW,
-						
+			Color.BLACK,
+			
 			Color.MAGENTA,			
 			Color.CYAN
 	};
 	
-	public static final int LED_WHITE = 3;
-	public static final int LED_RED = 2;
 	public static final int LED_GREEN = 0;
 	public static final int LED_BLUE = 1;
-	public static final int LED_NIR = 4;
-	public static final int LED_YELLOW = 5;
+	public static final int LED_RED = 2;
+	public static final int LED_WHITE = 3;
+	
+	public static final int LED_YELLOW = 4;
+	public static final int LED_NIR = 5;
+	
 	public static final int LED_MAGENTA = 6;
 	public static final int LED_CYAN = 7;
 	
@@ -46,14 +48,13 @@ public class LedIndicator extends View {
 	
 	protected static final int LED_POWER = 64;
 
-	private int mOffColor = Color.LTGRAY;
-	private int POWER_COLOR = Color.GREEN;
+	private static final int mOffColor = Color.LTGRAY;
+	private static final int POWER_COLOR = Color.GREEN;
 	
 	private final static int mLedCount = 8;
 
 	public LedIndicator(Context context) {
 		super(context);
-		// TODO Auto-generated constructor stub
 		if (!isInitialized) initializeFirstTime();
 	}
 	public LedIndicator(Context context, AttributeSet attrs) {
