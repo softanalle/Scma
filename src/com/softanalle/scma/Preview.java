@@ -330,6 +330,58 @@ SurfaceView.OnClickListener */ {
 		return true;
 	}
 	
+	public void takeCalibrationPicture(final boolean jpg, final boolean raw, final String storagePath) {
+		PictureCallback jpegCallback = null;
+		PictureCallback rawCallback = null;
+		final String filename = storagePath + "/whiteref";
+		if ( jpg ) {
+			jpegCallback = new PictureCallback() {
+
+				private String mJpegFilename = filename;
+				@Override public void onPictureTaken(byte[] data, Camera camera) {
+					try {
+						writeImageToDisc(mJpegFilename + ".jpg", data);					
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						Toast.makeText(getContext(), "Error while saving JPEG file: " + e, Toast.LENGTH_LONG).show();
+					}
+				}
+			};
+		}
+		if ( raw ) {
+			rawCallback = new PictureCallback() {
+				private String mRawFilename = filename;
+				@Override public void onPictureTaken(byte[] data, Camera camera) {
+					try {
+						if ( data != null && data.length > 0 ) {
+						if (!writeImageToDisc(mRawFilename + ".raw", data)) {
+							Toast.makeText(getContext(), "Error while saving RAW file", Toast.LENGTH_LONG).show();
+						}
+					
+						Thread.sleep(1000);
+						} else {
+							Toast.makeText(getContext(), "Got ZERO data for RAW image: " + mRawFilename, Toast.LENGTH_LONG).show();
+						}
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						Toast.makeText(getContext(), "Error while saving RAW file: " + e, Toast.LENGTH_LONG).show();
+					}
+				}
+			};
+
+		}
+		camera.takePicture(null,  rawCallback, null, jpegCallback);
+		try {
+			Thread.sleep(1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/*
 	 * take picture and store JPEG and RAW images
 	 * @param doJPEG store JPEG image

@@ -420,8 +420,7 @@ implements OnSharedPreferenceChangeListener
 					powerLedsOff();
 					mPreview.startPreview();					
 				}
-			});
-			
+			});			
 			
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
@@ -626,10 +625,14 @@ implements OnSharedPreferenceChangeListener
 			resetSettings();
 			return true;
 			
+		case R.id.calibration:
+			mPreview.takeCalibrationPicture(saveModeJPEG, saveModeRAW, Environment.getExternalStorageDirectory().getPath() + "/SCM/");
+			return true;
 		case R.id.about_info:
 			            
             intent = new Intent(getApplicationContext(), SplashActivity.class);
 			startActivity(intent);
+			return true;
 		default:
 			return super.onOptionsItemSelected(item);
 		}
