@@ -72,7 +72,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Button;
 import android.widget.FrameLayout;
 
 import android.app.admin.DevicePolicyManager;
@@ -360,11 +359,12 @@ implements OnSharedPreferenceChangeListener
 		pulseWidth6_ = 0;
 		*/
 
+        
+        
 		enableUi(false);
 		Log.d(TAG, "onCreate - done");
 
 	}
-
 
 	
 	// private Thread waitThread;
@@ -377,6 +377,11 @@ implements OnSharedPreferenceChangeListener
 				"Currently supported modes: ");
 	}
 	
+	private void showDebugMessage(String message) {
+		messageView_.setText(message);
+	}
+	
+
 	private void takeColorSeries() {
 		mLedState[mFocusLedIndex] = false;
 		mPulseWidth[mFocusLedIndex] = mDefaultPulseWidth[mFocusLedIndex];
@@ -398,20 +403,28 @@ implements OnSharedPreferenceChangeListener
 					*/
 				
 						// Preview have to be active when picture is taken
-				mPreview.startPreview();
-				Thread.sleep(50);
+				
+				
 		//		mPreview.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
 			
 				if (saveModeJPEG) {
+					mPreview.startPreview();
+					Thread.sleep(10);
 					String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
 							mImagePrefix + "_" + 
 							mImageSuffix[index] + ".jpg";
+					Toast.makeText(getApplicationContext(), "JPEG picture: " + filename,Toast.LENGTH_LONG).show();
+					
 					mPreview.takeJPEGPicture(filename);
 				}
+				
 				if ( saveModeRAW ) {
+					mPreview.startPreview();
+					Thread.sleep(10);
 					String filename = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
 							mImagePrefix + "_" + 
 							mImageSuffix[index] + ".raw";
+					Toast.makeText(getApplicationContext(), "RAW picture: " + filename,Toast.LENGTH_LONG).show();
 					mPreview.takeRAWPicture(filename);
 				}
 				//notifyAll();
