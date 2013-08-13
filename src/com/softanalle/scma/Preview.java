@@ -462,44 +462,6 @@ SurfaceView.OnClickListener */ {
 	};
 
 	
-	/*
-	 * Take a picture and write JPEG image
-	 * @param filename full filename with folder structure
-	 */
-	/*
-	public void takeJPEGPicture(final String fileName) {
-	    Log.i(TAG, "Tacking picture");
-	    PictureCallback callback = new PictureCallback() {
-
-	        private String mPictureFileName = fileName;
-
-	        @Override
-	        public void onPictureTaken(byte[] data, Camera camera) {
-	        	writeImageToDisc(mPictureFileName, data);
-	        }
-	    };
-	    camera.takePicture(null, null, callback);
-	}
-	*/
-	/*
-	 * Take a picture and write RAW image
-	 * @param filename full filename with folder structure
-	 */
-	/*
-	public void takeRAWPicture(final String fileName) {
-	    PictureCallback callback = new PictureCallback() {
-
-	        private String mPictureFileName = fileName;
-
-	        @Override
-	        public void onPictureTaken(byte[] data, Camera camera) {
-	        	writeImageToDisc(mPictureFileName, data);
-	        }
-	    };
-	    camera.takePicture(null, callback, null);
-		
-	}
-	*/
 	
 	/*
 	 * release camera handler, called on application onResume()

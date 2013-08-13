@@ -346,10 +346,12 @@ implements OnSharedPreferenceChangeListener
 		
 		List<Integer> modes = mPreview.getSupportedPictureFormats();
 		String lista = "";
-		if ( modes.size() > 0) {
+		if ( modes != null && modes.size() > 0) {
 			for (Integer i : modes) {
 				lista += Integer.toString(i) + " ";
 			}
+		} else {
+			lista = "List query failed";
 		}
 		Toast.makeText(getApplicationContext(), "Supported Picture formats: " + lista, Toast.LENGTH_LONG).show();
 		
