@@ -433,7 +433,7 @@ implements OnSharedPreferenceChangeListener
 				@Override
 				public void run() {
 					ledIndicator_.setPowerState(false);
-					toggleButton_.setChecked(true);
+					toggleButton_.setChecked(false);
 					pictureButton_.setEnabled(false);
 					focusButton_.setEnabled(true);
 					powerLedsOff();
