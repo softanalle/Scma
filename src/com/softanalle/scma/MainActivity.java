@@ -4,7 +4,7 @@ package com.softanalle.scma;
  * @author Tommi Rintala <t2r@iki.fi>
  * @license GNU GPL 3.0
  * 
-    Camera Preview controller for SCMA
+    Main Activity for SCMA
  
     Copyright (C) 2013  Tommi Rintala <t2r@iki.fi>
 
@@ -195,9 +195,16 @@ implements OnSharedPreferenceChangeListener
 	protected Button buttonClick;
 
 	DevicePolicyManager mDPM;
-    
-	
 
+	public static final int RESULT_SETTINGS_ACTIVITY = 1;
+	public static final int RESULT_IMAGE_ACTIVITY = 2;	
+
+	// Bundle key names
+	public static final String ARG_IMAGE_PREFIX = "arg_image_prefix";
+	public static final String ARG_WORKDIR = "arg_workdir";
+	public static final String ARG_IMAGE_ACTIVITY_RESULT = "arg_img_result";
+	
+	
     private Object lock_ = new Object();
     
 	@Override
@@ -371,6 +378,15 @@ implements OnSharedPreferenceChangeListener
 	// private Thread waitThread;
 
 	private void focusCamera() {
+		mFocusOn = true;
+		mFocusCount = 0;
+		try {
+			Thread.sleep(20);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		// do focusing stuff
 		mPreview.camera.autoFocus(null);
 		// mPreview.camera
@@ -378,6 +394,8 @@ implements OnSharedPreferenceChangeListener
 			//	"Currently supported modes: ");
 	}
 		
+	private boolean mFocusOn = false;
+	private int mFocusCount = 0;
 
 	private void takeColorSeries() {
 		mLedState[mFocusLedIndex] = false;
@@ -429,7 +447,7 @@ implements OnSharedPreferenceChangeListener
 	
 			powerState_ = false;
 			runOnUiThread(new Runnable() {
-				
+				final String image_name = mImagePrefix;
 				@Override
 				public void run() {
 					ledIndicator_.setPowerState(false);
@@ -437,7 +455,17 @@ implements OnSharedPreferenceChangeListener
 					pictureButton_.setEnabled(false);
 					focusButton_.setEnabled(true);
 					powerLedsOff();
-					mPreview.startPreview();					
+					//mPreview.startPreview();
+
+					//Bundle startOptions = new Bundle();
+					//startOptions.putString(ARG_IMAGE_PREFIX, image_name);
+					//startOptions.putString(ARG_WORKDIR, Environment.getExternalStorageDirectory() + "/SCM/");
+					Intent intent = new Intent(getApplicationContext(), ImageActivity.class);
+					intent.putExtra(ARG_IMAGE_PREFIX, image_name);
+					intent.putExtra(ARG_WORKDIR, Environment.getExternalStorageDirectory() + "/SCM");
+					startActivityForResult(intent, RESULT_IMAGE_ACTIVITY);
+					
+
 				}
 			});			
 			
@@ -524,6 +552,8 @@ implements OnSharedPreferenceChangeListener
 				Log.d(TAG, "Error in creation of savedir");
 			}
 			
+			mFocusCount = 0;
+			mFocusOn = false;
 			
 			enableUi(true);
 		}
@@ -545,6 +575,17 @@ implements OnSharedPreferenceChangeListener
 			//Thread.sleep(5);
 			
 			synchronized ( lock_ ) {
+				if ( mFocusOn ) {
+					mFocusCount++;					
+					if ( mFocusCount < 20 ) {
+					mLedState[mFocusLedIndex] = true;
+					} else {
+						mLedState[mFocusLedIndex] = false;
+						mFocusOn = false;
+						mFocusCount = 0;
+					}
+				}
+				
 				pwmOutput1_.setPulseWidth( mLedState[0] == false ? 0 : mPulseWidth[0] );
 				pwmOutput2_.setPulseWidth( mLedState[1] == false ? 0 : mPulseWidth[1] );
 				pwmOutput3_.setPulseWidth( mLedState[2] == false ? 0 : mPulseWidth[2] );
@@ -628,7 +669,7 @@ implements OnSharedPreferenceChangeListener
 	
 
 
-	private static final int RESULT_SETTINGS = 1;
+
 	
 	@Override public boolean onOptionsItemSelected(MenuItem item) {
 		Intent intent = null;
@@ -636,7 +677,7 @@ implements OnSharedPreferenceChangeListener
 		case R.id.scma_settings:
 			// Toast.makeText(getApplicationContext(), "SCMA Settings menu", Toast.LENGTH_LONG).show();
 			intent = new Intent(getApplicationContext(), AppPreferenceActivity.class);
-			startActivityForResult(intent, RESULT_SETTINGS);
+			startActivityForResult(intent, RESULT_SETTINGS_ACTIVITY);
 			return true;
 			
 		case R.id.reset_settings:
@@ -664,10 +705,13 @@ implements OnSharedPreferenceChangeListener
         super.onActivityResult(requestCode, resultCode, data);
  
         switch (requestCode) {
-        case RESULT_SETTINGS:
+        case RESULT_SETTINGS_ACTIVITY:
             getSettings();
             break;
- 
+        case RESULT_IMAGE_ACTIVITY:
+        	// do something here!
+        	String msg = data.getStringExtra(ARG_IMAGE_ACTIVITY_RESULT);
+        	break;
         }
  
     }

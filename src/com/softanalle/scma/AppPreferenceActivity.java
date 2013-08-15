@@ -43,7 +43,7 @@ implements OnSharedPreferenceChangeListener
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {        
-		setTheme(android.R.style.Theme_Black);
+		setTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 		super.onCreate(savedInstanceState);        
 		
 		addPreferencesFromResource(R.xml.preferences);        
