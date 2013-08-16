@@ -26,9 +26,12 @@ package com.softanalle.scma;
  */
 
 
+import java.io.File;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 //import android.graphics.Color;
 //import android.graphics.Paint;
 import android.os.Bundle;
@@ -50,6 +53,9 @@ public class ImageActivity extends Activity {
 	private AreaSelector areaSelector_;
 	private ImageView imageView_;
 	
+	private String mImagePrefix;
+	private String mWorkdir;
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {        
 		setTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen);
@@ -60,20 +66,20 @@ public class ImageActivity extends Activity {
 
 		Intent intent = getIntent();
 		
-		String image_prefix = intent.getStringExtra( MainActivity.ARG_IMAGE_PREFIX );
-		String workingDir = intent.getStringExtra( MainActivity.ARG_WORKDIR );
+		mImagePrefix = intent.getStringExtra( MainActivity.ARG_IMAGE_PREFIX );
+		mWorkdir = intent.getStringExtra( MainActivity.ARG_WORKDIR );
 		
 		//String image_prefix = savedInstanceState.getString(MainActivity.ARG_IMAGE_PREFIX);
 		//String workingDir = savedInstanceState.getString(MainActivity.ARG_WORKDIR);
-		if ( image_prefix == null ) {
-			image_prefix = "[name missing]";
+		if ( mImagePrefix == null ) {
+			mImagePrefix = "[name missing]";
 		}
-		if ( workingDir == null ) {
-			workingDir = "[path missing]";
+		if ( mWorkdir == null ) {
+			mWorkdir = "[path missing]";
 		}
 		nameLabel_ = (TextView) findViewById(R.id.textImageTitle);
 		//pictureButton_  = (Button) findViewById(R.id.pictureButton);
-		nameLabel_.setText(workingDir + "/" + image_prefix);
+		nameLabel_.setText(mWorkdir + "/" + mImagePrefix);
 
 		closeButton_ = (Button) findViewById(R.id.buttonClose);
 		closeButton_.setOnClickListener(new OnClickListener() {
@@ -103,10 +109,30 @@ public class ImageActivity extends Activity {
 		approveButton_.bringToFront();
 		closeButton_.bringToFront();
 		
-		Toast.makeText(getApplicationContext(), "Implement here image loading", Toast.LENGTH_LONG).show();
-		Toast.makeText(getApplicationContext(), "Implement here image manipulation", Toast.LENGTH_LONG).show();
+		// loading of large image might take some time...
+		Thread t = new Thread(new Runnable() {
+			final String wd = mWorkdir;
+			final String pr = mImagePrefix;
+			@Override
+			public void run() {
+				// TODO Auto-generated method stub
+				showImage(wd, pr);		
+			}
+		});
+				
+		// Toast.makeText(getApplicationContext(), "Implement here image loading", Toast.LENGTH_LONG).show();
+		// Toast.makeText(getApplicationContext(), "Implement here image manipulation", Toast.LENGTH_LONG).show();
 	}
 
+	private void showImage(String workdir, String filename) {
+		String fullname = workdir + "/" + filename + "_white.jpg";
+		File f = new File(fullname);
+		if (f.exists()) {
+			Drawable d = Drawable.createFromPath(fullname);		  
+			imageView_.setImageDrawable(d);
+		}
+	}
+	
 	//ImageView imageViewer_;
 	//private Paint mPaint;
 	/*
