@@ -160,17 +160,22 @@ public class AreaSelector extends View {
 	            final float dx = x - mPreviousX;
 	            final float dy = y - mPreviousY;
 	            
-	            // Move the object
-	            mPosX += dx;
-	            mPosY += dy;
-	            
-	            // Remember this touch position for the next move event
-	            mPreviousX = x;
-	            mPreviousY = y;
+	            // Only move if the ScaleGestureDetector isn't processing a gesture.
+	            if (!scaleGestureDetector.isInProgress()) {
 
-	            
-	        	status = false;
-	        	invalidate();
+	            	// Move the object
+	            	mPosX += dx;
+	            	mPosY += dy;
+
+	            	// Remember this touch position for the next move event
+	            	mPreviousX = x;
+	            	mPreviousY = y;
+
+
+
+	            	invalidate();
+	            }
+	            status = false;
 	            break;
 	            
 	        case MotionEvent.ACTION_DOWN:

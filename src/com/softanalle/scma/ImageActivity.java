@@ -52,7 +52,7 @@ public class ImageActivity extends Activity {
 	
 	private static final String TAG = "ImageActivity";
 	private TextView nameLabel_;
-	private Button closeButton_, approveButton_;
+	private Button closeButton_, approveButton_, resetButton_;
 	private AreaSelector areaSelector_;
 	private ImageView imageView_;
 	
@@ -98,19 +98,15 @@ public class ImageActivity extends Activity {
 		});
 		
 		approveButton_ = (Button) findViewById(R.id.buttonAcceptImage);
-		
-		//mPaint = new Paint();
-		//mPaint.setColor(Color.RED);
-		
 		imageView_ = (ImageView) findViewById(R.id.imageView1);
-		
-		
+		resetButton_ = (Button) findViewById(R.id.buttonResetCtrl);
 		areaSelector_ = (AreaSelector) findViewById(R.id.areaSelector1);
 		
 		// controller Z-order
 		areaSelector_.bringToFront();
 		approveButton_.bringToFront();
 		closeButton_.bringToFront();
+		resetButton_.bringToFront();
 		
 		// loading of large image might take some time...
 		Thread t = new Thread(new Runnable() {
