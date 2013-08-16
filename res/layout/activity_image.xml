@@ -15,7 +15,7 @@
         android:id="@+id/textImageTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:text="Large Text"
         android:textColor="#ff0000"
@@ -43,6 +43,13 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_toRightOf="@+id/buttonClose"
-        android:text="Button" />
+        android:text="@string/btn_accept_label" />
 
+    <Button
+        android:id="@+id/buttonResetCtrl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/buttonAcceptImage"
+        android:text="@string/btn_reset_label" />
 </RelativeLayout>

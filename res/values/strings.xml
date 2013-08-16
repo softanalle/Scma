@@ -33,5 +33,7 @@
     <string name="conf_focuscolor_label">Focus color to use</string>
     <string name="mn_calibrate_label">Calibrate</string>
     <string name="btn_close_label">Close</string>
+    <string name="btn_accept_label">Accept image</string>
+    <string name="btn_reset_label">Reset</string>
 
 </resources>

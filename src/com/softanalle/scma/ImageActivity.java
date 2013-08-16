@@ -30,11 +30,13 @@ import java.io.File;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 //import android.graphics.Color;
 //import android.graphics.Paint;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
@@ -48,6 +50,7 @@ import android.widget.Toast;
  */
 public class ImageActivity extends Activity {
 	
+	private static final String TAG = "ImageActivity";
 	private TextView nameLabel_;
 	private Button closeButton_, approveButton_;
 	private AreaSelector areaSelector_;
@@ -119,17 +122,28 @@ public class ImageActivity extends Activity {
 				showImage(wd, pr);		
 			}
 		});
+		t.run();
 				
 		// Toast.makeText(getApplicationContext(), "Implement here image loading", Toast.LENGTH_LONG).show();
 		// Toast.makeText(getApplicationContext(), "Implement here image manipulation", Toast.LENGTH_LONG).show();
 	}
 
 	private void showImage(String workdir, String filename) {
-		String fullname = workdir + "/" + filename + "_white.jpg";
-		File f = new File(fullname);
+		String fullname = workdir + "/" + filename;
+		if ( ! filename.contains("_white")) {
+			filename = filename + "_white.jpg";
+		}
+		
+		File f = new File(fullname);		
 		if (f.exists()) {
+			// imageView_.setImageBitmap(BitmapFactory.decodeFile(fullname));
 			Drawable d = Drawable.createFromPath(fullname);		  
 			imageView_.setImageDrawable(d);
+			
+			// imageView_.jumpDrawablesToCurrentState();
+		} else {
+			Toast.makeText(getApplicationContext(), "Image '" + fullname + "' load failed", Toast.LENGTH_LONG).show();
+			Log.e(TAG, "Image '" + fullname + "' load failed");
 		}
 	}
 	

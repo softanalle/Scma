@@ -48,6 +48,19 @@ public class AreaSelector extends View {
 	private float scaleFactor = 1.0f;
 	private ScaleGestureDetector scaleGestureDetector;
 
+	private static final int INVALID_POINTER_ID = -1;
+
+	// The ‘active pointer’ is the one currently moving our object.
+	private int mActivePointerId = INVALID_POINTER_ID;
+	private float mPosX;
+    private float mPosY;
+	private Paint mPaint;
+	private float mLeft, mRight, mTop, mBottom;
+	private int mWidth = 400;
+	private int mHeight = 200;
+	//private int mCenterX = 0;
+	//private int mCenterY = 0;
+
 	
 	public AreaSelector(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
@@ -65,12 +78,6 @@ public class AreaSelector extends View {
 		initComponent( context );
 	}
 	
-	private Paint mPaint;
-	private float mLeft, mRight, mTop, mBottom;
-	private int mWidth = 400;
-	private int mHeight = 200;
-	//private int mCenterX = 0;
-	//private int mCenterY = 0;
 	
 	private void initComponent(Context context) {
 		setFocusable(true);
@@ -139,52 +146,82 @@ public class AreaSelector extends View {
 	    float y = e.getY();
 
 	    int action = e.getAction() & MotionEvent.ACTION_MASK;
-        int pointerIndex = (e.getAction() & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT;
-        int pointerId = e.getPointerId(pointerIndex);
+	    
+        //int pointerIndex = (e.getAction() & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT;
+        //int pointerId = e.getPointerId(pointerIndex);
 
 	    
 	    
 	    
 		switch (action) {
 	        case MotionEvent.ACTION_MOVE:
+	        	
+	        	// Calculate the distance moved
+	            final float dx = x - mPreviousX;
+	            final float dy = y - mPreviousY;
+	            
+	            // Move the object
+	            mPosX += dx;
+	            mPosY += dy;
+	            
+	            // Remember this touch position for the next move event
+	            mPreviousX = x;
+	            mPreviousY = y;
 
-	        	/*
-	            float dx = x - mPreviousX;
-	            float dy = y - mPreviousY;
-
-	            // reverse direction of rotation above the mid-line
-	            if (y > getHeight() / 2) {
-	              dx = dx * -1 ;
-	            }
-
-	            // reverse direction of rotation to left of the mid-line
-	            if (x < getWidth() / 2) {
-	              dy = dy * -1 ;
-	            }
-*/
-	            //mRenderer.mAngle += (dx + dy) * TOUCH_SCALE_FACTOR;  // = 180.0f / 320
-	            //requestRender();
-	        	status = true;
+	            
+	        	status = false;
+	        	invalidate();
 	            break;
+	            
 	        case MotionEvent.ACTION_DOWN:
 	        	mPaint.setColor(Color.GREEN);
-	        	invalidate();
+	        	mPreviousX = x;
+	        	mPreviousY = y;
+	        	
+	        	// Save the ID of this pointer
+	            mActivePointerId = e.getPointerId(0);
+
+	        	// invalidate();
 	        	status = true;
 	        	break;
 	        case MotionEvent.ACTION_UP:
 	        	mPaint.setColor(Color.RED);
+	            mActivePointerId = INVALID_POINTER_ID;	        	
 	        	invalidate();
 	        	status = false;
 	        	break;
-	        	
+	            
+	        case MotionEvent.ACTION_CANCEL: {
+	            mActivePointerId = INVALID_POINTER_ID;
+	            break;
+	        }
+	        case MotionEvent.ACTION_POINTER_UP: {
+	            // Extract the index of the pointer that left the touch sensor
+	            final int pointerIndex = (action & MotionEvent.ACTION_POINTER_INDEX_MASK) 
+	                    >> MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+	            final int pointerId = e.getPointerId(pointerIndex);
+	            if (pointerId == mActivePointerId) {
+	                // This was our active pointer going up. Choose a new
+	                // active pointer and adjust accordingly.
+	                final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+	                mPreviousX = e.getX(newPointerIndex);
+	                mPreviousY = e.getY(newPointerIndex);
+	                mActivePointerId = e.getPointerId(newPointerIndex);
+	            }
+	            break;
+	        }
+
+
 	    }
 
 	    
-	    mPreviousX = x;
-	    mPreviousY = y;
+	    //mPreviousX = x;
+	    //mPreviousY = y;
 	    return status;
 	}
 
+
+	
 	private class ScaleListener extends
 	ScaleGestureDetector.SimpleOnScaleGestureListener {
 		@Override

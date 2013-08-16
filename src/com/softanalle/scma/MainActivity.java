@@ -117,7 +117,8 @@ implements OnSharedPreferenceChangeListener
 	private static final int IOIO_PIN_LED_BLUE   = 3;
 	private static final int IOIO_PIN_LED_RED    = 4;
 
-	// kelta valko nir vih sin pun 
+	// if we need to do soft reset to IOIO, set this boolean to true
+	private boolean doIOIOreset = false;
 
 	private static final int LED_INDEX_GREEN = 0;
 	private static final int LED_INDEX_BLUE = 1;	
@@ -616,7 +617,15 @@ implements OnSharedPreferenceChangeListener
 					powout2_.write( powerState_ );
 				}
 			}
-						
+		
+			/*
+			 *  if we need (for some reason) to do softreset to IOIO
+			 */
+			if ( doIOIOreset ) {
+				ioio_.softReset();
+				doIOIOreset = false;
+			}
+			
 			led_.write( !powerState_ );
 
 			visualize(powerState_, mLedState);
@@ -702,9 +711,10 @@ implements OnSharedPreferenceChangeListener
 			
 		case R.id.calibration:
 			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, true);
-			mPreview.takeCalibrationPicture(saveModeJPEG, saveModeRAW, Environment.getExternalStorageDirectory().getPath() + "/SCM/");
+			mPreview.takeCalibrationPicture(saveModeJPEG, saveModeRAW, Environment.getExternalStorageDirectory().getPath() + "/SCM");
 			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, false);
 			return true;
+			
 		case R.id.about_info:
 			            
             intent = new Intent(getApplicationContext(), SplashActivity.class);
@@ -713,6 +723,20 @@ implements OnSharedPreferenceChangeListener
 			
 		case R.id.itemTest1:
 			intent = new Intent(getApplicationContext(), ImageActivity.class);
+			intent.putExtra(ARG_WORKDIR, Environment.getExternalStorageDirectory().getPath() + "/SCM");
+			File f = new File(Environment.getExternalStorageDirectory().getPath() + "/SCM");
+			String filelist[] = f.list();
+			String foundFileName = null;
+			for (String file : filelist) {
+				if ( file.contains("_white")) {
+					foundFileName = file;
+					break;
+				}
+			}
+			
+			if ( foundFileName != null ) {
+				intent.putExtra(ARG_IMAGE_PREFIX, foundFileName);
+			}
 			startActivity(intent);
 			return true;
 			
