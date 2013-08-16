@@ -809,12 +809,7 @@ implements OnSharedPreferenceChangeListener
 		}		
 	}
 
-	/*
-        private Preference findPreference(String key) {
-                // TODO Auto-generated method stub
-                return null;
-        }
-	 */
+	
 	//@Override
 	//protected void onResume() {
 		//super.onResume();
@@ -824,13 +819,7 @@ implements OnSharedPreferenceChangeListener
 		 */
 	//}
 
-	/*
-        private Preference getPreferenceScreen() {
-                // TODO Auto-generated method stub
-                return null;
-        }
-	 */
-
+	
 	//@Override
 	//protected void onPause() {
 	//	super.onPause();
@@ -840,25 +829,7 @@ implements OnSharedPreferenceChangeListener
 		 */
 	//}
 
-	/*
-        @Override
-        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
-                        String key) {
-                // TODO Auto-generated method stub
 
-        }
-
-        public static class SettingsFragment extends PreferenceFragment {
-            @Override
-            public void onCreate(Bundle savedInstanceState) {
-                super.onCreate(savedInstanceState);
-
-                // Load the preferences from an XML resource
-                addPreferencesFromResource(R.xml.preferences);
-            }       
-        }
-	 */
-	
 	/** 
 	 * Check if this device has a camera
 	 * @param context The application context to be used
