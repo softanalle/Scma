@@ -30,8 +30,10 @@ import java.io.File;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.drawable.Drawable;
 //import android.graphics.Color;
 //import android.graphics.Paint;
@@ -124,19 +126,51 @@ public class ImageActivity extends Activity {
 		// Toast.makeText(getApplicationContext(), "Implement here image manipulation", Toast.LENGTH_LONG).show();
 	}
 
+	private Matrix mScaleMatrix = null;
+	private int mHeight, mWidth;
+	
+	public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
+		 
+		int width = bm.getWidth();		 
+		int height = bm.getHeight();
+		 
+		float scaleWidth = ((float) newWidth) / width;		 
+		float scaleHeight = ((float) newHeight) / height;
+		 
+		// create a matrix for the manipulation		 
+		mScaleMatrix = new Matrix();
+		 
+		// resize the bit map		 
+		mScaleMatrix.postScale(scaleWidth, scaleHeight);
+		 
+		// recreate the new Bitmap		 
+		Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, mScaleMatrix, false);
+		 
+		return resizedBitmap;
+		 
+		}
+	
+	
+	
 	private void showImage(String workdir, String filename) {
 		String fullname = workdir + "/" + filename;
+		mWidth = imageView_.getWidth();
+		mHeight = imageView_.getHeight();
+		
 		if ( ! filename.contains("_white")) {
 			filename = filename + "_white.jpg";
 		}
 		
 		File f = new File(fullname);		
 		if (f.exists()) {
-			// imageView_.setImageBitmap(BitmapFactory.decodeFile(fullname));
-			Drawable d = Drawable.createFromPath(fullname);		  
-			imageView_.setImageDrawable(d);
+			Bitmap tmp = BitmapFactory.decodeFile(fullname);
+			imageView_.setImageBitmap(getResizedBitmap(tmp, mHeight, mWidth));
 			
-			// imageView_.jumpDrawablesToCurrentState();
+			// imageView_.setImageBitmap();
+			//Drawable d = Drawable.createFromPath(fullname);			
+			//imageView_.setImageDrawable(d);
+			
+			
 		} else {
 			Toast.makeText(getApplicationContext(), "Image '" + fullname + "' load failed", Toast.LENGTH_LONG).show();
 			Log.e(TAG, "Image '" + fullname + "' load failed");
