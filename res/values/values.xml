@@ -9,12 +9,12 @@
         <item>Yellow</item>
     </string-array>
     <string-array name="led_indexes">
-        <item >pref_pulsewidth_red</item>
-        <item >pref_pulsewidth_green</item>
-        <item >pref_pulsewidth_blue</item>
-        <item >pref_pulsewidth_white</item>
-        <item>pref_pulsewidth_nir</item>
-        <item>pref_pulsewidth_yellow</item>
+        <item>red</item>
+        <item>green</item>
+        <item>blue</item>
+        <item>white</item>
+        <item>nir</item>
+        <item>yellow</item>
     </string-array>
     
     <integer-array name="image_formats">
@@ -31,7 +31,7 @@
 
     <item format="integer" name="pref_pulsewidth_default" type="integer">500</item>
     
-    <item format="integer" name="pref_focusled_color" type="integer">0</item>
+    <item format="string" name="pref_focusled_color" type="string">white</item>
     
     
 </resources>

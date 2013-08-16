@@ -114,7 +114,7 @@
             android:persistent="true" 
             android:summary="Seleted focus color" 
             android:order="310" 
-            android:defaultValue="@integer/pref_focusled_color"/>
+            android:defaultValue="@string/pref_focusled_color"/>
         
     </PreferenceCategory>
     
