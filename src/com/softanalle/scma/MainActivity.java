@@ -23,14 +23,14 @@ package com.softanalle.scma;
  */
 
 import android.os.Bundle;
-import android.app.Activity;
-import android.app.Application;
+// import android.app.Activity;
+// import android.app.Application;
 import android.view.Menu;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+// import java.io.FileNotFoundException;
+// import java.io.FileOutputStream;
+// import java.io.IOException;
 
 //import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
@@ -40,7 +40,7 @@ import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
-import android.annotation.TargetApi;
+// import android.annotation.TargetApi;
 import android.app.admin.DevicePolicyManager;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -695,6 +695,12 @@ implements OnSharedPreferenceChangeListener
             intent = new Intent(getApplicationContext(), SplashActivity.class);
 			startActivity(intent);
 			return true;
+			
+		case R.id.itemTest1:
+			intent = new Intent(getApplicationContext(), ImageActivity.class);
+			startActivity(intent);
+			return true;
+			
 		default:
 			return super.onOptionsItemSelected(item);
 		}

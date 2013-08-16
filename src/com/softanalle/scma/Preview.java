@@ -93,38 +93,17 @@ SurfaceView.OnClickListener */ {
 			// camera = getCameraInstance();
 			reclaimCamera();
 		}
-		
-		try {
-			
-			camera.setPreviewDisplay(holder);
-			// camera.setDisplayOrientation(0);
-			/*
-			camera.setPreviewCallback(new PreviewCallback() {
-				public void onPreviewFrame(byte[] data, Camera arg1) {
-					/ *
-					FileOutputStream outStream = null;
-					try {
-						outStream = new FileOutputStream(String.format("%s/SCM/%d.jpg", Environment.getExternalStorageDirectory().getPath(), System.currentTimeMillis()));
-						outStream.write(data);
-						outStream.close();
-						Log.d(TAG, "onPreviewFrame - wrote bytes: " + data.length);
-					} catch (FileNotFoundException e) {
-						e.printStackTrace();
-					} catch (IOException e) {
-						e.printStackTrace();
-					} finally {
-					}
-					 * /
-					Log.d(TAG, "onPreviewFrame() - updated preview screen");
-					// TODO: commented this out, should it be like this?
-					// Preview.this.invalidate();
-				}
-			});
-			*/
-			// camera.startPreview();
-			isReady_ = true;
-		} catch (IOException e) {
-			e.printStackTrace();
+		if ( camera == null ) {
+			Toast.makeText(getContext(), "Unable to obtain camera!", Toast.LENGTH_LONG).show();
+		} else {
+			try {
+
+				camera.setPreviewDisplay(holder);
+				
+				isReady_ = true;
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 	
@@ -514,10 +493,14 @@ SurfaceView.OnClickListener */ {
 	/*
 	 * reclaim camera, used usually on application onPause()
 	 */
-	public void reclaimCamera() {
+	public Camera reclaimCamera() {
 		if ( camera == null ) {
 			camera = getCameraInstance();
+			if ( camera == null ) {
+				Toast.makeText(getContext(), "Unable to obtain camera", Toast.LENGTH_LONG).show();
+			}
 		}
+		return camera;
 	}
 	
 }

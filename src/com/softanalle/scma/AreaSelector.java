@@ -40,49 +40,81 @@ import android.view.View;
 public class AreaSelector extends View {
 
 	private final static String TAG = "AreaSelector";
+	private boolean mInitialized = false;
 	
 	public AreaSelector(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
 		// TODO Auto-generated constructor stub
+		initComponent();
 	}
 	public AreaSelector(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		// TODO Auto-generated constructor stub
+		initComponent();
 	}
 	public AreaSelector(Context context) {
 		super(context);
 		// TODO Auto-generated constructor stub
+		initComponent();
 	}
 	
 	private Paint mPaint;
 	private float mLeft, mRight, mTop, mBottom;
 	private int mWidth = 0;
 	private int mHeight = 0;
+	private int mCenterX = 0;
+	private int mCenterY = 0;
 	
 	private void initComponent() {
 		mPaint = new Paint();
 		mPaint.setColor(Color.RED);
+		mInitialized = true;
 	}
 	
 	@Override
 	public void onDraw(Canvas canvas) {
-		super.draw(canvas);
+		// super.draw(canvas);
 		Log.d(TAG, "onDraw()");
 		
-		float left = (float) (0.25 * mWidth);
-		float right = (float) (0.75 * mWidth);
-		float top = (float) (0.25 * mHeight);
-		float bottom = (float) (0.75 * mHeight);
-				
-		canvas.drawRect(left, top, right, bottom, mPaint);
+		if ( mInitialized && canvas != null ) {
+			float left = (float) (0.25 * mWidth);
+			float right = (float) (0.75 * mWidth);
+			float top = (float) (0.25 * mHeight);
+			float bottom = (float) (0.75 * mHeight);
+
+			canvas.drawRect(left, top, right, bottom, mPaint);
+		}
 	}
 			
 	
 	@Override
 	public void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		Log.d(TAG, "onLayout(" + changed + "," + left + "," + top + "," + right + "," + bottom + ")");
-		int mWidth = right-left;
-		int mHeight = bottom-top;				
+		if ( !mInitialized || changed ) {
+			int mWidth = right-left;
+			int mHeight = bottom-top;
+			mTop = top;
+			mBottom = bottom;
+			mLeft = left;
+			mRight = right;
+		}
+	}
+
+	
+	public int getCenterX() {
+		return mCenterX;
 	}
 	
+	public int getCenterY() {
+		return mCenterY;
+	}
+	
+	public void setWidth(int w) {
+		mWidth = w;
+		mLeft = mCenterX - (int) (w / 2);
+		mRight = mCenterX + (int) (w / 2);
+	}
+	public void setHeight(int h) {
+		mHeight = h;
+	}
 }

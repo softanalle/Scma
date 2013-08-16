@@ -31,10 +31,10 @@
 
     <com.softanalle.scma.AreaSelector
         android:id="@+id/areaSelector1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="98dp" />
+        android:layout_marginBottom="0dp" />
 
 </RelativeLayout>

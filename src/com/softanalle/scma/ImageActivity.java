@@ -25,7 +25,7 @@ package com.softanalle.scma;
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import android.animation.ArgbEvaluator;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Canvas;
@@ -47,6 +47,7 @@ public class ImageActivity extends Activity {
 	
 	private TextView nameLabel_;
 	private Button closeButton_;
+	private AreaSelector areaSelector_;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {        
@@ -90,6 +91,9 @@ public class ImageActivity extends Activity {
 		//mPaint.setColor(Color.RED);
 		
 		//imageViewer_ = (ImageView) findViewById(R.id.imageView1);
+		
+		areaSelector_ = (AreaSelector) findViewById(R.id.areaSelector1);
+		areaSelector_.bringToFront();
 		
 		Toast.makeText(getApplicationContext(), "Implement here image loading", Toast.LENGTH_LONG).show();
 		Toast.makeText(getApplicationContext(), "Implement here image manipulation", Toast.LENGTH_LONG).show();
