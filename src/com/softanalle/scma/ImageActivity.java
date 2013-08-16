@@ -29,8 +29,8 @@ package com.softanalle.scma;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
+//import android.graphics.Color;
+//import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -46,8 +46,9 @@ import android.widget.Toast;
 public class ImageActivity extends Activity {
 	
 	private TextView nameLabel_;
-	private Button closeButton_;
+	private Button closeButton_, approveButton_;
 	private AreaSelector areaSelector_;
+	private ImageView imageView_;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {        
@@ -87,13 +88,20 @@ public class ImageActivity extends Activity {
 			}
 		});
 		
+		approveButton_ = (Button) findViewById(R.id.buttonAcceptImage);
+		
 		//mPaint = new Paint();
 		//mPaint.setColor(Color.RED);
 		
-		//imageViewer_ = (ImageView) findViewById(R.id.imageView1);
+		imageView_ = (ImageView) findViewById(R.id.imageView1);
+		
 		
 		areaSelector_ = (AreaSelector) findViewById(R.id.areaSelector1);
+		
+		// controller Z-order
 		areaSelector_.bringToFront();
+		approveButton_.bringToFront();
+		closeButton_.bringToFront();
 		
 		Toast.makeText(getApplicationContext(), "Implement here image loading", Toast.LENGTH_LONG).show();
 		Toast.makeText(getApplicationContext(), "Implement here image manipulation", Toast.LENGTH_LONG).show();

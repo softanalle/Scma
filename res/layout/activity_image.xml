@@ -37,4 +37,12 @@
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="0dp" />
 
+    <Button
+        android:id="@+id/buttonAcceptImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/buttonClose"
+        android:text="Button" />
+
 </RelativeLayout>

@@ -51,6 +51,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PowerManager;
 import android.text.Layout;
 import android.util.Log;
 import android.widget.Button;
@@ -109,13 +110,14 @@ implements OnSharedPreferenceChangeListener
 	private static final int IOIO_PIN_BOARD1_UP = 6;
 	private static final int IOIO_PIN_BOARD2_UP = 5;
 	
-	private static final int IOIO_PIN_LED_WHITE  = 2;
-	private static final int IOIO_PIN_LED_YELLOW = 3;
-	private static final int IOIO_PIN_LED_NIR    = 4;
-	private static final int IOIO_PIN_LED_GREEN  = 10;
-	private static final int IOIO_PIN_LED_BLUE   = 11;
-	private static final int IOIO_PIN_LED_RED    = 12;
+	private static final int IOIO_PIN_LED_WHITE  = 11;
+	private static final int IOIO_PIN_LED_YELLOW = 10;
+	private static final int IOIO_PIN_LED_NIR    = 12;
+	private static final int IOIO_PIN_LED_GREEN  = 2;
+	private static final int IOIO_PIN_LED_BLUE   = 3;
+	private static final int IOIO_PIN_LED_RED    = 4;
 
+	// kelta valko nir vih sin pun 
 
 	private static final int LED_INDEX_GREEN = 0;
 	private static final int LED_INDEX_BLUE = 1;	
@@ -324,11 +326,23 @@ implements OnSharedPreferenceChangeListener
 					mLedState[mFocusLedIndex] = true;
 					mPulseWidth[mFocusLedIndex] = defaultFocusPulseWidth;
 					mCurrentLedIndex = mFocusLedIndex;
+					
+					// make sure we don't go to screenlock while working
+					PowerManager pm = (PowerManager) getApplicationContext().getSystemService( Context.POWER_SERVICE );
+					wl = pm.newWakeLock(
+							PowerManager.SCREEN_DIM_WAKE_LOCK
+							| PowerManager.ON_AFTER_RELEASE,
+							TAG);					
+					wl.acquire();
 				} else {
 					powerState_ = false;
 					pictureButton_.setEnabled(false);
 					mShutdown = true;
 					mLedState[mFocusLedIndex] = false;
+					
+					// release screen un-locker
+					wl.release();
+
 				}                                               
 			}
 		});
@@ -374,6 +388,7 @@ implements OnSharedPreferenceChangeListener
 
 	}
 
+	private PowerManager.WakeLock wl = null;
 	
 	// private Thread waitThread;
 
