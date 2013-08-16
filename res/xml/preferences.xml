@@ -18,7 +18,7 @@
         android:order="200">
         <EditTextPreference 
             android:title="@string/pw_red_label" 
-            android:defaultValue="@string/led_default_pwm" 
+            android:defaultValue="@integer/pref_pulsewidth_default" 
             android:key="conf_red_pwm" 
             android:enabled="true" 
             android:order="210"
@@ -30,7 +30,7 @@
             android:summary="Pulsewidth for red led"/>
         <EditTextPreference 
             android:title="@string/pw_green_label" 
-            android:defaultValue="@string/led_default_pwm" 
+            android:defaultValue="@integer/pref_pulsewidth_default" 
             android:key="conf_green_pwm" 
             android:enabled="true" 
             android:order="220" 
@@ -42,7 +42,7 @@
             android:summary="Pulsewidth for green led"/>
         <EditTextPreference 
             android:title="@string/pw_blue_label" 
-            android:defaultValue="@string/led_default_pwm" 
+            android:defaultValue="@integer/pref_pulsewidth_default" 
             android:key="conf_blue_pwm" 
             android:enabled="true" 
             android:order="230" 
@@ -55,7 +55,7 @@
         
         <EditTextPreference 
             android:title="@string/pw_yellow_label" 
-            android:defaultValue="@string/led_default_pwm" 
+            android:defaultValue="@integer/pref_pulsewidth_default" 
             android:key="conf_yellow_pwm" 
             android:enabled="true" 
             android:order="240" 
@@ -67,7 +67,7 @@
             android:summary="Pulsewidth for yellow label"/>
         <EditTextPreference 
             android:title="@string/pw_white_label" 
-            android:defaultValue="@string/led_default_pwm" 
+            android:defaultValue="@integer/pref_pulsewidth_default" 
             android:key="conf_white_pwm" 
             android:enabled="true" 
             android:order="230" 
@@ -79,7 +79,7 @@
             android:summary="Pulsewidth for White label"/>
         <EditTextPreference 
             android:title="@string/pw_nir_label" 
-            android:defaultValue="@string/led_default_pwm" 
+            android:defaultValue="@integer/pref_pulsewidth_default" 
             android:key="conf_nir_pwm" 
             android:enabled="true" 
             android:order="230" 
@@ -92,7 +92,7 @@
         
         <EditTextPreference 
             android:title="@string/pw_focus_label" 
-            android:defaultValue="@string/led_default_pwm" 
+            android:defaultValue="@integer/pref_pulsewidth_default" 
             android:key="conf_focus_pwm" 
             android:enabled="true" 
             android:inputType="number"

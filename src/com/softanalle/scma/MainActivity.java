@@ -727,10 +727,12 @@ implements OnSharedPreferenceChangeListener
 			File f = new File(Environment.getExternalStorageDirectory().getPath() + "/SCM");
 			String filelist[] = f.list();
 			String foundFileName = null;
-			for (String file : filelist) {
-				if ( file.contains("_white")) {
-					foundFileName = file;
-					break;
+			if ( filelist != null ) {
+				for (String file : filelist) {
+					if ( file.contains("_white")) {
+						foundFileName = file;
+						break;
+					}
 				}
 			}
 			
@@ -771,20 +773,22 @@ implements OnSharedPreferenceChangeListener
 	private void getSettings() {
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-		
+		String dump = "before";
         try {
         	saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
         	saveModeRAW = sharedPref.getBoolean(KEY_PREF_SAVE_RAW, false);
-
+dump = "green";
         	mPulseWidth[LED_INDEX_GREEN] = sharedPref.getInt(KEY_PREF_GREEN_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_GREEN]);
+dump = "blue";        	
         	mPulseWidth[LED_INDEX_BLUE] = sharedPref.getInt(KEY_PREF_BLUE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_BLUE]);
         	mPulseWidth[LED_INDEX_RED] = sharedPref.getInt(KEY_PREF_RED_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_RED]);
         	mPulseWidth[LED_INDEX_YELLOW] = sharedPref.getInt(KEY_PREF_YELLOW_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_YELLOW]);
         	mPulseWidth[LED_INDEX_WHITE] = sharedPref.getInt(KEY_PREF_WHITE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_WHITE]);
         	mPulseWidth[LED_INDEX_NIR] = sharedPref.getInt(KEY_PREF_NIR_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_NIR]);
-
+dump = "focusColor";
         	String focusColor = sharedPref.getString(KEY_PREF_FOCUSCOLOR, "white");
         	int index = 0;
+dump = "loop";        	
         	for (String opt : mImageSuffix) {
         		if (opt.equalsIgnoreCase(focusColor)) {
         			mFocusLedIndex = index;
@@ -793,7 +797,7 @@ implements OnSharedPreferenceChangeListener
         	}
 
         } catch (ClassCastException cce) {
-        	Toast.makeText(getApplicationContext(), "Invalid setting: " + cce, Toast.LENGTH_LONG).show();
+        	Toast.makeText(getApplicationContext(), "Invalid setting for '" + dump + "': " + cce, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
         	Toast.makeText(getApplicationContext(), "Exeption: " + e, Toast.LENGTH_LONG).show();        	
         }
