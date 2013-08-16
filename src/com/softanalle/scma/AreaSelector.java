@@ -147,14 +147,9 @@ public class AreaSelector extends View {
 
 	    int action = e.getAction() & MotionEvent.ACTION_MASK;
 	    
-        //int pointerIndex = (e.getAction() & MotionEvent.ACTION_POINTER_ID_MASK) >> MotionEvent.ACTION_POINTER_ID_SHIFT;
-        //int pointerId = e.getPointerId(pointerIndex);
-
-	    
-	    
 	    
 		switch (action) {
-	        case MotionEvent.ACTION_MOVE:
+	        case MotionEvent.ACTION_MOVE: {
 	        	
 	        	// Calculate the distance moved
 	            final float dx = x - mPreviousX;
@@ -177,8 +172,9 @@ public class AreaSelector extends View {
 	            }
 	            status = false;
 	            break;
+	        }
 	            
-	        case MotionEvent.ACTION_DOWN:
+	        case MotionEvent.ACTION_DOWN: {
 	        	mPaint.setColor(Color.GREEN);
 	        	mPreviousX = x;
 	        	mPreviousY = y;
@@ -189,17 +185,21 @@ public class AreaSelector extends View {
 	        	// invalidate();
 	        	status = true;
 	        	break;
-	        case MotionEvent.ACTION_UP:
+	        }
+	        
+	        case MotionEvent.ACTION_UP: {
 	        	mPaint.setColor(Color.RED);
 	            mActivePointerId = INVALID_POINTER_ID;	        	
 	        	invalidate();
 	        	status = false;
 	        	break;
-	            
+	        }
+	        
 	        case MotionEvent.ACTION_CANCEL: {
 	            mActivePointerId = INVALID_POINTER_ID;
 	            break;
 	        }
+	        
 	        case MotionEvent.ACTION_POINTER_UP: {
 	            // Extract the index of the pointer that left the touch sensor
 	            final int pointerIndex = (action & MotionEvent.ACTION_POINTER_INDEX_MASK) 
@@ -215,18 +215,16 @@ public class AreaSelector extends View {
 	            }
 	            break;
 	        }
-
-
 	    }
 
-	    
-	    //mPreviousX = x;
-	    //mPreviousY = y;
 	    return status;
 	}
 
 
-	
+/*
+ * Scale gesture listener, at this point only scaling gesture is used. Perhaps others would
+ * be nice, though?	
+ */
 	private class ScaleListener extends
 	ScaleGestureDetector.SimpleOnScaleGestureListener {
 		@Override
