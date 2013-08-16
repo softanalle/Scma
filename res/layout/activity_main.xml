@@ -27,33 +27,36 @@
 
         </com.softanalle.scma.LedIndicator>
 
-            <Button
+        <ToggleButton
+                android:id="@+id/powerButton"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"                
+                android:layout_marginLeft="3dp"
+                android:layout_marginBottom="3dp"
+                android:layout_alignParentBottom="true" 
+                android:layout_alignParentLeft="true"
+                android:textOff="@string/poweroff_label"                
+                android:textOn="@string/poweron_label" />
+           
+           
+        <Button
+            android:id="@+id/focusButton"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_marginBottom="3dp"
+            android:layout_marginLeft="200dp"
+            android:layout_centerHorizontal="true"                       
+            android:layout_alignTop="@+id/powerButton"
+            android:text="@string/focusbtn_label" />
+            
+ 		<Button
                 android:id="@+id/pictureButton"
                 android:layout_width="120dp"
                 android:layout_height="50dp"
-                android:layout_alignParentBottom="true"
-                android:layout_alignRight="@+id/ledIndicator1"
-                android:layout_margin="5dp"
+                android:layout_alignTop="@+id/powerButton"            
+                android:layout_marginRight="3dp"                
+                android:layout_alignParentRight="true"
                 android:text="@string/storageBtn_label" />
-
-            <Button
-            android:id="@+id/focusButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="5dp"
-            android:layout_marginLeft="200dp"
-            android:layout_alignTop="@+id/pictureButton"
-            android:text="@string/focusbtn_label" />
             
-            <ToggleButton
-                android:id="@+id/powerButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/pictureButton"
-                android:layout_alignLeft="@+id/ledIndicator1"
-                android:layout_margin="5dp"
-                android:textOff="@string/poweroff_label"
-                android:textOn="@string/poweron_label" />
-                       
         
 </RelativeLayout>
