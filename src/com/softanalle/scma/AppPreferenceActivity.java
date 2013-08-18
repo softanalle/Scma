@@ -71,7 +71,7 @@ implements OnSharedPreferenceChangeListener
 	}
 
 
-	@SuppressWarnings("deprecation")
+	//@SuppressWarnings("deprecation")
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
         if (key.equals(MainActivity.KEY_PREF_FOCUSCOLOR)) {
             Preference connectionPref = findPreference(key);

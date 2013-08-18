@@ -137,7 +137,7 @@ implements OnSharedPreferenceChangeListener
 	private boolean saveModeJPEG = false;
 	private boolean saveModeRAW = false;
 	private int mCurrentLedIndex = 0;
-	public final String[] mImageSuffix = { "green", "blue",  "red", "white", "yellow", "nir", "other" };
+	public final String[] mImageSuffix = { "GREEN", "BLUE",  "RED", "WHITE", "YELLOW", "NIR", "OTHER" };
 
 	private final int defaultPulseWidth = 500; // PWM pulse width
 	private final int mLedFlashTime = 30; // milliseconds the led takes to raise/shutdown
@@ -177,8 +177,8 @@ implements OnSharedPreferenceChangeListener
 	// private static String mImagePrefix = "focus";
 	public static final String TAG = "SCMA";
 	
-	public static final String KEY_PREF_FOCUSCOLOR = "pref_focuscolor";
-	public static final String KEY_PREF_DEF_PULSEWIDTH = "pref_pulsewidth_default";
+	public static final String KEY_PREF_FOCUSCOLOR = "conf_focusled_color";
+	// public static final String KEY_PREF_DEFAULT_PULSEWIDTH = "conf_pwm_default";
 	public static final String KEY_PREF_RED_PULSEWIDTH = "conf_red_pwm";
 	public static final String KEY_PREF_GREEN_PULSEWIDTH = "conf_green_pwm";
 	public static final String KEY_PREF_BLUE_PULSEWIDTH = "conf_blue_pwm";
@@ -720,7 +720,7 @@ implements OnSharedPreferenceChangeListener
             intent = new Intent(getApplicationContext(), SplashActivity.class);
 			startActivity(intent);
 			return true;
-			
+/*			
 		case R.id.itemTest1:
 			intent = new Intent(getApplicationContext(), ImageActivity.class);
 			intent.putExtra(ARG_WORKDIR, Environment.getExternalStorageDirectory().getPath() + "/SCM");
@@ -741,7 +741,7 @@ implements OnSharedPreferenceChangeListener
 			}
 			startActivity(intent);
 			return true;
-			
+*/			
 		default:
 			return super.onOptionsItemSelected(item);
 		}
@@ -766,35 +766,44 @@ implements OnSharedPreferenceChangeListener
 	/*
 	 * reset the settings to default values. They are defined in preferences.xml -file.
 	 */
-	private void resetSettings() {
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+	private void resetSettings() {		
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
 	}
 
 	private void getSettings() {
-        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		String dump = "before";
         try {
         	saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
         	saveModeRAW = sharedPref.getBoolean(KEY_PREF_SAVE_RAW, false);
-dump = "green";
-        	mPulseWidth[LED_INDEX_GREEN] = sharedPref.getInt(KEY_PREF_GREEN_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_GREEN]);
-dump = "blue";        	
+        	dump = "green";
+        	mPulseWidth[LED_INDEX_GREEN] = Integer.parseInt(sharedPref.getString(KEY_PREF_GREEN_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_GREEN])));
+        	dump = "blue";
+        	mPulseWidth[LED_INDEX_BLUE] = Integer.parseInt(sharedPref.getString(KEY_PREF_BLUE_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_BLUE])));
+        	mPulseWidth[LED_INDEX_RED] = Integer.parseInt(sharedPref.getString(KEY_PREF_RED_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_RED])));
+        	mPulseWidth[LED_INDEX_YELLOW] = Integer.parseInt(sharedPref.getString(KEY_PREF_YELLOW_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_YELLOW])));
+        	mPulseWidth[LED_INDEX_WHITE] = Integer.parseInt(sharedPref.getString(KEY_PREF_WHITE_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_WHITE])));
+        	mPulseWidth[LED_INDEX_NIR] = Integer.parseInt(sharedPref.getString(KEY_PREF_NIR_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_NIR])));
+
+        	/*
         	mPulseWidth[LED_INDEX_BLUE] = sharedPref.getInt(KEY_PREF_BLUE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_BLUE]);
         	mPulseWidth[LED_INDEX_RED] = sharedPref.getInt(KEY_PREF_RED_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_RED]);
         	mPulseWidth[LED_INDEX_YELLOW] = sharedPref.getInt(KEY_PREF_YELLOW_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_YELLOW]);
         	mPulseWidth[LED_INDEX_WHITE] = sharedPref.getInt(KEY_PREF_WHITE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_WHITE]);
         	mPulseWidth[LED_INDEX_NIR] = sharedPref.getInt(KEY_PREF_NIR_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_NIR]);
-dump = "focusColor";
-        	String focusColor = sharedPref.getString(KEY_PREF_FOCUSCOLOR, "white");
-        	int index = 0;
-dump = "loop";        	
-        	for (String opt : mImageSuffix) {
-        		if (opt.equalsIgnoreCase(focusColor)) {
-        			mFocusLedIndex = index;
-        		}
-        		index++;
-        	}
+        	 */
+        	dump = "focusColor";
+
+        	mFocusLedIndex= Integer.parseInt(sharedPref.getString(KEY_PREF_FOCUSCOLOR, "3"));
+        	//int index = 0;
+        	dump = "loop";        	
+        	//for (String opt : mImageSuffix) {
+        	//	if (opt.equalsIgnoreCase(focusColor)) {
+        	//		mFocusLedIndex = index;
+        	//	}
+        	//	index++;
+        	//}
 
         } catch (ClassCastException cce) {
         	Toast.makeText(getApplicationContext(), "Invalid setting for '" + dump + "': " + cce, Toast.LENGTH_LONG).show();

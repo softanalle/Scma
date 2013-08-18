@@ -365,7 +365,7 @@ SurfaceView.OnClickListener */ {
 				private String mJpegFilename = filename;
 				@Override public void onPictureTaken(byte[] data, Camera camera) {
 					try {
-						writeImageToDisc(mJpegFilename + ".jpg", data);					
+						writeImageToDisc(mJpegFilename + ".JPG", data);					
 						Thread.sleep(200);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
@@ -382,7 +382,7 @@ SurfaceView.OnClickListener */ {
 				@Override public void onPictureTaken(byte[] data, Camera camera) {
 					try {
 						if ( data != null && data.length > 0 ) {
-						if (!writeImageToDisc(mRawFilename + ".raw", data)) {
+						if (!writeImageToDisc(mRawFilename + ".RAW", data)) {
 							Toast.makeText(getContext(), "Error while saving RAW file", Toast.LENGTH_LONG).show();
 						}
 					
@@ -426,7 +426,7 @@ SurfaceView.OnClickListener */ {
 				private String mJpegFilename = filename;
 				@Override public void onPictureTaken(byte[] data, Camera camera) {
 					try {
-						writeImageToDisc(mJpegFilename + ".jpg", data);
+						writeImageToDisc(mJpegFilename + ".JPG", data);
 					
 						Thread.sleep(200);
 					} catch (InterruptedException e) {
@@ -445,7 +445,7 @@ SurfaceView.OnClickListener */ {
 				@Override public void onPictureTaken(byte[] data, Camera camera) {
 					try {
 						if ( data != null && data.length > 0 ) {
-						if (!writeImageToDisc(mRawFilename + ".raw", data)) {
+						if (!writeImageToDisc(mRawFilename + ".RAW", data)) {
 							Toast.makeText(getContext(), "Error while saving RAW file", Toast.LENGTH_LONG).show();
 						}
 					

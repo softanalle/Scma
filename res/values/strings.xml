@@ -35,5 +35,7 @@
     <string name="btn_close_label">Close</string>
     <string name="btn_accept_label">Accept image</string>
     <string name="btn_reset_label">Reset</string>
+    <string name="conf_defaultpwm_label">LED default PWM value</string>
+    <string name="conf_ledpwm_label">Led PWM value</string>
 
 </resources>

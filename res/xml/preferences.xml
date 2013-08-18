@@ -15,10 +15,9 @@
     
     <PreferenceCategory 
         android:title="@string/led_powers_label" 
-        android:order="200">
-        <EditTextPreference 
+        android:order="200"><EditTextPreference 
             android:title="@string/pw_red_label" 
-            android:defaultValue="@integer/pref_pulsewidth_default" 
+            android:defaultValue="@string/pref_pulsewidth_default" 
             android:key="conf_red_pwm" 
             android:enabled="true" 
             android:order="210"
@@ -27,10 +26,11 @@
             android:maxLength="4"
             android:maxLines="1"
             android:singleLine="true" 
-            android:summary="Pulsewidth for red led"/>
+            android:summary="@string/conf_ledpwm_label"/>
+        
         <EditTextPreference 
             android:title="@string/pw_green_label" 
-            android:defaultValue="@integer/pref_pulsewidth_default" 
+            android:defaultValue="@string/pref_pulsewidth_default" 
             android:key="conf_green_pwm" 
             android:enabled="true" 
             android:order="220" 
@@ -38,11 +38,10 @@
             android:lines="1"
             android:maxLength="4"
             android:maxLines="1"
-            android:singleLine="true" 
-            android:summary="Pulsewidth for green led"/>
+            android:singleLine="true" android:summary="@string/conf_ledpwm_label"/>
         <EditTextPreference 
             android:title="@string/pw_blue_label" 
-            android:defaultValue="@integer/pref_pulsewidth_default" 
+            android:defaultValue="@string/pref_pulsewidth_default" 
             android:key="conf_blue_pwm" 
             android:enabled="true" 
             android:order="230" 
@@ -51,11 +50,11 @@
             android:maxLength="4"
             android:maxLines="1"
             android:singleLine="true" 
-            android:summary="Pulsewidth for blue label"/>
+            android:summary="@string/conf_ledpwm_label"/>
         
         <EditTextPreference 
             android:title="@string/pw_yellow_label" 
-            android:defaultValue="@integer/pref_pulsewidth_default" 
+            android:defaultValue="@string/pref_pulsewidth_default" 
             android:key="conf_yellow_pwm" 
             android:enabled="true" 
             android:order="240" 
@@ -64,10 +63,11 @@
             android:maxLength="4"
             android:maxLines="1"
             android:singleLine="true" 
-            android:summary="Pulsewidth for yellow label"/>
+            android:summary="@string/conf_ledpwm_label"/>
+        
         <EditTextPreference 
             android:title="@string/pw_white_label" 
-            android:defaultValue="@integer/pref_pulsewidth_default" 
+            android:defaultValue="@string/pref_pulsewidth_default" 
             android:key="conf_white_pwm" 
             android:enabled="true" 
             android:order="230" 
@@ -76,10 +76,11 @@
             android:maxLength="4"
             android:maxLines="1"
             android:singleLine="true" 
-            android:summary="Pulsewidth for White label"/>
+            android:summary="@string/conf_ledpwm_label"/>
+        
         <EditTextPreference 
             android:title="@string/pw_nir_label" 
-            android:defaultValue="@integer/pref_pulsewidth_default" 
+            android:defaultValue="@string/pref_pulsewidth_default" 
             android:key="conf_nir_pwm" 
             android:enabled="true" 
             android:order="230" 
@@ -88,11 +89,11 @@
             android:maxLength="4"
             android:maxLines="1"
             android:singleLine="true" 
-            android:summary="Pulsewidth for NIR label"/>
+            android:summary="@string/conf_ledpwm_label"/>
         
         <EditTextPreference 
             android:title="@string/pw_focus_label" 
-            android:defaultValue="@integer/pref_pulsewidth_default" 
+            android:defaultValue="@string/pref_pulsewidth_default" 
             android:key="conf_focus_pwm" 
             android:enabled="true" 
             android:inputType="number"
@@ -100,7 +101,8 @@
             android:maxLength="4"
             android:maxLines="1"
             android:singleLine="true" 
-            android:order="205"/>
+            android:order="205" android:summary="@string/conf_ledpwm_label"/>
+        
         
     </PreferenceCategory>
     
@@ -109,7 +111,7 @@
             android:title="Focus color" 
             android:entries="@array/led_colors" 
             android:entryValues="@array/led_indexes" 
-            android:key="pref_focuscolor" 
+            android:key="conf_focusled_color" 
             android:enabled="true" 
             android:persistent="true" 
             android:summary="Seleted focus color" 
