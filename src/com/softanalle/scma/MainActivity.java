@@ -72,7 +72,10 @@ import com.softanalle.scma.R;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.List;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
@@ -90,6 +93,7 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.SyncResult;
 import android.content.pm.PackageManager;
+import android.content.res.AssetManager;
 //import android.content.SharedPreferences;
 //import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.util.Log;
@@ -101,6 +105,8 @@ import android.widget.FrameLayout;
 
 import android.app.admin.DevicePolicyManager;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
 
 public class MainActivity extends IOIOActivity 
 implements OnSharedPreferenceChangeListener 
@@ -162,7 +168,7 @@ implements OnSharedPreferenceChangeListener
 	private Button pictureButton_, focusButton_;
 	private int focusPulseWidth_ = defaultFocusPulseWidth;
 
-	
+	public static String mStorageDir = "n/a";	
 
     // Splash screen timer
     private static final int SPLASH_TIME_OUT = 3000;
@@ -216,7 +222,7 @@ implements OnSharedPreferenceChangeListener
 		setTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 		setContentView(R.layout.activity_main);
 
-		
+
 		
 		pictureButton_  = (Button) findViewById(R.id.pictureButton);
 		toggleButton_ = (ToggleButton) findViewById(R.id.powerButton);
@@ -430,11 +436,10 @@ implements OnSharedPreferenceChangeListener
 				
 				Thread.sleep(mLedWaitDelay);
 										
-				String imageNamePrefix = Environment.getExternalStorageDirectory().getPath() + "/SCM/" +
-						mImagePrefix + "_" + mImageSuffix[index];
+				String imageFilename = mStorageDir + "/" + mImagePrefix + "_" + mImageSuffix[index];
 	
 				mPreview.startPreview();
-				mPreview.takePicture(saveModeJPEG, saveModeRAW, imageNamePrefix);
+				mPreview.takePicture(saveModeJPEG, saveModeRAW, imageFilename);
 				if ( saveModeJPEG ) {
 					Thread.sleep(mRawPictureDelay);
 				}
@@ -477,9 +482,9 @@ implements OnSharedPreferenceChangeListener
 					//startOptions.putString(ARG_IMAGE_PREFIX, image_name);
 					//startOptions.putString(ARG_WORKDIR, Environment.getExternalStorageDirectory() + "/SCM/");
 					Intent intent = new Intent(getApplicationContext(), ImageActivity.class);
-					intent.putExtra(ARG_IMAGE_PREFIX, image_name);
-					intent.putExtra(ARG_WORKDIR, Environment.getExternalStorageDirectory() + "/SCM");
-					startActivityForResult(intent, RESULT_IMAGE_ACTIVITY);
+					intent.putExtra( ARG_IMAGE_PREFIX, image_name );
+					intent.putExtra( ARG_WORKDIR, mStorageDir );
+					startActivityForResult( intent, RESULT_IMAGE_ACTIVITY );
 					
 
 				}
@@ -514,6 +519,7 @@ implements OnSharedPreferenceChangeListener
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
+		Toast.makeText(getApplicationContext(), "StorageDir = " + mStorageDir, Toast.LENGTH_LONG).show();
 		return true;
 	}
 
@@ -560,7 +566,7 @@ implements OnSharedPreferenceChangeListener
 						
 
 			try {
-				File saveDir = new File(String.format("%s/SCM", Environment.getExternalStorageDirectory().getPath()));
+				File saveDir = new File( mStorageDir );
 				if ( ! saveDir.isDirectory()) {
 					saveDir.mkdir();
 				}
@@ -711,7 +717,7 @@ implements OnSharedPreferenceChangeListener
 			
 		case R.id.calibration:
 			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, true);
-			mPreview.takeCalibrationPicture(saveModeJPEG, saveModeRAW, Environment.getExternalStorageDirectory().getPath() + "/SCM");
+			mPreview.takeCalibrationPicture( saveModeJPEG, saveModeRAW, mStorageDir );
 			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, false);
 			return true;
 			
@@ -721,12 +727,28 @@ implements OnSharedPreferenceChangeListener
 			startActivity(intent);
 			return true;
 			
-		case R.id.itemTest1:
+		case R.id.itemCopyAssets: {
+			Thread t = new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					copyTestAssets();					
+				}
+			});
+			t.run();
+			return true;
+		}
+		case R.id.itemTest1: {
+			
 			intent = new Intent(getApplicationContext(), ImageActivity.class);
-			intent.putExtra(ARG_WORKDIR, Environment.getExternalStorageDirectory().getPath() + "/SCM");
-			File f = new File(Environment.getExternalStorageDirectory().getPath() + "/SCM");
-			String filelist[] = f.list();
-			String foundFileName = null;
+			intent.putExtra(ARG_WORKDIR, mStorageDir );
+			File f = new File( mStorageDir );
+			//String filelist[] = f.list();
+
+
+			String foundFileName = "testimg";
+			/*
 			if ( filelist != null ) {
 				for (String file : filelist) {
 					if ( file.contains("_white")) {
@@ -736,16 +758,68 @@ implements OnSharedPreferenceChangeListener
 					}
 				}
 			}
+			*/
 			
 			if ( foundFileName != null ) {
 				intent.putExtra(ARG_IMAGE_PREFIX, foundFileName);
 			}
 			startActivity(intent);
 			return true;
-			
+		}
 		default:
 			return super.onOptionsItemSelected(item);
 		}
+	}
+	
+	private void copyTestAssets() {
+		AssetManager am = getResources().getAssets();
+		String[] list;
+		try {			
+			list = am.list("test");
+			File destDir = new File(mStorageDir);
+			for (String s:list) {
+				// doAssetyThing("test/" + s, mStorageDir );
+
+				//I use this next line as the start of copying a pdf from one location
+				//to another. I wanted to give you a real function in use.
+				
+				File dstFile = new File(destDir, s);
+				
+				//File dstFile = new File(destDir.getPath() + s);
+				//if (! dstFile.exists()) {
+				
+				InputStream in = am.open("test/" + s);
+				OutputStream out = new FileOutputStream(dstFile);
+				
+				//FileUtils.copyFileToDirectory(srcFile, destDir);
+				IOUtils.copy(in, out);
+				Toast.makeText(getApplicationContext(), "Copied: " + s, Toast.LENGTH_LONG).show();
+				Log.d(TAG, "Copied: " + s);
+				Log.d(TAG, "Dest: " + mStorageDir);
+				in.close();
+				out.close();
+				
+				//}
+				//InputStream inStream = am.open("SubDir1/" + s);
+				//OutputStream outStream = new Outpu
+				//more code
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			String message = "";
+			if ( e.getMessage() != null ) {
+				message = e.getMessage();
+			}
+			Toast.makeText(getApplicationContext(), e.toString() + " / " + message, Toast.LENGTH_LONG).show();
+		} catch (Exception e) {
+			String message = "";
+			if ( e.getMessage() != null ) {
+				message = e.getMessage();
+			}
+			Toast.makeText(getApplicationContext(), e.toString() + " : " + message, Toast.LENGTH_LONG).show();
+		}
+
 	}
 	
 	@Override
@@ -775,6 +849,9 @@ implements OnSharedPreferenceChangeListener
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		String dump = "before";
+		
+		mStorageDir = Environment.getExternalStorageState() + "/SCM";
+		
         try {
         	saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
         	saveModeRAW = sharedPref.getBoolean(KEY_PREF_SAVE_RAW, false);
