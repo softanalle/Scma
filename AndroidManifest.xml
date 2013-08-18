@@ -58,8 +58,13 @@
         		<intent-filter>
                 	<action android:name="android.intent.action.BOOT_COMPLETED" />
                 	<category android:name="android.intent.category.DEFAULT" />
+                	<action android:name="android.intent.action.QUICKBOOT_POWERON" />
         </intent-filter>
 		</receiver>        
+		<service
+            android:name="on.boot.completed.StarterService"
+            android:enabled="true"
+            android:exported="true" />
     </application>
 
 </manifest>
