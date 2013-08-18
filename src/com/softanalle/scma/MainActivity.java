@@ -720,7 +720,7 @@ implements OnSharedPreferenceChangeListener
             intent = new Intent(getApplicationContext(), SplashActivity.class);
 			startActivity(intent);
 			return true;
-/*			
+			
 		case R.id.itemTest1:
 			intent = new Intent(getApplicationContext(), ImageActivity.class);
 			intent.putExtra(ARG_WORKDIR, Environment.getExternalStorageDirectory().getPath() + "/SCM");
@@ -730,7 +730,8 @@ implements OnSharedPreferenceChangeListener
 			if ( filelist != null ) {
 				for (String file : filelist) {
 					if ( file.contains("_white")) {
-						foundFileName = file;
+						File q = new File(file);
+						foundFileName = q.getName();
 						break;
 					}
 				}
@@ -741,7 +742,7 @@ implements OnSharedPreferenceChangeListener
 			}
 			startActivity(intent);
 			return true;
-*/			
+			
 		default:
 			return super.onOptionsItemSelected(item);
 		}

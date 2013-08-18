@@ -153,13 +153,15 @@ public class ImageActivity extends Activity {
 	
 	
 	private void showImage(String workdir, String filename) {
-		String fullname = workdir + "/" + filename;
+
 		mWidth = imageView_.getWidth();
 		mHeight = imageView_.getHeight();
 		
-		if ( ! filename.contains("_white")) {
-			filename = filename + "_white.jpg";
+		if ( ! filename.contains("_WHITE")) {
+			filename = filename + "_WHITE.JPG";
 		}
+		
+		String fullname = workdir + "/" + filename;
 		
 		File f = new File(fullname);		
 		if (f.exists()) {
