@@ -481,9 +481,6 @@ implements OnSharedPreferenceChangeListener
 					powerLedsOff();
 					//mPreview.startPreview();
 
-					//Bundle startOptions = new Bundle();
-					//startOptions.putString(ARG_IMAGE_PREFIX, image_name);
-					//startOptions.putString(ARG_WORKDIR, Environment.getExternalStorageDirectory() + "/SCM/");
 					Intent intent = new Intent(getApplicationContext(), ImageActivity.class);
 					intent.putExtra( ARG_IMAGE_PREFIX, image_name );
 					intent.putExtra( ARG_WORKDIR, mStorageDir );
@@ -522,7 +519,7 @@ implements OnSharedPreferenceChangeListener
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
-		Toast.makeText(getApplicationContext(), "StorageDir = " + mStorageDir, Toast.LENGTH_LONG).show();
+		//Toast.makeText(getApplicationContext(), "StorageDir = " + mStorageDir, Toast.LENGTH_LONG).show();
 		return true;
 	}
 
@@ -694,7 +691,24 @@ implements OnSharedPreferenceChangeListener
 
 	
 
-
+	void showError(String err, String msg) {
+		new AlertDialog.Builder(this)
+		.setIcon(R.drawable.ic_dialog_alert)
+		.setTitle("Error")
+		.setMessage(err + " " + msg) 
+		/*
+				.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int which) {
+						//Stop the activity
+						//maintenancetabs.this.finish();
+						int pid = android.os.Process.myPid();
+						android.os.Process.killProcess(pid);
+					}
+				})*/
+		.setNegativeButton("No", null)
+		.show();		
+	}
 
 	
 	
@@ -765,8 +779,16 @@ implements OnSharedPreferenceChangeListener
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		String dump = "before";
-		
-		mStorageDir = Environment.getExternalStorageState() + "/SCM";
+		File tmp = Environment.getExternalStorageDirectory();
+		try {
+			mStorageDir = new File(tmp.getCanonicalPath() + "/SCM").getCanonicalPath();
+		} catch (IOException e1) {
+			String msg = "";
+			if ( e1.getMessage() != null ) {
+				msg = e1.getMessage();
+			}
+			showError(e1.toString(), msg);
+		}
 		
 		try {
 			File saveDir = new File( mStorageDir );

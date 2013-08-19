@@ -157,7 +157,7 @@ public class ImageActivity extends Activity {
 		mWidth = imageView_.getWidth();
 		mHeight = imageView_.getHeight();
 		
-		if ( ! filename.contains("_WHITE")) {
+		if ( ! filename.contains("_WHITE.")) {
 			filename = filename + "_WHITE.JPG";
 		}
 		
@@ -166,21 +166,23 @@ public class ImageActivity extends Activity {
 		File f = new File(fullname);
 		BitmapFactory.Options opts = new BitmapFactory.Options();
 		
-		opts.inJustDecodeBounds = true;
-		
+		//opts.inJustDecodeBounds = true;
+		opts.inSampleSize = 4;
 		if (f.exists()) {
-			Bitmap tmp = BitmapFactory.decodeFile(fullname, opts);
-			int w = tmp.getWidth();
-			int h = tmp.getHeight();
-			int cw = imageView_.getWidth();
-			int ch = imageView_.getHeight();
+			//Bitmap tmp = BitmapFactory.decodeFile(fullname, opts);
+			//int w = opts.outWidth;
+			//int h = opts.outHeight;
+			//int cw = imageView_.getWidth();
+			//int ch = imageView_.getHeight();
 			
-			int sampleSize = w > h ? (int) w / cw : h / ch;
+			//int sampleSize = w > h ? (int) w / cw : h / ch;
 			
 			// stage 2
-			opts.inJustDecodeBounds = false;
-			opts.inSampleSize = sampleSize;
-			imageView_.setImageBitmap(getResizedBitmap(tmp, mHeight, mWidth));
+			//opts.inJustDecodeBounds = false;
+			
+			imageView_.setImageBitmap(BitmapFactory.decodeFile(fullname, opts));
+			
+			//imageView_.setImageBitmap(getResizedBitmap(tmp, mHeight, mWidth));
 			
 			// imageView_.setImageBitmap();
 			//Drawable d = Drawable.createFromPath(fullname);			

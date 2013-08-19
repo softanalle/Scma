@@ -89,14 +89,14 @@ SurfaceView.OnClickListener */ {
 		// mPreviewRectPaint.setColor(Color.RED);
 		
 		//mHolder.setType(SurfaceHolder.)
-		Log.d(TAG, "create OK");
+		//Log.d(TAG, "create OK");
 	}
 
 	/**
 	 * Called when surface is created
 	 */
 	public void surfaceCreated(SurfaceHolder holder) {
-		Log.d(TAG, "surfaceCreated(holder)");
+		//Log.d(TAG, "surfaceCreated(holder)");
 		if ( camera == null ) {
 			Log.d(TAG, "-camera was null, opening");
 			// camera = getCameraInstance();
@@ -120,7 +120,7 @@ SurfaceView.OnClickListener */ {
 	 * Called when surface is destroyed
 	 */
 	public void surfaceDestroyed(SurfaceHolder holder) {
-		Log.d(TAG, "surfaceDestroyed(holder)");
+		//Log.d(TAG, "surfaceDestroyed(holder)");
 		if ( camera != null ) {
 			Log.d(TAG, "-camera was not null, releasing");
 			stopPreview();
@@ -186,14 +186,12 @@ SurfaceView.OnClickListener */ {
 			params.setFocusMode(Parameters.FOCUS_MODE_MACRO);
 			
 			if (supportedPictureFormats_.contains(ImageFormat.RGB_565)) {			
-			params.setPictureFormat(ImageFormat.RGB_565);
+				params.setPictureFormat(ImageFormat.RGB_565);
 			} else if ( supportedPictureFormats_.contains(ImageFormat.YV12)) {
 				params.setPictureFormat(ImageFormat.YV12);
 			} else {
 				params.setPictureFormat(ImageFormat.NV21);
 			}
-			
-			
 			
 			// turn flash off
 			params.setFlashMode(Parameters.FLASH_MODE_OFF);
@@ -224,14 +222,19 @@ SurfaceView.OnClickListener */ {
 		}
 	}
 
-
-
 	
-	
+	/**
+	 * Get the image filename suffix
+	 * @return
+	 */
 	public String getImageFilenameSuffix() {
 		return mImageFilenameSuffix;
 	}
 
+	/**
+	 * Set the image filename suffix
+	 * @param imageFilenameSuffix
+	 */
 	public void setImageFilenameSuffix(String imageFilenameSuffix) {
 		mImageFilenameSuffix = imageFilenameSuffix;
 	}
