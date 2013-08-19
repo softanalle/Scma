@@ -66,6 +66,8 @@ SurfaceView.OnClickListener */ {
 	private boolean isPreview_ = false;
 	private boolean isReady_ = false;
 
+	private String mImageFilenameSuffix = "focus";
+	
 	// support option arrays
 	private List<String> whiteBalanceModes_ = null;
 	private List<Integer> supportedPictureFormats_ = null;
@@ -74,6 +76,10 @@ SurfaceView.OnClickListener */ {
 	SurfaceHolder mHolder;
 	public Camera camera;
 	
+	/**
+	 * Constructor
+	 * @param context
+	 */
 	Preview(Context context) {
 		super(context);
 
@@ -86,6 +92,9 @@ SurfaceView.OnClickListener */ {
 		Log.d(TAG, "create OK");
 	}
 
+	/**
+	 * Called when surface is created
+	 */
 	public void surfaceCreated(SurfaceHolder holder) {
 		Log.d(TAG, "surfaceCreated(holder)");
 		if ( camera == null ) {
@@ -107,6 +116,9 @@ SurfaceView.OnClickListener */ {
 		}
 	}
 	
+	/**
+	 * Called when surface is destroyed
+	 */
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		Log.d(TAG, "surfaceDestroyed(holder)");
 		if ( camera != null ) {
@@ -128,7 +140,7 @@ SurfaceView.OnClickListener */ {
 	          return;
 	        }
 
-		Log.d(TAG, "surfaceChanged(holder)");
+		// Log.d(TAG, "surfaceChanged(holder)");
 		if ( camera == null ) {
 			Log.d(TAG, "-camera was null, opening");
 			camera = getCameraInstance();
@@ -207,36 +219,14 @@ SurfaceView.OnClickListener */ {
 		} else {
 			Log.d(TAG, "-camera is still null, failed to retrieve");
 		}
-		}catch (Exception e) {
+		} catch (Exception e) {
 			Log.d(TAG, "Error starting camera preview: " + e.getMessage());
 		}
 	}
 
-	//private Paint mPreviewRectPaint = new Paint();
+
+
 	
-	
-	//@Override
-	//public void onDraw(Canvas canvas) {
-		//super.draw(canvas);
-		//Paint p = new Paint(Color.RED);
-		//Log.d(TAG, "draw");
-		//canvas.drawText("PREVIEW", canvas.getWidth() / 2,
-		//		canvas.getHeight() / 2, mPreviewRectPaint);
-		/*
-		super.draw(canvas);
-		
-		canvas.drawColor(Color.WHITE);
-
-		canvas.drawRect(100,  100,  canvas.getWidth() - 100, canvas.getHeight() - 100, mPreviewRectPaint);
-		*/
-		//Paint p = new Paint(Color.RED);
-		//p.setTextSize(canvas.getHeight() / 10);
-		//Log.d(TAG, "draw");
-		//canvas.drawText("PREVIEW",  canvas.getWidth() / 2,  canvas.getHeight() / 2, p);
-	//}
-
-
-	private String mImageFilenameSuffix = "focus";
 	
 	public String getImageFilenameSuffix() {
 		return mImageFilenameSuffix;
@@ -247,36 +237,10 @@ SurfaceView.OnClickListener */ {
 	}
 
 	
-	/*
-	@Override
-	public void onClick(View v) {
-		// TODO Auto-generated method stub
-		Log.d(TAG, "onClick()");
-		camera.takePicture(null, null, 
-				new PictureCallback() {
-
-
-			public void onPictureTaken(byte[] data, Camera camera) {
-				// TODO Auto-generated method stub
-				FileOutputStream outStream = null;
-				try {
-					outStream = new FileOutputStream(String.format("%s/SCM/P_%d_%s.jpg", 
-							Environment.getExternalStorageDirectory().getPath(), System.currentTimeMillis(), mImageFilenameSuffix));
-					outStream.write(data);
-					outStream.close();
-					Log.d(TAG, "saveJpegCallback - wrote bytes: " + data.length);
-				} catch (FileNotFoundException e) {
-					e.printStackTrace();
-				} catch (IOException e) {
-					e.printStackTrace();
-				} finally {
-				}
-
-			}
-		});
-
-	}
-*/
+	/**
+	 * Is the control ready 
+	 * @return
+	 */
 	public boolean isReady() {
 		return isReady_;
 	}
@@ -293,6 +257,9 @@ SurfaceView.OnClickListener */ {
 	    return c; // returns null if camera is unavailable
 	}
 	
+	/**
+	 * Activate camera preview
+	 */
 	public void startPreview() {
 		if ( camera != null && !isPreview_) {
 			camera.startPreview();
@@ -300,6 +267,9 @@ SurfaceView.OnClickListener */ {
 		}
 	}
 
+	/**
+	 * Stop camera preview
+	 */
 	public void stopPreview() {
 		if ( camera != null ) {
 			camera.stopPreview();
@@ -333,6 +303,12 @@ SurfaceView.OnClickListener */ {
 	//	return supportedPictureFormats_;
 	//}
 	
+	/**
+	 * Save a byte vector to a file
+	 * @param filename the name of file to write
+	 * @param data byte vector of data
+	 * @return success of operation
+	 */
 	private boolean writeImageToDisc(String filename, byte[] data) {
 		//Log.d(TAG, "writeImageToDisc - begin");
 		FileOutputStream outStream = null;
@@ -354,6 +330,12 @@ SurfaceView.OnClickListener */ {
 		return true;
 	}
 	
+	/**
+	 * Take the calibration picture and save
+	 * @param jpg
+	 * @param raw
+	 * @param storagePath
+	 */
 	public void takeCalibrationPicture(final boolean jpg, final boolean raw, final String storagePath) {
 		PictureCallback jpegCallback = null;
 		PictureCallback rawCallback = null;
@@ -410,7 +392,7 @@ SurfaceView.OnClickListener */ {
 		startPreview();
 	}
 	
-	/*
+	/**
 	 * take picture and store JPEG and RAW images
 	 * @param doJPEG store JPEG image
 	 * @param doRAW store RAW image
@@ -468,7 +450,7 @@ SurfaceView.OnClickListener */ {
 		//Log.i(TAG, "done: " + filename);
 	}
 	
-	/*
+	/**
 	 * ShutterCallback - if we wish to accomplish something on shutter click, we do it here.
 	 * remember to activate call in takePicture() -function
 	 */
@@ -481,7 +463,7 @@ SurfaceView.OnClickListener */ {
 
 	
 	
-	/*
+	/**
 	 * release camera handler, called on application onResume()
 	 */
 	public void releaseCamera() {
@@ -490,7 +472,8 @@ SurfaceView.OnClickListener */ {
 			camera = null;
 		}
 	}
-	/*
+	
+	/**
 	 * reclaim camera, used usually on application onPause()
 	 */
 	public Camera reclaimCamera() {

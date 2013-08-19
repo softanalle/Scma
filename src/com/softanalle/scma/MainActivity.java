@@ -87,7 +87,9 @@ import android.preference.PreferenceManager;
 //import android.preference.PreferenceFragment;
 //import android.preference.PreferenceManager;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -97,6 +99,7 @@ import android.content.res.AssetManager;
 //import android.content.SharedPreferences;
 //import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -701,75 +704,6 @@ implements OnSharedPreferenceChangeListener
 
 
 	
-	@Override public boolean onOptionsItemSelected(MenuItem item) {
-		Intent intent = null;
-		switch (item.getItemId()) {
-		case R.id.scma_settings:
-			// Toast.makeText(getApplicationContext(), "SCMA Settings menu", Toast.LENGTH_LONG).show();
-			intent = new Intent(getApplicationContext(), AppPreferenceActivity.class);
-			startActivityForResult(intent, RESULT_SETTINGS_ACTIVITY);
-			return true;
-			
-		case R.id.reset_settings:
-			Toast.makeText(getApplicationContext(), "Reset settings", Toast.LENGTH_LONG).show();
-			resetSettings();
-			return true;
-			
-		case R.id.calibration:
-			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, true);
-			mPreview.takeCalibrationPicture( saveModeJPEG, saveModeRAW, mStorageDir );
-			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, false);
-			return true;
-			
-		case R.id.about_info:
-			            
-            intent = new Intent(getApplicationContext(), SplashActivity.class);
-			startActivity(intent);
-			return true;
-			
-		case R.id.itemCopyAssets: {
-			Thread t = new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					copyTestAssets();					
-				}
-			});
-			t.run();
-			return true;
-		}
-		case R.id.itemTest1: {
-			
-			intent = new Intent(getApplicationContext(), ImageActivity.class);
-			intent.putExtra(ARG_WORKDIR, mStorageDir );
-			File f = new File( mStorageDir );
-			//String filelist[] = f.list();
-
-
-			String foundFileName = "testimg";
-			/*
-			if ( filelist != null ) {
-				for (String file : filelist) {
-					if ( file.contains("_white")) {
-						File q = new File(file);
-						foundFileName = q.getName();
-						break;
-					}
-				}
-			}
-			*/
-			
-			if ( foundFileName != null ) {
-				intent.putExtra(ARG_IMAGE_PREFIX, foundFileName);
-			}
-			startActivity(intent);
-			return true;
-		}
-		default:
-			return super.onOptionsItemSelected(item);
-		}
-	}
 	
 	private void copyTestAssets() {
 		AssetManager am = getResources().getAssets();
@@ -821,22 +755,6 @@ implements OnSharedPreferenceChangeListener
 		}
 
 	}
-	
-	@Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
- 
-        switch (requestCode) {
-        case RESULT_SETTINGS_ACTIVITY:
-            getSettings();
-            break;
-        case RESULT_IMAGE_ACTIVITY:
-        	// do something here!
-        	String msg = data.getStringExtra(ARG_IMAGE_ACTIVITY_RESULT);
-        	break;
-        }
- 
-    }
 	
 	/*
 	 * reset the settings to default values. They are defined in preferences.xml -file.
@@ -983,6 +901,7 @@ implements OnSharedPreferenceChangeListener
 		getSettings();
 	}
 	
+	
 	/*
 	public void focusComplete() {
 		ledIndicator_.setLedState(LED_INDEX_FOCUS, false);
@@ -1034,4 +953,136 @@ implements OnSharedPreferenceChangeListener
 		}
 	})).start();
 	*/
+
+	/*
+	 * Check result codes when returning from started (sub)activities
+	 * @see android.app.Activity#onActivityResult(int, int, android.content.Intent)
+	 */
+	@Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+ 
+        switch (requestCode) {
+        case RESULT_SETTINGS_ACTIVITY:
+            getSettings();
+            break;
+        case RESULT_IMAGE_ACTIVITY:
+        	// do something here!
+        	String msg = data.getStringExtra(ARG_IMAGE_ACTIVITY_RESULT);
+        	break;
+        }
+ 
+    }
+	
+	/*
+	 * Response to key presses
+	 * @see android.app.Activity#onKeyDown(int, android.view.KeyEvent)
+	 */
+	@Override 
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		switch (keyCode) {
+			case KeyEvent.KEYCODE_BACK: {
+				//Handle the back button
+				//if(keyCode == KeyEvent.KEYCODE_BACK) {
+				//Ask the user if they want to quit
+				new AlertDialog.Builder(this)
+				.setIcon(R.drawable.ic_dialog_alert)
+				.setTitle("Exit?")
+				.setMessage("You are about to exit the Application. " + 
+						"Do you really want to exit?")
+						.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								//Stop the activity
+								//maintenancetabs.this.finish();
+								int pid = android.os.Process.myPid();
+								android.os.Process.killProcess(pid);
+							}
+						})
+						.setNegativeButton("No", null)
+						.show();
+				return true;
+			}
+			
+			// eat zoom -events
+			case KeyEvent.KEYCODE_ZOOM_IN: {
+				return true;
+			}
+			case KeyEvent.KEYCODE_ZOOM_OUT: {
+				return true;
+			}
+		}
+		return super.onKeyDown(keyCode, event);
+	}
+	
+	@Override public boolean onOptionsItemSelected(MenuItem item) {
+		Intent intent = null;
+		switch (item.getItemId()) {
+		case R.id.scma_settings:
+			// Toast.makeText(getApplicationContext(), "SCMA Settings menu", Toast.LENGTH_LONG).show();
+			intent = new Intent(getApplicationContext(), AppPreferenceActivity.class);
+			startActivityForResult(intent, RESULT_SETTINGS_ACTIVITY);
+			return true;
+			
+		case R.id.reset_settings:
+			Toast.makeText(getApplicationContext(), "Reset settings", Toast.LENGTH_LONG).show();
+			resetSettings();
+			return true;
+			
+		case R.id.calibration:
+			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, true);
+			mPreview.takeCalibrationPicture( saveModeJPEG, saveModeRAW, mStorageDir );
+			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, false);
+			return true;
+			
+		case R.id.about_info:
+			            
+            intent = new Intent(getApplicationContext(), SplashActivity.class);
+			startActivity(intent);
+			return true;
+			
+		case R.id.itemCopyAssets: {
+			Thread t = new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					copyTestAssets();					
+				}
+			});
+			t.run();
+			return true;
+		}
+		case R.id.itemTest1: {
+			
+			intent = new Intent(getApplicationContext(), ImageActivity.class);
+			intent.putExtra(ARG_WORKDIR, mStorageDir );
+			File f = new File( mStorageDir );
+			//String filelist[] = f.list();
+
+
+			String foundFileName = "testimg";
+			/*
+			if ( filelist != null ) {
+				for (String file : filelist) {
+					if ( file.contains("_white")) {
+						File q = new File(file);
+						foundFileName = q.getName();
+						break;
+					}
+				}
+			}
+			*/
+			
+			if ( foundFileName != null ) {
+				intent.putExtra(ARG_IMAGE_PREFIX, foundFileName);
+			}
+			startActivity(intent);
+			return true;
+		}
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
+
 }

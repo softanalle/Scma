@@ -53,6 +53,9 @@ public class LedIndicator extends View {
 	
 	private final static int mLedCount = 8;
 
+	/*
+	 * Constructors for the component
+	 */
 	public LedIndicator(Context context) {
 		super(context);
 		if (!isInitialized) initializeFirstTime();
@@ -80,8 +83,12 @@ public class LedIndicator extends View {
 	private int mWidth = 24;
 	private boolean isReady;
 
+	/**
+	 * Initialize the component, this is needed to run only one time,
+	 * but can be called several times.
+	 */
 	private void initializeFirstTime() {
-		Log.d(TAG, "initializeFirstTime()");
+		//Log.d(TAG, "initializeFirstTime()");
 		if (isReady) {
 			Log.d(TAG, "(isReady)");
 			return; // no new initialization
@@ -112,16 +119,20 @@ public class LedIndicator extends View {
 			
 			mPowerLed.setBounds(mPowerArea);
 		} catch (Exception ex) {
-			Log.e(TAG, "Error while building leds");
+			Log.e(TAG, "Error while building leds;" + ex.toString());
 		} finally {
 			isReady = true;
 		}
-		Log.d(TAG, "initializeFirstTime(): success");
+		//Log.d(TAG, "initializeFirstTime(): success");
 	}
 
+	/*
+	 * Respond on layout change
+	 * @see android.view.View#onLayout(boolean, int, int, int, int)
+	 */
 	@Override
 	public void onLayout(boolean changed, int left, int top, int right, int bottom) {
-		Log.d(TAG, "onLayout(" + changed + "," + left + "," + top + "," + right + "," + bottom + ")");
+		//Log.d(TAG, "onLayout(" + changed + "," + left + "," + top + "," + right + "," + bottom + ")");
 		if (!isInitialized) initializeFirstTime();
 
 		if ( changed ) {
@@ -147,6 +158,10 @@ public class LedIndicator extends View {
 		}
 	}
 
+	/**
+	 * Draw the canvas
+	 * @see android.view.View#onDraw(android.graphics.Canvas)
+	 */
 	@Override
 	public void onDraw(Canvas canvas) {
 		if (isReady && canvas != null) {
@@ -161,6 +176,10 @@ public class LedIndicator extends View {
 		invalidate();
 	}
 
+	/**
+	 * Set the status of power-led (the one in the right)
+	 * @param on power status
+	 */
 	public void setPowerState(boolean on) {		
 		if ( on ) {
 			mPowerLed.getPaint().setColor(POWER_COLOR);
@@ -208,6 +227,11 @@ public class LedIndicator extends View {
 	}
     
     
+	/**
+	 * Set the state of led
+	 * @param index the number of led
+	 * @param onoff the led status
+	 */
     public void setLedState(int index, boolean onoff) {
     	if ( index >= 0 && index < mLedCount) {
     		if ( onoff != mActivity[index] ) {
@@ -224,7 +248,11 @@ public class LedIndicator extends View {
     		}
     	}
     }
-    
+
+    /**
+     * Get the number of leds
+     * @return int The number of leds
+     */
     public int getLedCount() {
     	return mLedCount;
     }
