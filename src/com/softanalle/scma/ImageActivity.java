@@ -148,7 +148,7 @@ public class ImageActivity extends Activity {
 		 
 		return resizedBitmap;
 		 
-		}
+	}
 	
 	
 	
@@ -163,9 +163,23 @@ public class ImageActivity extends Activity {
 		
 		String fullname = workdir + "/" + filename;
 		
-		File f = new File(fullname);		
+		File f = new File(fullname);
+		BitmapFactory.Options opts = new BitmapFactory.Options();
+		
+		opts.inJustDecodeBounds = true;
+		
 		if (f.exists()) {
-			Bitmap tmp = BitmapFactory.decodeFile(fullname);
+			Bitmap tmp = BitmapFactory.decodeFile(fullname, opts);
+			int w = tmp.getWidth();
+			int h = tmp.getHeight();
+			int cw = imageView_.getWidth();
+			int ch = imageView_.getHeight();
+			
+			int sampleSize = w > h ? (int) w / cw : h / ch;
+			
+			// stage 2
+			opts.inJustDecodeBounds = false;
+			opts.inSampleSize = sampleSize;
 			imageView_.setImageBitmap(getResizedBitmap(tmp, mHeight, mWidth));
 			
 			// imageView_.setImageBitmap();
@@ -190,4 +204,7 @@ public class ImageActivity extends Activity {
 		   );
 	}
 	*/
+	public void onResize() {
+		
+	}
 }

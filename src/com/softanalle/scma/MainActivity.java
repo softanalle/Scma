@@ -568,14 +568,7 @@ implements OnSharedPreferenceChangeListener
 			pwmOutput6_.setPulseWidth( 0 );
 						
 
-			try {
-				File saveDir = new File( mStorageDir );
-				if ( ! saveDir.isDirectory()) {
-					saveDir.mkdir();
-				}
-			} catch (Exception e) {
-				Log.d(TAG, "Error in creation of savedir");
-			}
+			
 			
 			mFocusCount = 0;
 			mFocusOn = false;
@@ -723,15 +716,18 @@ implements OnSharedPreferenceChangeListener
 				//if (! dstFile.exists()) {
 				
 				InputStream in = am.open("test/" + s);
-				OutputStream out = new FileOutputStream(dstFile);
+				//OutputStream out = new FileOutputStream(dstFile);
 				
 				//FileUtils.copyFileToDirectory(srcFile, destDir);
-				IOUtils.copy(in, out);
-				Toast.makeText(getApplicationContext(), "Copied: " + s, Toast.LENGTH_LONG).show();
+				//IOUtils.copy(in, out);
+				
+				FileUtils.copyInputStreamToFile(in, dstFile);
+				
+				//Toast.makeText(getApplicationContext(), "Copied: " + s, Toast.LENGTH_LONG).show();
 				Log.d(TAG, "Copied: " + s);
 				Log.d(TAG, "Dest: " + mStorageDir);
 				in.close();
-				out.close();
+				//out.close();
 				
 				//}
 				//InputStream inStream = am.open("SubDir1/" + s);
@@ -745,13 +741,15 @@ implements OnSharedPreferenceChangeListener
 			if ( e.getMessage() != null ) {
 				message = e.getMessage();
 			}
-			Toast.makeText(getApplicationContext(), e.toString() + " / " + message, Toast.LENGTH_LONG).show();
+			showError(e.toString(), message);
+			//Toast.makeText(getApplicationContext(), e.toString() + " / " + message, Toast.LENGTH_LONG).show();
 		} catch (Exception e) {
 			String message = "";
 			if ( e.getMessage() != null ) {
 				message = e.getMessage();
 			}
-			Toast.makeText(getApplicationContext(), e.toString() + " : " + message, Toast.LENGTH_LONG).show();
+			showError(e.toString(), message);
+			//Toast.makeText(getApplicationContext(), e.toString() + " : " + message, Toast.LENGTH_LONG).show();
 		}
 
 	}
@@ -769,6 +767,15 @@ implements OnSharedPreferenceChangeListener
 		String dump = "before";
 		
 		mStorageDir = Environment.getExternalStorageState() + "/SCM";
+		
+		try {
+			File saveDir = new File( mStorageDir );
+			if ( ! saveDir.isDirectory()) {
+				saveDir.mkdir();
+			}
+		} catch (Exception e) {
+			Log.d(TAG, "Error in creation of savedir");
+		}
 		
         try {
         	saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
