@@ -940,19 +940,7 @@ implements OnSharedPreferenceChangeListener
 	
 	*/
 	
-/*
-	(new Thread(new Runnable() {
 
-		@Override
-		public void run() {
-			Message msg = myHandler.obtainMessage();
-
-			msg.obj = doLongOperation();
-
-			myHandler.sendMessage(msg);
-		}
-	})).start();
-	*/
 
 	/*
 	 * Check result codes when returning from started (sub)activities
