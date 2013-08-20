@@ -44,7 +44,7 @@ public class AreaSelector extends View {
 	private final static String TAG = "AreaSelector";
 	private boolean mInitialized = false;
 
-	// private Drawable image;
+	
 	private float scaleFactor = 1.0f;
 	private ScaleGestureDetector scaleGestureDetector;
 
@@ -58,23 +58,21 @@ public class AreaSelector extends View {
 	private float mLeft, mRight, mTop, mBottom;
 	private int mWidth = 400;
 	private int mHeight = 200;
-	//private int mCenterX = 0;
-	//private int mCenterY = 0;
-
+    private float mPreviousX;
+	private float mPreviousY;	
 	
 	public AreaSelector(Context context, AttributeSet attrs, int defStyle) {
 		super(context, attrs, defStyle);
-		// TODO Auto-generated constructor stub
 		initComponent( context );
 	}
+	
 	public AreaSelector(Context context, AttributeSet attrs) {
 		super(context, attrs);
-		// TODO Auto-generated constructor stub
 		initComponent( context );
 	}
+	
 	public AreaSelector(Context context) {
 		super(context);
-		// TODO Auto-generated constructor stub
 		initComponent( context );
 	}
 	
@@ -92,6 +90,8 @@ public class AreaSelector extends View {
 		scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
 		
 		mInitialized = true;
+		mPosX = (float) (getWidth() / 2.0);
+		mPosY = (float) (getHeight() / 2.0);
 		invalidate();
 	}
 	
@@ -102,10 +102,10 @@ public class AreaSelector extends View {
 		Log.d(TAG, "onDraw()");
 		
 		if ( mInitialized && canvas != null ) {
-			float left = (float) (mPreviousX - mWidth / 2 * scaleFactor);
-			float right = (float)  (mPreviousX + mWidth / 2 * scaleFactor);
-			float top = (float) (mPreviousY - mHeight / 2 * scaleFactor);
-			float bottom = (float) (mPreviousY + mHeight / 2 * scaleFactor);			
+			float left = (float) (mPosX - mWidth / 2 * scaleFactor);
+			float right = (float)  (mPosX + mWidth / 2 * scaleFactor);
+			float top = (float) (mPosY - mHeight / 2 * scaleFactor);
+			float bottom = (float) (mPosY + mHeight / 2 * scaleFactor);			
 			
 			canvas.drawLine(left,  top,  right,  top,  mPaint);
 			canvas.drawLine(right,  top,  right,  bottom,  mPaint);
@@ -115,23 +115,31 @@ public class AreaSelector extends View {
 		}
 	}
 			
-	
+	/*
+	 * We need to know if layout changes
+	 * @see android.view.View#onLayout(boolean, int, int, int, int)
+	 */
 	@Override
 	public void onLayout(boolean changed, int left, int top, int right, int bottom) {
 		Log.d(TAG, "onLayout(" + changed + "," + left + "," + top + "," + right + "," + bottom + ")");
-		//if ( changed ) {
-			mWidth = (int) ((right-left) *  .5);
-			mHeight = (int) ((bottom-top) * .5);
+		if ( changed ) {
+			mWidth = (int) ((right - left) *  .5);
+			mHeight = (int) ((bottom - top) * .5);
 			mTop = top;
 			mBottom = bottom;
 			mLeft = left;
 			mRight = right;
-		//}
+		mPosX = (float) ((float) (right - (float) left) / 2.0);
+		mPosY = (float) ((float) (bottom - (float) top) / 2.0);
+		}
 	}
 
-    private float mPreviousX;
-	private float mPreviousY;
+
 	
+	/*
+	 * (non-Javadoc)
+	 * @see android.view.View#onTouchEvent(android.view.MotionEvent)
+	 */
 	@Override
 	public boolean onTouchEvent(MotionEvent e) {
 		boolean status = false;
