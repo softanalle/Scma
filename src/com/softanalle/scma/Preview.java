@@ -76,9 +76,8 @@ SurfaceView.OnClickListener */ {
 	SurfaceHolder mHolder;
 	public Camera camera;
 	
-	/**
-	 * Constructor
-	 * @param context
+	/*
+	 * @param context Control context
 	 */
 	Preview(Context context) {
 		super(context);
@@ -92,8 +91,9 @@ SurfaceView.OnClickListener */ {
 		//Log.d(TAG, "create OK");
 	}
 
-	/**
+	/*
 	 * Called when surface is created
+	 * @see android.view.SurfaceHolder.Callback#surfaceCreated(android.view.SurfaceHolder)
 	 */
 	public void surfaceCreated(SurfaceHolder holder) {
 		//Log.d(TAG, "surfaceCreated(holder)");
@@ -116,8 +116,9 @@ SurfaceView.OnClickListener */ {
 		}
 	}
 	
-	/**
+	/*
 	 * Called when surface is destroyed
+	 * @see android.view.SurfaceHolder.Callback#surfaceDestroyed(android.view.SurfaceHolder)
 	 */
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		//Log.d(TAG, "surfaceDestroyed(holder)");
@@ -132,93 +133,96 @@ SurfaceView.OnClickListener */ {
 	}
 
 	
-	
+	/*
+	 * on surface change event
+	 * @see android.view.SurfaceHolder.Callback#surfaceChanged(android.view.SurfaceHolder, int, int, int)
+	 */
 	public void surfaceChanged(SurfaceHolder holder, int format, int height, int width) {
 
 		if (mHolder.getSurface() == null){
-	          // preview surface does not exist
-	          return;
-	        }
+			// preview surface does not exist
+			return;
+		}
 
 		// Log.d(TAG, "surfaceChanged(holder)");
 		if ( camera == null ) {
 			Log.d(TAG, "-camera was null, opening");
 			camera = getCameraInstance();
 		}
-		
-		// stop preview before making changes
-        try {
-            stopPreview();
-            isPreview_ = false;
-        } catch (Exception e){
-          // ignore: tried to stop a non-existent preview
-        }
 
-        
-        
+		// stop preview before making changes
 		try {
-		if (camera != null) {
-			
-			
-			Camera.Parameters params = camera.getParameters();
-			params.setPreviewSize(width,  height);
-			
-			whiteBalanceModes_ = params.getSupportedWhiteBalance();
-			supportedPictureFormats_ = params.getSupportedPictureFormats();
-			
-			params.set("rawsave-mode", "1");
-			
-			// no compression!
-			params.setJpegQuality(100);
-			
-			List<Camera.Size> previewSizes = params.getSupportedPreviewSizes();
-			
-			for (Size p : previewSizes) {
-				if ( p.width == 640 ) {
-					params.setPreviewSize(p.width,  p.height);
-					break;
-				}
-			}
-			
-			// turn autofocus off
-			//params.setFocusMode(Parameters.FOCUS_MODE_FIXED);
-			
-			params.setFocusMode(Parameters.FOCUS_MODE_MACRO);
-			
-			if (supportedPictureFormats_.contains(ImageFormat.RGB_565)) {			
-				params.setPictureFormat(ImageFormat.RGB_565);
-			} else if ( supportedPictureFormats_.contains(ImageFormat.YV12)) {
-				params.setPictureFormat(ImageFormat.YV12);
-			} else {
-				params.setPictureFormat(ImageFormat.NV21);
-			}
-			
-			// turn flash off
-			params.setFlashMode(Parameters.FLASH_MODE_OFF);
-			
-			if ( params.isAutoWhiteBalanceLockSupported()) {
-				params.setAutoWhiteBalanceLock(true);
-			} else {
-				Toast.makeText(getContext(), "Unable to lock AutoWhiteBalance", Toast.LENGTH_LONG).show();
-			}
-			
-			if ( params. isAutoExposureLockSupported() ) {
-				params.setAutoExposureLock(true);
-			} else {
-				Toast.makeText(getContext(), "Unable to lock AutoExposure", Toast.LENGTH_LONG).show();
-			}
-			
-			// we don't work with GPS data
-			params.removeGpsData();
-			
-			camera.setParameters(params);
-			startPreview();
-			isReady_ = true;
-		} else {
-			Log.d(TAG, "-camera is still null, failed to retrieve");
+			stopPreview();
+			isPreview_ = false;
+		} catch (Exception e){
+			// ignore: tried to stop a non-existent preview
 		}
+
+
+
+		try {
+			if (camera != null) {
+
+
+				Camera.Parameters params = camera.getParameters();
+				params.setPreviewSize(width,  height);
+
+				whiteBalanceModes_ = params.getSupportedWhiteBalance();
+				supportedPictureFormats_ = params.getSupportedPictureFormats();
+
+				params.set("rawsave-mode", "1");
+
+				// no compression!
+				params.setJpegQuality(100);
+
+				List<Camera.Size> previewSizes = params.getSupportedPreviewSizes();
+
+				for (Size p : previewSizes) {
+					if ( p.width == 640 ) {
+						params.setPreviewSize(p.width,  p.height);
+						break;
+					}
+				}
+
+				// turn autofocus off
+				//params.setFocusMode(Parameters.FOCUS_MODE_FIXED);
+
+				params.setFocusMode(Parameters.FOCUS_MODE_MACRO);
+
+				if (supportedPictureFormats_.contains(ImageFormat.RGB_565)) {			
+					params.setPictureFormat(ImageFormat.RGB_565);
+				} else if ( supportedPictureFormats_.contains(ImageFormat.YV12)) {
+					params.setPictureFormat(ImageFormat.YV12);
+				} else {
+					params.setPictureFormat(ImageFormat.NV21);
+				}
+
+				// turn flash off
+				params.setFlashMode(Parameters.FLASH_MODE_OFF);
+
+				if ( params.isAutoWhiteBalanceLockSupported()) {
+					params.setAutoWhiteBalanceLock(true);
+				} else {
+					Toast.makeText(getContext(), "Unable to lock AutoWhiteBalance", Toast.LENGTH_LONG).show();
+				}
+
+				if ( params. isAutoExposureLockSupported() ) {
+					params.setAutoExposureLock(true);
+				} else {
+					Toast.makeText(getContext(), "Unable to lock AutoExposure", Toast.LENGTH_LONG).show();
+				}
+
+				// we don't work with GPS data
+				params.removeGpsData();
+
+				camera.setParameters(params);
+				startPreview();
+				isReady_ = true;
+			} else {
+				Log.e(TAG, "-camera is still null, failed to retrieve");
+			}
 		} catch (Exception e) {
-			Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+			Log.e(TAG, "Error starting camera preview: " + e.getMessage());
 		}
 	}
 

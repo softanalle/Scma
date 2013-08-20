@@ -42,5 +42,17 @@
     
     <item format="string" name="pref_focusled_color" type="string">3</item>
     
+    <string-array name="scale_factors">
+        <item>2</item>
+        <item>4</item>
+        <item>8</item>
+        <item>16</item>
+    </string-array>
     
+    <string-array name="scale_factor_labels">
+        <item>&#189;</item>
+        <item>&#188;</item>
+        <item>1/8</item>
+        <item>1/16</item>
+    </string-array>    
 </resources>

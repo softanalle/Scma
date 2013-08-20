@@ -118,6 +118,9 @@
             android:order="310" 
             android:defaultValue="@string/pref_focusled_color"/>
         
+        
+    </PreferenceCategory><PreferenceCategory android:title="Image preview" android:order="400">
+        <ListPreference android:key="conf_preview_scale" android:title="Preview image scale factor" android:entries="@array/scale_factor_labels" android:entryValues="@array/scale_factors" android:defaultValue="4"/>
     </PreferenceCategory>
     
 

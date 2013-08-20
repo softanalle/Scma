@@ -76,7 +76,10 @@ public class AreaSelector extends View {
 		initComponent( context );
 	}
 	
-	
+	/*
+	 * initialize component
+	 * @param context the context to use
+	 */
 	private void initComponent(Context context) {
 		setFocusable(true);
 		
@@ -89,12 +92,26 @@ public class AreaSelector extends View {
 		
 		scaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
 		
+		reset();
+	}
+	
+	/*
+	 * Reset area selector to original values
+	 */
+	protected void reset() {
 		mInitialized = true;
 		mPosX = (float) (getWidth() / 2.0);
 		mPosY = (float) (getHeight() / 2.0);
+		mWidth = (int) (getWidth() *  .5);
+		mHeight = (int) (getHeight() * .5);
+		
 		invalidate();
 	}
 	
+	/*
+	 * (non-Javadoc)
+	 * @see android.view.View#onDraw(android.graphics.Canvas)
+	 */
 	@Override
 	public void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
@@ -229,10 +246,10 @@ public class AreaSelector extends View {
 	}
 
 
-/*
- * Scale gesture listener, at this point only scaling gesture is used. Perhaps others would
- * be nice, though?	
- */
+	/*
+	 * Scale gesture listener, at this point only scaling gesture is used. Perhaps others would
+	 * be nice, though?	
+	 */
 	private class ScaleListener extends
 	ScaleGestureDetector.SimpleOnScaleGestureListener {
 		@Override
@@ -247,20 +264,20 @@ public class AreaSelector extends View {
 		}
 }
 	
-	// getters / setters
+
 	
 	/*
 	 * 
 	 */
 	public float getCenterX() {
-		return mPreviousX;
+		return mPosX;
 	}
 	
 	/*
 	 * 
 	 */
 	public float getCenterY() {
-		return mPreviousY;
+		return mPosY;
 	}
 	
 	/*
@@ -278,4 +295,6 @@ public class AreaSelector extends View {
 	public void setHeight(int h) {
 		mHeight = h;
 	}
+	
+	
 }

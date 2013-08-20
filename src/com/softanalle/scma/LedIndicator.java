@@ -142,7 +142,7 @@ public class LedIndicator extends View {
 			for (int i=0;i<mLedCount;i++) {
 				int x = mLeft + i * 2 + i * mWidth;
 				int y = mTop + 2;
-				Log.d(TAG, "setPos:" + x + ", " + y + ", " + mWidth + ", " + mHeight);
+				// Log.d(TAG, "setPos:" + x + ", " + y + ", " + mWidth + ", " + mHeight);
 				mLedArea[i].left = x;
 				mLedArea[i].top = y;
 				mLedArea[i].bottom = y + mHeight;

@@ -199,6 +199,8 @@ implements OnSharedPreferenceChangeListener
 	public static final String KEY_PREF_SAVE_JPEG = "conf_write_jpeg";
 	public static final String KEY_PREF_SAVE_RAW = "conf_write_raw";
 
+	public static final String KEY_PREF_PREVIEW_SCALE = "conf_preview_scale";
+	
 	private boolean powerState_ = false;
 	private String mImagePrefix = "";
 	

@@ -30,6 +30,7 @@ import java.io.File;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -38,6 +39,7 @@ import android.graphics.drawable.Drawable;
 //import android.graphics.Color;
 //import android.graphics.Paint;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -60,6 +62,8 @@ public class ImageActivity extends Activity {
 	
 	private String mImagePrefix;
 	private String mWorkdir;
+
+	private int mSampleSize = 4;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {        
@@ -91,7 +95,6 @@ public class ImageActivity extends Activity {
 			
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
 				Intent intent = getIntent();
 				setResult(MainActivity.RESULT_IMAGE_ACTIVITY, intent);
                 //close this Activity...
@@ -110,6 +113,25 @@ public class ImageActivity extends Activity {
 		closeButton_.bringToFront();
 		resetButton_.bringToFront();
 		
+		approveButton_.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				nameLabel_.setText("(" + mSampleSize * areaSelector_.getCenterX() + ", " +
+						mSampleSize * areaSelector_.getCenterY() + ") [" + 
+						mSampleSize * areaSelector_.getWidth() + " x " +
+						mSampleSize * areaSelector_.getHeight() + "]"
+						);
+			}
+		});
+		
+		resetButton_.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+				areaSelector_.reset();				
+			}
+		});
 		// loading of large image might take some time...
 		Thread t = new Thread(new Runnable() {
 			final String wd = mWorkdir;
@@ -151,12 +173,18 @@ public class ImageActivity extends Activity {
 	}
 	
 	
-	
+	/*
+	 * scale and show the image in the ImageView -control as preview
+	 * @param workdir
+	 * @param filename
+	 */
 	private void showImage(String workdir, String filename) {
 
 		mWidth = imageView_.getWidth();
 		mHeight = imageView_.getHeight();
 		
+		SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		mSampleSize = Integer.parseInt(sharedPref.getString(MainActivity.KEY_PREF_PREVIEW_SCALE, "4"));
 		if ( ! filename.contains("_WHITE.")) {
 			filename = filename + "_WHITE.JPG";
 		}
@@ -166,47 +194,15 @@ public class ImageActivity extends Activity {
 		File f = new File(fullname);
 		BitmapFactory.Options opts = new BitmapFactory.Options();
 		
-		//opts.inJustDecodeBounds = true;
-		opts.inSampleSize = 4;
+		
+		opts.inSampleSize = mSampleSize;
 		if (f.exists()) {
-			//Bitmap tmp = BitmapFactory.decodeFile(fullname, opts);
-			//int w = opts.outWidth;
-			//int h = opts.outHeight;
-			//int cw = imageView_.getWidth();
-			//int ch = imageView_.getHeight();
-			
-			//int sampleSize = w > h ? (int) w / cw : h / ch;
-			
-			// stage 2
-			//opts.inJustDecodeBounds = false;
-			
+
 			imageView_.setImageBitmap(BitmapFactory.decodeFile(fullname, opts));
-			
-			//imageView_.setImageBitmap(getResizedBitmap(tmp, mHeight, mWidth));
-			
-			// imageView_.setImageBitmap();
-			//Drawable d = Drawable.createFromPath(fullname);			
-			//imageView_.setImageDrawable(d);
-			
-			
+
 		} else {
 			Toast.makeText(getApplicationContext(), "Image '" + fullname + "' load failed", Toast.LENGTH_LONG).show();
 			Log.e(TAG, "Image '" + fullname + "' load failed");
 		}
-	}
-	
-	//ImageView imageViewer_;
-	//private Paint mPaint;
-	/*
-	protected void onDraw(Canvas canvas) {
-		   super.onDraw(canvas);
-
-		   // Draw the shadow
-		   canvas.drawRect(left, top, right, bottom, paint);
-		   );
-	}
-	*/
-	public void onResize() {
-		
 	}
 }
