@@ -411,7 +411,6 @@ implements OnSharedPreferenceChangeListener
 		try {
 			Thread.sleep(20);
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -500,7 +499,6 @@ implements OnSharedPreferenceChangeListener
 			});			
 			
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		
@@ -729,51 +727,32 @@ implements OnSharedPreferenceChangeListener
 			list = am.list("test");
 			File destDir = new File(mStorageDir);
 			for (String s:list) {
-				// doAssetyThing("test/" + s, mStorageDir );
-
-				//I use this next line as the start of copying a pdf from one location
-				//to another. I wanted to give you a real function in use.
-				
+								
 				File dstFile = new File(destDir, s);
 				
-				//File dstFile = new File(destDir.getPath() + s);
-				//if (! dstFile.exists()) {
-				
 				InputStream in = am.open("test/" + s);
-				//OutputStream out = new FileOutputStream(dstFile);
-				
-				//FileUtils.copyFileToDirectory(srcFile, destDir);
-				//IOUtils.copy(in, out);
 				
 				FileUtils.copyInputStreamToFile(in, dstFile);
-				
-				//Toast.makeText(getApplicationContext(), "Copied: " + s, Toast.LENGTH_LONG).show();
+
 				Log.d(TAG, "Copied: " + s);
 				Log.d(TAG, "Dest: " + mStorageDir);
 				in.close();
-				//out.close();
 				
-				//}
-				//InputStream inStream = am.open("SubDir1/" + s);
-				//OutputStream outStream = new Outpu
-				//more code
 			}
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+
 			e.printStackTrace();
 			String message = "";
 			if ( e.getMessage() != null ) {
 				message = e.getMessage();
 			}
 			showError(e.toString(), message);
-			//Toast.makeText(getApplicationContext(), e.toString() + " / " + message, Toast.LENGTH_LONG).show();
 		} catch (Exception e) {
 			String message = "";
 			if ( e.getMessage() != null ) {
 				message = e.getMessage();
 			}
 			showError(e.toString(), message);
-			//Toast.makeText(getApplicationContext(), e.toString() + " : " + message, Toast.LENGTH_LONG).show();
 		}
 
 	}
@@ -783,6 +762,7 @@ implements OnSharedPreferenceChangeListener
 	 */
 	private void resetSettings() {		
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
+        Toast.makeText(getApplicationContext(), "Settings reseted", Toast.LENGTH_LONG).show();
 	}
 
 	private void getSettings() {
@@ -973,7 +953,7 @@ implements OnSharedPreferenceChangeListener
             getSettings();
             break;
         case RESULT_IMAGE_ACTIVITY:
-        	// do something here!
+        	// TODO: do something here!
         	String msg = data.getStringExtra(ARG_IMAGE_ACTIVITY_RESULT);
         	break;
         }
@@ -1030,8 +1010,7 @@ implements OnSharedPreferenceChangeListener
 			startActivityForResult(intent, RESULT_SETTINGS_ACTIVITY);
 			return true;
 			
-		case R.id.reset_settings:
-			Toast.makeText(getApplicationContext(), "Reset settings", Toast.LENGTH_LONG).show();
+		case R.id.reset_settings:			
 			resetSettings();
 			return true;
 			
@@ -1052,7 +1031,6 @@ implements OnSharedPreferenceChangeListener
 				
 				@Override
 				public void run() {
-					// TODO Auto-generated method stub
 					copyTestAssets();					
 				}
 			});

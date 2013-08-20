@@ -122,11 +122,11 @@ implements OnSharedPreferenceChangeListener
     private void updatePrefSummary(Preference p) {
         if (p instanceof ListPreference) {
             ListPreference listPref = (ListPreference) p;
-            p.setSummary("Currently: " + listPref.getEntry());
+            p.setSummary("Currently selected: " + listPref.getEntry());
         }
         if (p instanceof EditTextPreference) {
             EditTextPreference editTextPref = (EditTextPreference) p;
-            p.setSummary("Current: " + editTextPref.getText());
+            p.setSummary("Current value: " + editTextPref.getText());
         }
     }
 }

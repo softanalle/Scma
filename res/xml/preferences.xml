@@ -70,7 +70,7 @@
             android:defaultValue="@string/pref_pulsewidth_default" 
             android:key="conf_white_pwm" 
             android:enabled="true" 
-            android:order="230" 
+            android:order="250" 
             android:inputType="number"
             android:lines="1"
             android:maxLength="4"
@@ -83,26 +83,13 @@
             android:defaultValue="@string/pref_pulsewidth_default" 
             android:key="conf_nir_pwm" 
             android:enabled="true" 
-            android:order="230" 
+            android:order="260" 
             android:inputType="number"
             android:lines="1"
             android:maxLength="4"
             android:maxLines="1"
             android:singleLine="true" 
             android:summary="@string/conf_ledpwm_label"/>
-        
-        <EditTextPreference 
-            android:title="@string/pw_focus_label" 
-            android:defaultValue="@string/pref_pulsewidth_default" 
-            android:key="conf_focus_pwm" 
-            android:enabled="true" 
-            android:inputType="number"
-            android:lines="1"
-            android:maxLength="4"
-            android:maxLines="1"
-            android:singleLine="true" 
-            android:order="205" android:summary="@string/conf_ledpwm_label"/>
-        
         
     </PreferenceCategory>
     
@@ -116,11 +103,17 @@
             android:persistent="true" 
             android:summary="Seleted focus color" 
             android:order="310" 
-            android:defaultValue="@string/pref_focusled_color"/>
+            android:defaultValue="@string/pref_focusled_color"/><EditTextPreference android:title="@string/pw_focus_label" android:defaultValue="@string/pref_pulsewidth_default" android:key="conf_focus_pwm" android:enabled="true" android:inputType="number" android:lines="1" android:maxLength="4" android:maxLines="1" android:singleLine="true" android:order="315" android:summary="@string/conf_ledpwm_label" />
         
         
     </PreferenceCategory><PreferenceCategory android:title="Image preview" android:order="400">
-        <ListPreference android:key="conf_preview_scale" android:title="Preview image scale factor" android:entries="@array/scale_factor_labels" android:entryValues="@array/scale_factors" android:defaultValue="4"/>
+        <ListPreference 
+            android:key="conf_preview_scale" 
+            android:title="Preview image scale factor" 
+            android:entries="@array/scale_factor_labels" 
+            android:entryValues="@array/scale_factors" 
+            android:defaultValue="4" 
+            android:order="410"/>
     </PreferenceCategory>
     
 

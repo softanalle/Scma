@@ -138,7 +138,6 @@ public class ImageActivity extends Activity {
 			final String pr = mImagePrefix;
 			@Override
 			public void run() {
-				// TODO Auto-generated method stub
 				showImage(wd, pr);		
 			}
 		});

@@ -351,56 +351,53 @@ SurfaceView.OnClickListener */ {
 		PictureCallback jpegCallback = null;
 		PictureCallback rawCallback = null;
 		final String filename = storagePath + "/whiteref";
-		startPreview();
-		if ( jpg ) {
-			jpegCallback = new PictureCallback() {
+		if ( camera != null ) {
+			startPreview();
+			if ( jpg ) {
+				jpegCallback = new PictureCallback() {
 
-				private String mJpegFilename = filename;
-				@Override public void onPictureTaken(byte[] data, Camera camera) {
-					try {
-						writeImageToDisc(mJpegFilename + ".JPG", data);					
-						Thread.sleep(200);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						Toast.makeText(getContext(), "Error while saving JPEG file: " + e, Toast.LENGTH_LONG).show();
-					}
-				}
-			};
-		}
-		
-		if ( raw ) {			
-			rawCallback = new PictureCallback() {
-				private String mRawFilename = filename;
-				@Override public void onPictureTaken(byte[] data, Camera camera) {
-					try {
-						if ( data != null && data.length > 0 ) {
-						if (!writeImageToDisc(mRawFilename + ".RAW", data)) {
-							Toast.makeText(getContext(), "Error while saving RAW file", Toast.LENGTH_LONG).show();
+					private String mJpegFilename = filename;
+					@Override public void onPictureTaken(byte[] data, Camera camera) {
+						try {
+							writeImageToDisc(mJpegFilename + ".JPG", data);					
+							Thread.sleep(200);
+						} catch (InterruptedException e) {
+							Toast.makeText(getContext(), "Error while saving JPEG file: " + e, Toast.LENGTH_LONG).show();
 						}
-					
-						Thread.sleep(1000);
-						} else {
-							Toast.makeText(getContext(), "Got ZERO data for RAW image: " + mRawFilename, Toast.LENGTH_LONG).show();
-						}
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-						Toast.makeText(getContext(), "Error while saving RAW file: " + e, Toast.LENGTH_LONG).show();
 					}
-				}
-			};
+				};
+			}
 
+			if ( raw ) {			
+				rawCallback = new PictureCallback() {
+					private String mRawFilename = filename;
+					@Override public void onPictureTaken(byte[] data, Camera camera) {
+						try {
+							if ( data != null && data.length > 0 ) {
+								if (!writeImageToDisc(mRawFilename + ".RAW", data)) {
+									Toast.makeText(getContext(), "Error while saving RAW file", Toast.LENGTH_LONG).show();
+								}
+
+								Thread.sleep(1000);
+							} else {
+								Toast.makeText(getContext(), "Got ZERO data for RAW image: " + mRawFilename, Toast.LENGTH_LONG).show();
+							}
+						} catch (InterruptedException e) {
+							Toast.makeText(getContext(), "Error while saving RAW file: " + e, Toast.LENGTH_LONG).show();
+						}
+					}
+				};
+
+			}
+			camera.takePicture(null,  rawCallback, null, jpegCallback);
+			isPreview_ = false;
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// if sleep fails, what can you do?
+			}
+			startPreview();
 		}
-		camera.takePicture(null,  rawCallback, null, jpegCallback);
-		isPreview_ = false;
-		try {
-			Thread.sleep(1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		startPreview();
 	}
 	
 	/**
@@ -423,8 +420,6 @@ SurfaceView.OnClickListener */ {
 					
 						Thread.sleep(200);
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 						Toast.makeText(getContext(), "Error while saving JPEG file: " + e, Toast.LENGTH_LONG).show();
 					}
 				}
@@ -447,18 +442,14 @@ SurfaceView.OnClickListener */ {
 							Toast.makeText(getContext(), "Got ZERO data for RAW image: " + mRawFilename, Toast.LENGTH_LONG).show();
 						}
 					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
 						Toast.makeText(getContext(), "Error while saving RAW file: " + e, Toast.LENGTH_LONG).show();
 					}
 				}
 			};
 		}
-		//Log.i(TAG, "Take JPEG (" + doJPEG + ") and RAW (" + doRAW + ")");
 		
 		camera.takePicture(null,  rawCallback, jpegCallback);
-		isPreview_ = false;
-		//Log.i(TAG, "done: " + filename);
+		isPreview_ = false;	
 	}
 	
 	/**
