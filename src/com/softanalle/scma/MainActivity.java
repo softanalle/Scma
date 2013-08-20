@@ -642,6 +642,7 @@ implements OnSharedPreferenceChangeListener
 		@Override
 		public void disconnected() {
 			enableUi(false);
+			showError("Connection error.", "Connection to led controller (IOIO) was lost."); 
 		}
 	}
 
