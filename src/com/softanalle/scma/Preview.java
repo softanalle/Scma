@@ -284,13 +284,17 @@ SurfaceView.OnClickListener */ {
 		}
 	}
 	
-	public void doFocus() {
-		
-		//camera.cancelAutoFocus();
-		camera.autoFocus(null);
-		
+	/*
+	 * @param cb autofocus callback function
+	 */
+	protected void doFocus(Camera.AutoFocusCallback cb) {
+		camera.autoFocus(cb);
 	}
 
+	protected void doFocus() {
+		camera.autoFocus(null);
+	}
+	
 	/*
 	@Override
 	public void onAutoFocus(boolean success, Camera camera) {

@@ -43,6 +43,7 @@ import ioio.lib.util.android.IOIOActivity;
 // import android.annotation.TargetApi;
 import android.app.admin.DevicePolicyManager;
 import android.hardware.Camera;
+import android.hardware.Camera.AutoFocusCallback;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 //import android.os.AsyncTask;
@@ -415,12 +416,18 @@ implements OnSharedPreferenceChangeListener
 		}
 		
 		// do focusing stuff
-		mPreview.camera.autoFocus(null);
-		// mPreview.camera
-		//messageView_.setText("Currently supported WhiteBalance modes: " + mPreview.getWhiteBalanceModes().toString()+
-			//	"Currently supported modes: ");
+		//mPreview.camera.autoFocus(null);
+		mPreview.camera.autoFocus(myAutoFocusCallback);
 	}
-		
+	
+	
+	AutoFocusCallback myAutoFocusCallback = new AutoFocusCallback(){
+
+		  @Override
+		  public void onAutoFocus(boolean arg0, Camera arg1) {
+			  mLedState[mFocusLedIndex] = false;
+		  }};
+	
 	private boolean mFocusOn = false;
 	private int mFocusCount = 0;
 
