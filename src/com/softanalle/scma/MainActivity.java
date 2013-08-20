@@ -816,30 +816,19 @@ implements OnSharedPreferenceChangeListener
         	mPulseWidth[LED_INDEX_GREEN] = Integer.parseInt(sharedPref.getString(KEY_PREF_GREEN_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_GREEN])));
         	dump = "blue";
         	mPulseWidth[LED_INDEX_BLUE] = Integer.parseInt(sharedPref.getString(KEY_PREF_BLUE_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_BLUE])));
+        	dump = "red";
         	mPulseWidth[LED_INDEX_RED] = Integer.parseInt(sharedPref.getString(KEY_PREF_RED_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_RED])));
+        	dump = "yellow";
         	mPulseWidth[LED_INDEX_YELLOW] = Integer.parseInt(sharedPref.getString(KEY_PREF_YELLOW_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_YELLOW])));
+        	dump = "white";
         	mPulseWidth[LED_INDEX_WHITE] = Integer.parseInt(sharedPref.getString(KEY_PREF_WHITE_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_WHITE])));
+        	dump = "nir";
         	mPulseWidth[LED_INDEX_NIR] = Integer.parseInt(sharedPref.getString(KEY_PREF_NIR_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_NIR])));
 
-        	/*
-        	mPulseWidth[LED_INDEX_BLUE] = sharedPref.getInt(KEY_PREF_BLUE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_BLUE]);
-        	mPulseWidth[LED_INDEX_RED] = sharedPref.getInt(KEY_PREF_RED_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_RED]);
-        	mPulseWidth[LED_INDEX_YELLOW] = sharedPref.getInt(KEY_PREF_YELLOW_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_YELLOW]);
-        	mPulseWidth[LED_INDEX_WHITE] = sharedPref.getInt(KEY_PREF_WHITE_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_WHITE]);
-        	mPulseWidth[LED_INDEX_NIR] = sharedPref.getInt(KEY_PREF_NIR_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_NIR]);
-        	 */
         	dump = "focusColor";
 
         	mFocusLedIndex= Integer.parseInt(sharedPref.getString(KEY_PREF_FOCUSCOLOR, "3"));
-        	//int index = 0;
-        	dump = "loop";        	
-        	//for (String opt : mImageSuffix) {
-        	//	if (opt.equalsIgnoreCase(focusColor)) {
-        	//		mFocusLedIndex = index;
-        	//	}
-        	//	index++;
-        	//}
-
+        	
         } catch (ClassCastException cce) {
         	Toast.makeText(getApplicationContext(), "Invalid setting for '" + dump + "': " + cce, Toast.LENGTH_LONG).show();
         } catch (Exception e) {
@@ -848,7 +837,10 @@ implements OnSharedPreferenceChangeListener
 
 	}
 	
-	
+	/*
+	 * Respond to preference changes
+	 * @see android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged(android.content.SharedPreferences, java.lang.String)
+	 */
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
 		//Preference keyPref = findPreference(key);
 		if ( key.equalsIgnoreCase(KEY_PREF_FOCUSCOLOR)) {
@@ -881,26 +873,6 @@ implements OnSharedPreferenceChangeListener
 		}		
 	}
 
-	
-	//@Override
-	//protected void onResume() {
-		//super.onResume();
-		/*
-            getPreferenceScreen().getSharedPreferences()
-                    .registerOnSharedPreferenceChangeListener(this);
-		 */
-	//}
-
-	
-	//@Override
-	//protected void onPause() {
-	//	super.onPause();
-		/*
-            getPreferenceScreen().getSharedPreferences()
-                    .unregisterOnSharedPreferenceChangeListener(this);
-		 */
-	//}
-
 
 	/** 
 	 * Check if this device has a camera
@@ -915,6 +887,7 @@ implements OnSharedPreferenceChangeListener
 	        return false;
 	    }
 	}
+	
 	/*
 	 * Actions required when application is paused
 	 * @see android.app.Activity#onPause()
@@ -924,7 +897,10 @@ implements OnSharedPreferenceChangeListener
 		super.onPause();
 		if ( mPreview != null ) {
 			mPreview.releaseCamera();
-		}		
+		}
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+		sp.unregisterOnSharedPreferenceChangeListener(this);
+        
 	}
 	
 	/*
@@ -937,6 +913,9 @@ implements OnSharedPreferenceChangeListener
 		if ( mPreview != null ) {
 			mPreview.reclaimCamera();
 		}
+		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+		sp.registerOnSharedPreferenceChangeListener(this);
+        
 		getSettings();
 	}
 	
@@ -1080,26 +1059,15 @@ implements OnSharedPreferenceChangeListener
 			t.run();
 			return true;
 		}
+		/*
 		case R.id.itemTest1: {
 			
 			intent = new Intent(getApplicationContext(), ImageActivity.class);
 			intent.putExtra(ARG_WORKDIR, mStorageDir );
 			File f = new File( mStorageDir );
-			//String filelist[] = f.list();
-
-
+			
 			String foundFileName = "testimg";
-			/*
-			if ( filelist != null ) {
-				for (String file : filelist) {
-					if ( file.contains("_white")) {
-						File q = new File(file);
-						foundFileName = q.getName();
-						break;
-					}
-				}
-			}
-			*/
+			
 			
 			if ( foundFileName != null ) {
 				intent.putExtra(ARG_IMAGE_PREFIX, foundFileName);
@@ -1107,6 +1075,7 @@ implements OnSharedPreferenceChangeListener
 			startActivity(intent);
 			return true;
 		}
+		*/
 		default:
 			return super.onOptionsItemSelected(item);
 		}

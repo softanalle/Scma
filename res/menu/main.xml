@@ -12,7 +12,6 @@
 	android:title="@string/mn_reset_label" android:orderInCategory="300">
     </item>
     <item android:id="@+id/about_info" android:showAsAction="never" android:title="@string/mn_about_label" android:orderInCategory="500"></item>
-    <item android:id="@+id/itemTest1" android:title="Test 1"></item>
     <item android:id="@+id/itemCopyAssets" android:title="Copy A"></item>
     
 
