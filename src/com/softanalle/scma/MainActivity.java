@@ -64,6 +64,9 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
+import com.google.code.microlog4android.Logger;
+import com.google.code.microlog4android.LoggerFactory;
+import com.google.code.microlog4android.config.PropertyConfigurator;
 //import com.softanalle.scmctrls.LedIndicator;
 //import com.softanalle.previewtest.Preview;
 import com.softanalle.scma.R;
@@ -223,13 +226,17 @@ implements OnSharedPreferenceChangeListener
 	
     private Object lock_ = new Object();
     
+    private static final Logger logger = LoggerFactory.getLogger();
+    
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 		setContentView(R.layout.activity_main);
 
+		PropertyConfigurator.getConfigurator(this).configure();
 
+		logger.debug("onCreate()");
 		
 		pictureButton_  = (Button) findViewById(R.id.pictureButton);
 		toggleButton_ = (ToggleButton) findViewById(R.id.powerButton);
@@ -309,7 +316,8 @@ implements OnSharedPreferenceChangeListener
 		pictureButton_.setOnClickListener(new OnClickListener() {
 
 			@Override
-			public void onClick(View v) {				
+			public void onClick(View v) {
+				logger.debug("pictureButton.onClick()");
 				if ( powerState_ ) {
 					// disable buttons -> no error clicks
 					pictureButton_.setEnabled(false);
@@ -333,6 +341,7 @@ implements OnSharedPreferenceChangeListener
 
 			@Override
 			public void onClick(View v) {		
+				logger.debug("toggleButton.onClick(" + ((ToggleButton) v).isChecked() + ")");
 				// mPreview.camera.takePicture(shutterCallback, rawCallback, jpegCallback);
 				if ( ((ToggleButton) v).isChecked()) {
 					powerState_ = true;
@@ -366,6 +375,7 @@ implements OnSharedPreferenceChangeListener
 		focusButton_.setOnClickListener(new OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				logger.debug("focusButton.onClick()");
 				try {
 					ledIndicator_.setLedState(LED_INDEX_FOCUS, true);
 					Thread.sleep(10);
@@ -410,6 +420,7 @@ implements OnSharedPreferenceChangeListener
 	// private Thread waitThread;
 
 	private void focusCamera() {
+		logger.debug("focusCamera()");
 		mFocusOn = true;
 		mFocusCount = 0;
 		try {
@@ -435,6 +446,7 @@ implements OnSharedPreferenceChangeListener
 	private int mFocusCount = 0;
 
 	private void takeColorSeries() {
+		logger.debug("takeColorSeries()");
 		mLedState[mFocusLedIndex] = false;
 		mPulseWidth[mFocusLedIndex] = mDefaultPulseWidth[mFocusLedIndex];
 		
@@ -510,6 +522,7 @@ implements OnSharedPreferenceChangeListener
 	
 	
 	private void powerLedsOff() {
+		logger.debug("powerLedsOff()");
 		synchronized (MainActivity.class) {
 			mShutdown = true;	
 		}
@@ -523,11 +536,13 @@ implements OnSharedPreferenceChangeListener
 	}
 
 	public void setFocusLed(boolean onoff) {
+		logger.debug("setFocusLed("+onoff+")");
 		ledIndicator_.setLedState(LED_INDEX_FOCUS, onoff);
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		logger.debug("onCreateOptionsMenu()");
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
 		//Toast.makeText(getApplicationContext(), "StorageDir = " + mStorageDir, Toast.LENGTH_LONG).show();
@@ -551,6 +566,7 @@ implements OnSharedPreferenceChangeListener
 		
 		@Override
 		public void setup() throws ConnectionLostException {
+			logger.debug("IOIO.setup()");
 			led_ = ioio_.openDigitalOutput(IOIO.LED_PIN, true);
 			powout1_ = ioio_.openDigitalOutput(IOIO_PIN_BOARD1_UP, true);
 			powout2_ = ioio_.openDigitalOutput(IOIO_PIN_BOARD2_UP, true);
@@ -576,7 +592,6 @@ implements OnSharedPreferenceChangeListener
 			pwmOutput6_.setPulseWidth( 0 );
 						
 
-			
 			
 			mFocusCount = 0;
 			mFocusOn = false;
@@ -650,6 +665,7 @@ implements OnSharedPreferenceChangeListener
 		 */
 		@Override
 		public void disconnected() {
+			logger.debug("IOIO.disconnected()");
 			enableUi(false);
 			showError("Connection error.", "Connection to led controller (IOIO) was lost."); 
 		}
@@ -661,6 +677,7 @@ implements OnSharedPreferenceChangeListener
 	 */
 	@Override
 	protected IOIOLooper createIOIOLooper() {
+		logger.debug("createIOIOLooper()");
 		return new Looper();
 	}
 	
@@ -668,6 +685,7 @@ implements OnSharedPreferenceChangeListener
 	 * enable/disable the UI components. This is called by IOIO looper!!
 	 */
 	private void enableUi(final boolean enable) {
+		logger.debug("enableUI()");
 		runOnUiThread(new Runnable() {
 			@Override
 			public void run() {
@@ -704,6 +722,7 @@ implements OnSharedPreferenceChangeListener
 	
 
 	void showError(String err, String msg) {
+		logger.debug("showError('" + err + ", '" + msg + "')");
 		new AlertDialog.Builder(this)
 		.setIcon(R.drawable.ic_dialog_alert)
 		.setTitle("Error")
@@ -725,6 +744,7 @@ implements OnSharedPreferenceChangeListener
 	
 	
 	private void copyTestAssets() {
+		logger.debug("copyTestAssets()");
 		AssetManager am = getResources().getAssets();
 		String[] list;
 		try {			
@@ -764,12 +784,14 @@ implements OnSharedPreferenceChangeListener
 	/*
 	 * reset the settings to default values. They are defined in preferences.xml -file.
 	 */
-	private void resetSettings() {		
+	private void resetSettings() {
+		logger.debug("resetSettings()");
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         Toast.makeText(getApplicationContext(), "Settings reseted", Toast.LENGTH_LONG).show();
 	}
 
 	private void getSettings() {
+		logger.debug("getSettings()");
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		String dump = "before";
@@ -826,6 +848,7 @@ implements OnSharedPreferenceChangeListener
 	 * @see android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged(android.content.SharedPreferences, java.lang.String)
 	 */
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+		logger.debug("onSharedPreferenceChanged()");
 		//Preference keyPref = findPreference(key);
 		if ( key.equalsIgnoreCase(KEY_PREF_FOCUSCOLOR)) {
 			mFocusLedIndex = sharedPreferences.getInt(KEY_PREF_FOCUSCOLOR, 3);
@@ -863,6 +886,7 @@ implements OnSharedPreferenceChangeListener
 	 * @param context The application context to be used
 	 */
 	private boolean checkCameraHardware(Context context) {
+		logger.debug("checkCameraHardware()");
 	    if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
 	        // this device has a camera
 	        return true;
@@ -879,6 +903,7 @@ implements OnSharedPreferenceChangeListener
 	@Override
 	protected void onPause () {
 		super.onPause();
+		logger.debug("onPause()");
 		if ( mPreview != null ) {
 			mPreview.releaseCamera();
 		}
@@ -894,6 +919,7 @@ implements OnSharedPreferenceChangeListener
 	@Override
 	protected void onResume() {
 		super.onResume();
+		logger.debug("onResume()");
 		if ( mPreview != null ) {
 			mPreview.reclaimCamera();
 		}
@@ -971,6 +997,7 @@ implements OnSharedPreferenceChangeListener
 	 */
 	@Override 
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		logger.debug("onKeyDown(keyCode="+keyCode+")");
 		switch (keyCode) {
 			case KeyEvent.KEYCODE_BACK: {
 				//Handle the back button
@@ -1010,33 +1037,42 @@ implements OnSharedPreferenceChangeListener
 		Intent intent = null;
 		switch (item.getItemId()) {
 		case R.id.scma_settings:
+			logger.debug("Menu action: settings: begin");
 			// Toast.makeText(getApplicationContext(), "SCMA Settings menu", Toast.LENGTH_LONG).show();
 			intent = new Intent(getApplicationContext(), AppPreferenceActivity.class);
 			startActivityForResult(intent, RESULT_SETTINGS_ACTIVITY);
+			logger.debug("Menu action: settings: done");
 			return true;
 			
-		case R.id.reset_settings:			
+		case R.id.reset_settings:
+			logger.debug("Menu action: reset settings: begin");
 			resetSettings();
+			logger.debug("Menu action: reset settings: done");
 			return true;
 			
 		case R.id.calibration:
+			logger.debug("Menu action: calibration: begin");
 			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, true);
 			mPreview.takeCalibrationPicture( saveModeJPEG, saveModeRAW, mStorageDir );
 			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, false);
+			logger.debug("Menu action: calibration: done");
 			return true;
 			
 		case R.id.about_info:
-			            
+			logger.debug("Menu action: about: begin");			            
             intent = new Intent(getApplicationContext(), SplashActivity.class);
 			startActivity(intent);
+			logger.debug("Menu action: about: done");
 			return true;
 			
 		case R.id.itemCopyAssets: {
+			logger.debug("Copy assets: begin");
 			Thread t = new Thread(new Runnable() {
 				
 				@Override
 				public void run() {
-					copyTestAssets();					
+					copyTestAssets();
+					logger.debug("Copy assets: done");
 				}
 			});
 			t.run();
