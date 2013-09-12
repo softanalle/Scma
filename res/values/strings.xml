@@ -5,6 +5,10 @@
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
 
+    <string name="wait_loading">Please wait...</string>
+    
+    <string name="imageViewDescription">Image viewer component</string>
+    <string name="logoDescription">Logo image</string>
    
     <string name="poweron_label">Power on</string>
     <string name="poweroff_label">Power off</string>

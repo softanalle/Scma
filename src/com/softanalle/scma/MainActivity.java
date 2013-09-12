@@ -105,6 +105,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import android.app.admin.DevicePolicyManager;
@@ -341,12 +342,14 @@ implements OnSharedPreferenceChangeListener
 					mCurrentLedIndex = mFocusLedIndex;
 					
 					// make sure we don't go to screenlock while working
+					/*
 					PowerManager pm = (PowerManager) getApplicationContext().getSystemService( Context.POWER_SERVICE );
 					wl = pm.newWakeLock(
 							PowerManager.SCREEN_DIM_WAKE_LOCK
 							| PowerManager.ON_AFTER_RELEASE,
 							TAG);					
 					wl.acquire();
+					*/
 				} else {
 					powerState_ = false;
 					pictureButton_.setEnabled(false);
@@ -354,7 +357,7 @@ implements OnSharedPreferenceChangeListener
 					mLedState[mFocusLedIndex] = false;
 					
 					// release screen un-locker
-					wl.release();
+					//wl.release();
 
 				}                                               
 			}
@@ -399,9 +402,10 @@ implements OnSharedPreferenceChangeListener
 		enableUi(false);
 		Log.d(TAG, "onCreate - done");
 
+		this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
-	private PowerManager.WakeLock wl = null;
+//	private PowerManager.WakeLock wl = null;
 	
 	// private Thread waitThread;
 
@@ -880,7 +884,7 @@ implements OnSharedPreferenceChangeListener
 		}
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 		sp.unregisterOnSharedPreferenceChangeListener(this);
-        
+		this.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 	
 	/*
@@ -897,6 +901,7 @@ implements OnSharedPreferenceChangeListener
 		sp.registerOnSharedPreferenceChangeListener(this);
         
 		getSettings();
+		this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 	
 	

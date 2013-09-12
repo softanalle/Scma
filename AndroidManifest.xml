@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.softanalle.scma"
-    android:versionCode="16"
-    android:versionName="1.0" android:installLocation="internalOnly">
+    android:versionCode="18"
+    android:versionName="1.0.18" android:installLocation="internalOnly">
 
     <uses-permission android:name="android.permission.BLUETOOTH"/>
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -60,11 +60,9 @@
                 	<category android:name="android.intent.category.DEFAULT" />
                 	<action android:name="android.intent.action.QUICKBOOT_POWERON" />
         </intent-filter>
-		</receiver>        
-		<service
-            android:name="on.boot.completed.StarterService"
-            android:enabled="true"
-            android:exported="true" />
+		</receiver>
+         
+
     </application>
 
 </manifest>

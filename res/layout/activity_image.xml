@@ -5,6 +5,7 @@
 
 
     <ImageView
+        android:contentDescription="@string/imageViewDescription"
         android:id="@+id/imageView1"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
@@ -17,7 +18,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:text="Large Text"
+        android:text="@string/wait_loading"
         android:textColor="#ff0000"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 

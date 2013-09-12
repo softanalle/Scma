@@ -26,7 +26,7 @@ public class LedIndicator extends View {
 			
 			Color.WHITE,			
 			Color.YELLOW,
-			Color.BLACK,
+			Color.LTGRAY,
 			
 			Color.MAGENTA,			
 			Color.CYAN
@@ -48,7 +48,7 @@ public class LedIndicator extends View {
 	
 	protected static final int LED_POWER = 64;
 
-	private static final int mOffColor = Color.LTGRAY;
+	private static final int mOffColor = Color.BLACK;
 	private static final int POWER_COLOR = Color.GREEN;
 	
 	private final static int mLedCount = 8;
