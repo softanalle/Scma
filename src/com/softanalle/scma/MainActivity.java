@@ -597,6 +597,7 @@ implements OnSharedPreferenceChangeListener
 			mFocusOn = false;
 			
 			enableUi(true);
+			logger.debug("IOIO.setup() done");
 		}
 
 		
@@ -649,6 +650,8 @@ implements OnSharedPreferenceChangeListener
 			if ( doIOIOreset ) {
 				ioio_.softReset();
 				doIOIOreset = false;
+				
+				logger.debug("IOIO reset completed");
 			}
 			
 			led_.write( !powerState_ );
@@ -1065,6 +1068,10 @@ implements OnSharedPreferenceChangeListener
 			logger.debug("Menu action: about: done");
 			return true;
 			
+		case R.id.resetIOIO:
+			logger.debug("IOIO reset requested");
+			doIOIOreset = true;			
+			return true;
 		case R.id.itemCopyAssets: {
 			logger.debug("Copy assets: begin");
 			Thread t = new Thread(new Runnable() {
