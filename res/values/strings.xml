@@ -30,6 +30,9 @@
     <string name="focusbtn_label">Focus</string>
     <string name="mn_scma_label">Settings</string>
     <string name="mn_about_label">About&#8230;</string>
+    <string name="mn_changelog_label">Change Log</string>
+    <string name="mn_resetioio_label">Reset IOIO</string>
+    <string name="mn_copyassets_label">Copy Ass.</string>
     <string name="text_copyright">"&#169; All rights reserved by Tommi Rintala (softanalle@gmail.com) GPL 2.0 "</string>
     <string name="conf_filemode_label">Image format</string>
     <string name="conf_writejpeg_label">JPEG</string>
@@ -42,4 +45,8 @@
     <string name="conf_defaultpwm_label">LED default PWM value</string>
     <string name="conf_ledpwm_label">Led PWM value</string>
 
+    <string name="changelog_full_title">Change Log</string>
+    <string name="changelog_title">What\'s New</string>
+    <string name="changelog_ok_button">OK</string>
+    <string name="changelog_show_full">more...</string>
 </resources>

@@ -116,6 +116,8 @@ import android.app.admin.DevicePolicyManager;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+import sheetrock.panda.changelog.ChangeLog;
+
 public class MainActivity extends IOIOActivity 
 implements OnSharedPreferenceChangeListener 
  
@@ -412,9 +414,15 @@ implements OnSharedPreferenceChangeListener
 		enableUi(false);
 		Log.d(TAG, "onCreate - done");
 
+	    cl = new ChangeLog(this);
+	    if (cl.firstRun())
+	        cl.getLogDialog().show();
+		
 		this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
+	private ChangeLog  cl;
+	
 //	private PowerManager.WakeLock wl = null;
 	
 	// private Thread waitThread;
@@ -605,6 +613,8 @@ implements OnSharedPreferenceChangeListener
 		@Override
 		public void loop() throws ConnectionLostException, InterruptedException {
 		
+			ioio_.beginBatch();
+			try {
 			synchronized (lock_) {
 				if (!mShutdown) {
 					powout1_.write( powerState_ );
@@ -642,8 +652,12 @@ implements OnSharedPreferenceChangeListener
 					powout1_.write( powerState_ );
 					powout2_.write( powerState_ );
 				}
+				led_.write( !powerState_ );
 			}
-		
+			} finally {
+				ioio_.endBatch();
+			}
+			
 			/*
 			 *  if we need (for some reason) to do softreset to IOIO
 			 */
@@ -654,12 +668,10 @@ implements OnSharedPreferenceChangeListener
 				logger.debug("IOIO reset completed");
 			}
 			
-			led_.write( !powerState_ );
-
 			visualize(powerState_, mLedState);
 
-			// default 10ms
-			Thread.sleep(10);
+			// sleep, ie. give other threads time to respond for default 10ms
+			Thread.sleep(20);
 		}
 
 		/*
@@ -1071,6 +1083,10 @@ implements OnSharedPreferenceChangeListener
 		case R.id.resetIOIO:
 			logger.debug("IOIO reset requested");
 			doIOIOreset = true;			
+			return true;
+			
+		case R.id.changelog_full:
+			cl.getFullLogDialog().show();
 			return true;
 		case R.id.itemCopyAssets: {
 			logger.debug("Copy assets: begin");

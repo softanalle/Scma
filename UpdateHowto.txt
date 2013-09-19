@@ -1,0 +1,18 @@
+Uses:   http://code.google.com/p/android-change-log/
+
+
+Abstract explanation:
+
+    First input HTML as writing a web page until the body-Tag. Here you can enter CSS for div.title, div.subtitle, div.freetext and div.list (see below) and any other elements you should be using, e.g. links.
+    To begin a section for any version start the line with a $ sign followed by the version. This line will not be displayed in the dialog but it is important for Android Change Log for knowing what to display and what not. It corresponds to the versionName in the AndroidManifest.xml.
+    % begins a line of a version section title.
+    _ begins a line of a version section subtitle.
+    ! begins a line of free text.
+    # begins a line within a numbered list.
+    * begins a line within a bullet list.
+    Lines beginning without any of these signs (for example the HTML at the beginning of changelog.txt) will be used as they are.
+    You can use HTML anywhere you want.
+    Insert a line containing "$ END_OF_CHANGE_LOG" after the last version section.
+    After that you should enter HTML again, at least the end-body-tag and the end-html-tag.
+    You can indent lines, but you don't have to.
+    You don't need to use these special symbols, you can write your log completely in HTML. Only the lines beginning with $-signs are mandatory if you want to be able to only display what's new instead of a full change log. 

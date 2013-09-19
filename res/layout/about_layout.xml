@@ -31,6 +31,8 @@
         android:layout_below="@+id/textAppLabel"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="34dp"
+        android:scaleX="2.0"
+        android:scaleY="2.0"
         android:src="@drawable/ic_launcher" />
 
     <TextView
