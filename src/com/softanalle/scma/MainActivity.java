@@ -102,19 +102,17 @@ import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
 //import android.content.SharedPreferences;
 //import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.util.Log;
+//import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
+//import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 
-import android.app.admin.DevicePolicyManager;
-
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
+//import org.apache.commons.io.IOUtils;
 
 import sheetrock.panda.changelog.ChangeLog;
 
@@ -153,6 +151,9 @@ implements OnSharedPreferenceChangeListener
 	private boolean saveModeJPEG = false;
 	private boolean saveModeRAW = false;
 	private int mCurrentLedIndex = 0;
+	
+	private boolean mImageSequenceComplete = false;
+	
 	public final String[] mImageSuffix = { "GREEN", "BLUE",  "RED", "WHITE", "YELLOW", "NIR", "OTHER" };
 
 	private final int defaultPulseWidth = 500; // PWM pulse width
@@ -256,6 +257,7 @@ implements OnSharedPreferenceChangeListener
 			// ok, we have camera
 			Log.i(TAG, "Device has camera");
 		} else {
+			logger.error("Unable to find camera");
 			Toast.makeText(getApplicationContext(), "Camera is missing!", Toast.LENGTH_LONG).show();
 		}
 		
@@ -265,35 +267,39 @@ implements OnSharedPreferenceChangeListener
 		
 		mPreview = new Preview(this);
 
-		Log.d(TAG, "Preview created");
+		logger.debug("Created Preview -object");
+		//Log.d(TAG, "Preview created");
 		
 		
 		
 		mPreview.startPreview();
+		logger.debug("Preview object started");
 		
 		if ( tmp == null ) {
-			Log.d(TAG, "Layout IS NULL");
+			logger.debug(TAG + ": Layout IS NULL");
 			Toast.makeText(getApplicationContext(),"Layout is NULL: ", Toast.LENGTH_LONG).show();
-		} else {
+		//} else {
 		
-			Log.d(TAG, "Layout found");
+			//Log.d(TAG, "Layout found");
 		} 		
 			
 		
 		if ( mPreview != null ) {
-			Log.d(TAG, "Will add preview");
+			logger.debug( "Will add preview");
 			try {
 				tmp.addView(mPreview);
 				//tmp.addView(mPreview);
 			} catch (Exception e) {
+				logger.error("onCreate(): got exception: " + e.toString());
 				Toast.makeText(getApplicationContext(),"Got exception: " + e.toString(), Toast.LENGTH_LONG).show();
+				
 			}
 
 		} else {
-			Log.d(TAG, "Preview creation FAILED");
+			logger.error("onCreate(): Preview creation FAILED");
 		}
 
-		Log.d(TAG, "Added preview");
+		logger.debug("onCreate(): Added preview");
 		
 		ledIndicator_.bringToFront();
 		toggleButton_.bringToFront();
@@ -392,6 +398,8 @@ implements OnSharedPreferenceChangeListener
 		
 		pictureButton_.setEnabled(false);
 
+		logger.debug("onCreate(): controls initialized");
+		
 		Log.d(TAG, "onCreate'd");
 		mDPM = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 		Log.d(TAG, "  getCameraDisabled(): " + mDPM.getCameraDisabled(null));
@@ -418,6 +426,7 @@ implements OnSharedPreferenceChangeListener
 	    if (cl.firstRun())
 	        cl.getLogDialog().show();
 		
+	    // set windows flags to keep full screen
 		this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
@@ -455,6 +464,8 @@ implements OnSharedPreferenceChangeListener
 
 	private void takeColorSeries() {
 		logger.debug("takeColorSeries()");
+		logger.debug("imageSequence started");
+		
 		mLedState[mFocusLedIndex] = false;
 		mPulseWidth[mFocusLedIndex] = mDefaultPulseWidth[mFocusLedIndex];
 		
@@ -474,7 +485,12 @@ implements OnSharedPreferenceChangeListener
 				String imageFilename = mStorageDir + "/" + mImagePrefix + "_" + mImageSuffix[index];
 	
 				mPreview.startPreview();
+				
+				logger.debug("Take picture: " + imageFilename);
+				logger.debug("--store JPG: " + saveModeJPEG);
+				logger.debug("--store RAW: " + saveModeRAW);
 				mPreview.takePicture(saveModeJPEG, saveModeRAW, imageFilename);
+				
 				if ( saveModeJPEG ) {
 					Thread.sleep(mRawPictureDelay);
 				}
@@ -484,9 +500,7 @@ implements OnSharedPreferenceChangeListener
 				if ( saveModeRAW ) {
 					Thread.sleep(mRawPictureDelay);
 				}
-				
-	
-								
+											
 				Thread.sleep(mCameraRetryDelay);
 				
 				mPulseWidth[index] = 0;
@@ -502,32 +516,39 @@ implements OnSharedPreferenceChangeListener
 			}
 	
 			powerState_ = false;
-			runOnUiThread(new Runnable() {
-				final String image_name = mImagePrefix;
-				@Override
-				public void run() {
-					ledIndicator_.setPowerState(false);
-					toggleButton_.setChecked(false);
-					pictureButton_.setEnabled(false);
-					focusButton_.setEnabled(true);
-					powerLedsOff();
-					//mPreview.startPreview();
-
-					Intent intent = new Intent(getApplicationContext(), ImageActivity.class);
-					intent.putExtra( ARG_IMAGE_PREFIX, image_name );
-					intent.putExtra( ARG_WORKDIR, mStorageDir );
-					startActivityForResult( intent, RESULT_IMAGE_ACTIVITY );
-					
-
-				}
-			});			
-			
+			mImageSequenceComplete = true;
+			logger.debug("Image sequence completed.");
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
 		
 	}
 	
+	/**
+	 * Create the activity for area selecting
+	 */
+	private void openImageAreaSelector() {	
+		logger.debug("openImageAreaSelector()");
+		runOnUiThread(new Runnable() {
+			final String image_name = mImagePrefix;
+			@Override
+			public void run() {
+				ledIndicator_.setPowerState(false);
+				toggleButton_.setChecked(false);
+				pictureButton_.setEnabled(false);
+				focusButton_.setEnabled(true);
+				powerLedsOff();
+				//mPreview.startPreview();
+
+				Intent intent = new Intent(getApplicationContext(), ImageActivity.class);
+				intent.putExtra( ARG_IMAGE_PREFIX, image_name );
+				intent.putExtra( ARG_WORKDIR, mStorageDir );
+				startActivityForResult( intent, RESULT_IMAGE_ACTIVITY );
+				
+			}
+		});			
+		mImageSequenceComplete = false;
+	}
 	
 	private void powerLedsOff() {
 		logger.debug("powerLedsOff()");
@@ -670,6 +691,10 @@ implements OnSharedPreferenceChangeListener
 			
 			visualize(powerState_, mLedState);
 
+			if ( mImageSequenceComplete ) {
+				openImageAreaSelector();
+			}
+			
 			// sleep, ie. give other threads time to respond for default 10ms
 			Thread.sleep(20);
 		}
@@ -813,12 +838,21 @@ implements OnSharedPreferenceChangeListener
 		File tmp = Environment.getExternalStorageDirectory();
 		try {
 			mStorageDir = new File(tmp.getCanonicalPath() + "/SCM").getCanonicalPath();
+		
 		} catch (IOException e1) {
 			String msg = "";
 			if ( e1.getMessage() != null ) {
 				msg = e1.getMessage();
 			}
+			logger.error(e1.toString() + " : " + msg);
 			showError(e1.toString(), msg);
+		} catch (Exception e) {
+			String msg = "";
+			if ( e.getMessage() != null ) {
+				msg = e.getMessage();
+			}
+			logger.error(e.toString());
+			logger.error(msg);
 		}
 		
 		try {
@@ -827,7 +861,8 @@ implements OnSharedPreferenceChangeListener
 				saveDir.mkdir();
 			}
 		} catch (Exception e) {
-			Log.d(TAG, "Error in creation of savedir");
+			logger.error("Error in creation of StorageDIR: " + e.toString());
+			//Log.d(TAG, "Error in creation of savedir");
 		}
 		
         try {
@@ -852,8 +887,10 @@ implements OnSharedPreferenceChangeListener
         	
         } catch (ClassCastException cce) {
         	Toast.makeText(getApplicationContext(), "Invalid setting for '" + dump + "': " + cce, Toast.LENGTH_LONG).show();
+        	logger.error("Invalid setting for '" + dump + "': " + cce);
         } catch (Exception e) {
-        	Toast.makeText(getApplicationContext(), "Exeption: " + e, Toast.LENGTH_LONG).show();        	
+        	Toast.makeText(getApplicationContext(), "Exeption: " + e, Toast.LENGTH_LONG).show();
+        	logger.error("Exeption: " + e);
         }
 
 	}

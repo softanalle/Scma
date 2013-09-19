@@ -19,16 +19,20 @@
     </style>
   </head>
   <body>
-$ 1.21
-  % Version 1.21
+$ 1.0.21
+  % Version 1.0.21
   _ 2013-09-20
-    * Now with <a href="http://code.google.com/p/android-change-log/">Android Change Log</a>! 
+    * Apply IOIO batch statement for writing states in one-write, instead of several sequential writes.
+    * Improved exception handling
+    * Added more logging
+    * Now with <a href="http://code.google.com/p/android-change-log/">Android Change Log</a>, created by Karsten Priegnitz! 
 
-$ 1.20
-  % Version 1.20
+$ 1.0.20
+  % Version 1.0.20
   _ 2013-09-14
     * Added 'reset IOIO' -menu command
-
+    * Application logging with micrologger added, the logfile can be found from root of SD card (microlog.txt -file)
+    
 $ END_OF_CHANGE_LOG
   </body>
 </html>
