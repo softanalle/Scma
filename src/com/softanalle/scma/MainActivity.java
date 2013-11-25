@@ -22,6 +22,7 @@ package com.softanalle.scma;
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import android.net.Uri;
 import android.os.Bundle;
 // import android.app.Activity;
 // import android.app.Application;
@@ -114,7 +115,7 @@ import android.widget.FrameLayout;
 import org.apache.commons.io.FileUtils;
 //import org.apache.commons.io.IOUtils;
 
-import sheetrock.panda.changelog.ChangeLog;
+//import sheetrock.panda.changelog.ChangeLog;
 
 public class MainActivity extends IOIOActivity 
 implements OnSharedPreferenceChangeListener 
@@ -157,7 +158,7 @@ implements OnSharedPreferenceChangeListener
 	public final String[] mImageSuffix = { "GREEN", "BLUE",  "RED", "WHITE", "YELLOW", "NIR", "OTHER" };
 
 	private final int defaultPulseWidth = 500; // PWM pulse width
-	private final int mLedFlashTime = 30; // milliseconds the led takes to raise/shutdown
+	//private final int mLedFlashTime = 30; // milliseconds the led takes to raise/shutdown
 	private final int mLedCount = 6; // how many leds actually there are!
 
 	private int mFocusLedIndex = 2; // led INDEX of focus color; default=3  
@@ -421,16 +422,16 @@ implements OnSharedPreferenceChangeListener
 		*/
 		enableUi(false);
 		Log.d(TAG, "onCreate - done");
-
+/*
 	    cl = new ChangeLog(this);
 	    if (cl.firstRun())
 	        cl.getLogDialog().show();
-		
+	*/	
 	    // set windows flags to keep full screen
 		this.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 	}
 
-	private ChangeLog  cl;
+	//private ChangeLog  cl;
 	
 //	private PowerManager.WakeLock wl = null;
 	
@@ -1123,7 +1124,10 @@ implements OnSharedPreferenceChangeListener
 			return true;
 			
 		case R.id.changelog_full:
-			cl.getFullLogDialog().show();
+			
+			intent = new Intent(Intent.ACTION_VIEW,Uri.parse("http://www.delektre.com/Scma/"));
+			startActivity(intent);
+            
 			return true;
 		case R.id.itemCopyAssets: {
 			logger.debug("Copy assets: begin");
