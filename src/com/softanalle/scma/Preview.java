@@ -169,8 +169,10 @@ SurfaceView.OnClickListener */ {
 
 				whiteBalanceModes_ = params.getSupportedWhiteBalance();
 				supportedPictureFormats_ = params.getSupportedPictureFormats();
-
-				params.set("rawsave-mode", "1");
+				
+				
+				//params.set("rawsave-mode", "1");
+					
 
 				// no compression!
 				params.setJpegQuality(100);
@@ -409,7 +411,14 @@ SurfaceView.OnClickListener */ {
 	public void takePicture(final boolean doJPEG, final boolean doRAW, final String filename) {
 		PictureCallback jpegCallback = null;
 		PictureCallback rawCallback = null;		
+		
 		if ( doJPEG ) {
+			if ( doRAW ) {
+				Camera.Parameters parameters = camera.getParameters();
+				parameters.set("rawsave-mode",  "1");
+				parameters.set("rawfname",  "/mnt/sdcard/test.raw");
+				camera.setParameters(parameters);
+			}
 			//startPreview();
 			jpegCallback = new PictureCallback() {
 
@@ -425,7 +434,7 @@ SurfaceView.OnClickListener */ {
 				}
 			};
 		}
-		
+		/*
 		if ( doRAW ) {
 			if ( doJPEG) { startPreview(); }
 			rawCallback = new PictureCallback() {
@@ -447,7 +456,7 @@ SurfaceView.OnClickListener */ {
 				}
 			};
 		}
-		
+		*/
 		camera.takePicture(null,  rawCallback, jpegCallback);
 		isPreview_ = false;	
 	}

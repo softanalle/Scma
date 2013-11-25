@@ -1,38 +1,17 @@
-<html>
-  <head>
-    <style type='text/css'>
-      a            { color:#a0a0e0 }
-      div.title    { 
-          color:#C0F0C0; 
-          font-size:1.2em; 
-          font-weight:bold; 
-          margin-top:1em; 
-          margin-bottom:0.5em; 
-          text-align:center }
-      div.subtitle { 
-          color:#C0F0C0; 
-          font-size:0.8em; 
-          margin-bottom:1em; 
-          text-align:center }
-      div.freetext { color:#F0F0F0 }
-      div.list     { color:#C0C0F0 }
-    </style>
-  </head>
-  <body>
-$ 1.0.21
-  % Version 1.0.21
-  _ 2013-09-20
-    * Apply IOIO batch statement for writing states in one-write, instead of several sequential writes.
-    * Improved exception handling
-    * Added more logging
-    * Now with <a href="http://code.google.com/p/android-change-log/">Android Change Log</a>, created by Karsten Priegnitz! 
+Changelog
 
-$ 1.0.20
-  % Version 1.0.20
-  _ 2013-09-14
+1.0.22  Tommi Rintala, 2013-11-25
+   * Removed changelog -class due to too large code size
+   * Changed changelog to open changelog file with browser
+   * save RAW image inside JPEG envelope
+   
+1.0.21 Tommi Rintala, 2013-09-20
+   * Apply IOIO batch statement for writing states in one-write, instead of several sequential writes.
+   * Improved exception handling
+   * Added more logging
+   * Now with <a href="http://code.google.com/p/android-change-log/">Android Change Log</a>, created by Karsten Priegnitz! 
+
+1.0.20 Tommi Rintala, 2013-09-14
     * Added 'reset IOIO' -menu command
     * Application logging with micrologger added, the logfile can be found from root of SD card (microlog.txt -file)
     
-$ END_OF_CHANGE_LOG
-  </body>
-</html>

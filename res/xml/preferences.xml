@@ -5,12 +5,12 @@
             android:title="@string/conf_writejpeg_label" 
             android:defaultValue="true" 
             android:summaryOn="Save JPEG image files" 
-            android:summaryOff="Don't save JPEG image files"/>
+            android:summaryOff="Don't save JPEG image files" android:disableDependentsState="true"/>
         <CheckBoxPreference android:key="conf_write_raw" 
             android:title="@string/conf_writeraw_label" 
             android:summaryOn="Save RAW image files" 
             android:defaultValue="false" 
-            android:summaryOff="Don't save RAW image files"/>
+            android:summaryOff="Don't save RAW image files" android:dependency="@string/conf_writejpeg_label"/>
     </PreferenceCategory>
     
     <PreferenceCategory 

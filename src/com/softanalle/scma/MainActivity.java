@@ -1125,7 +1125,7 @@ implements OnSharedPreferenceChangeListener
 			
 		case R.id.changelog_full:
 			
-			intent = new Intent(Intent.ACTION_VIEW,Uri.parse("http://www.delektre.com/Scma/"));
+			intent = new Intent(Intent.ACTION_VIEW,Uri.parse("http://www.delektre.com/Scma/Changelog.txt"));
 			startActivity(intent);
             
 			return true;
