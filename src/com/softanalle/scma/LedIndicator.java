@@ -14,7 +14,7 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.util.AttributeSet;
 import android.util.Log;
-// import android.widget.TextView;
+
 
 public class LedIndicator extends View {
 	private boolean isInitialized = false;

@@ -29,30 +29,19 @@ package com.softanalle.scma;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.acl.LastOwnerException;
 import java.util.List;
 
 import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ImageFormat;
-import android.graphics.Paint;
 import android.hardware.Camera;
-import android.hardware.Camera.AutoFocusCallback;
-import android.hardware.Camera.CameraInfo;
 import android.hardware.Camera.Parameters;
 import android.hardware.Camera.PictureCallback;
 import android.hardware.Camera.ShutterCallback;
 import android.hardware.Camera.Size;
-import android.media.audiofx.BassBoost.Settings;
-//import android.hardware.Camera.PictureCallback;
-//import android.hardware.Camera.PreviewCallback;
-//import android.os.Environment;
 import android.util.Log;
 import android.view.SurfaceView;
 import android.view.SurfaceHolder;
 import android.widget.Toast;
-//import android.view.View;
 
 public class Preview extends SurfaceView 
 implements SurfaceHolder.Callback
@@ -97,6 +86,7 @@ SurfaceView.OnClickListener */ {
 	 */
 	public void surfaceCreated(SurfaceHolder holder) {
 		//Log.d(TAG, "surfaceCreated(holder)");
+		MainActivity.logger.debug("preview.surfaceCreated()", null);
 		if ( camera == null ) {
 			Log.d(TAG, "-camera was null, opening");
 			// camera = getCameraInstance();
@@ -122,6 +112,7 @@ SurfaceView.OnClickListener */ {
 	 */
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		//Log.d(TAG, "surfaceDestroyed(holder)");
+		MainActivity.logger.debug("preview.surfaceDestroyed()", null);
 		if ( camera != null ) {
 			Log.d(TAG, "-camera was not null, releasing");
 			stopPreview();
@@ -138,7 +129,7 @@ SurfaceView.OnClickListener */ {
 	 * @see android.view.SurfaceHolder.Callback#surfaceChanged(android.view.SurfaceHolder, int, int, int)
 	 */
 	public void surfaceChanged(SurfaceHolder holder, int format, int height, int width) {
-
+		MainActivity.logger.debug("preview.surfaceChanged()", null);
 		if (mHolder.getSurface() == null){
 			// preview surface does not exist
 			return;
@@ -222,9 +213,12 @@ SurfaceView.OnClickListener */ {
 				isReady_ = true;
 			} else {
 				Log.e(TAG, "-camera is still null, failed to retrieve");
+				MainActivity.logger.error("-camera is still null, failed to retrieve");
 			}
 		} catch (Exception e) {
+			MainActivity.logger.error("Error starting camera preview: " + e.getMessage());
 			Log.e(TAG, "Error starting camera preview: " + e.getMessage());
+			
 		}
 	}
 
@@ -233,19 +227,21 @@ SurfaceView.OnClickListener */ {
 	 * Get the image filename suffix
 	 * @return
 	 */
+	/*
 	public String getImageFilenameSuffix() {
 		return mImageFilenameSuffix;
 	}
-
+*/
 	/**
 	 * Set the image filename suffix
 	 * @param imageFilenameSuffix
 	 */
+	/*
 	public void setImageFilenameSuffix(String imageFilenameSuffix) {
 		mImageFilenameSuffix = imageFilenameSuffix;
 	}
 
-	
+	*/
 	/**
 	 * Is the control ready 
 	 * @return
@@ -256,12 +252,14 @@ SurfaceView.OnClickListener */ {
 	
 	/** A safe way to get an instance of the Camera object. */
 	public static Camera getCameraInstance(){
+		MainActivity.logger.debug("preview.getCameraInstance()");
 	    Camera c = null;
 	    try {
 	        c = Camera.open(); // attempt to get a Camera instance
 	    }
 	    catch (Exception e){
 	        // Camera is not available (in use or does not exist)
+	    	MainActivity.logger.error("preview.getCameraInstance() : camera not available");
 	    }
 	    return c; // returns null if camera is unavailable
 	}
@@ -270,6 +268,7 @@ SurfaceView.OnClickListener */ {
 	 * Activate camera preview
 	 */
 	public void startPreview() {
+		MainActivity.logger.debug("startPreview");
 		if ( camera != null && !isPreview_) {
 			camera.startPreview();
 			isPreview_ = true;
@@ -280,6 +279,7 @@ SurfaceView.OnClickListener */ {
 	 * Stop camera preview
 	 */
 	public void stopPreview() {
+		MainActivity.logger.debug("stopPreview");
 		if ( camera != null ) {
 			camera.stopPreview();
 			isPreview_ = false;
@@ -290,10 +290,12 @@ SurfaceView.OnClickListener */ {
 	 * @param cb autofocus callback function
 	 */
 	protected void doFocus(Camera.AutoFocusCallback cb) {
+		MainActivity.logger.debug("preview.doFocus(Camera.AutoFocusCallback)");
 		camera.autoFocus(cb);
 	}
 
 	protected void doFocus() {
+		MainActivity.logger.debug("preview.doFocus()");
 		camera.autoFocus(null);
 	}
 	
@@ -324,6 +326,7 @@ SurfaceView.OnClickListener */ {
 	 */
 	private boolean writeImageToDisc(String filename, byte[] data) {
 		//Log.d(TAG, "writeImageToDisc - begin");
+		MainActivity.logger.debug("preview.writeImageToDisc(" + filename + ", " + data.length + " bytes)");
 		FileOutputStream outStream = null;
 		try {			
 			outStream = new FileOutputStream( filename );			
@@ -335,6 +338,7 @@ SurfaceView.OnClickListener */ {
 			e.printStackTrace();
 			return false;
 		} catch (IOException e) {
+			MainActivity.logger.error("preview.writeImageToDisc(): " + e.toString());
 			e.printStackTrace();
 			return false;
 		} finally {
@@ -349,27 +353,37 @@ SurfaceView.OnClickListener */ {
 	 * @param raw
 	 * @param storagePath
 	 */
-	public void takeCalibrationPicture(final boolean jpg, final boolean raw, final String storagePath) {
+	public void takeCalibrationPicture(final boolean raw, final String storagePath) {
 		PictureCallback jpegCallback = null;
 		PictureCallback rawCallback = null;
+		MainActivity.logger.debug("preview.takeCalibrationPicture(" + raw + ", " + storagePath + ")");
 		final String filename = storagePath + "/whiteref";
 		if ( camera != null ) {
 			startPreview();
-			if ( jpg ) {
-				jpegCallback = new PictureCallback() {
-
-					private String mJpegFilename = filename;
-					@Override public void onPictureTaken(byte[] data, Camera camera) {
-						try {
-							writeImageToDisc(mJpegFilename + ".JPG", data);					
-							Thread.sleep(200);
-						} catch (InterruptedException e) {
-							Toast.makeText(getContext(), "Error while saving JPEG file: " + e, Toast.LENGTH_LONG).show();
-						}
-					}
-				};
+			
+			if ( raw ) {
+				// set the raw-info data to image
+				Camera.Parameters parameters = camera.getParameters();
+				parameters.set("rawsave-mode",  "1");
+				parameters.set("rawfname",  filename + ".raw");
+				camera.setParameters(parameters);
 			}
+			
 
+			jpegCallback = new PictureCallback() {
+
+				private String mJpegFilename = filename;
+				@Override public void onPictureTaken(byte[] data, Camera camera) {
+					try {
+						writeImageToDisc(mJpegFilename + ".JPG", data);					
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+						Toast.makeText(getContext(), "Error while saving JPEG file: " + e, Toast.LENGTH_LONG).show();
+					}
+				}
+			};
+
+/*
 			if ( raw ) {			
 				rawCallback = new PictureCallback() {
 					private String mRawFilename = filename;
@@ -391,7 +405,8 @@ SurfaceView.OnClickListener */ {
 				};
 
 			}
-			camera.takePicture(null,  rawCallback, null, jpegCallback);
+			*/
+			camera.takePicture(null,  rawCallback, jpegCallback);
 			isPreview_ = false;
 			try {
 				Thread.sleep(1000);
@@ -408,32 +423,32 @@ SurfaceView.OnClickListener */ {
 	 * @param doRAW store RAW image
 	 * @param filename the full filename for image, without suffix (.jpg, .raw)
 	 */
-	public void takePicture(final boolean doJPEG, final boolean doRAW, final String filename) {
+	public void takePicture(final boolean doRAW, final String filename) {
 		PictureCallback jpegCallback = null;
 		PictureCallback rawCallback = null;		
 		
-		if ( doJPEG ) {
-			if ( doRAW ) {
-				Camera.Parameters parameters = camera.getParameters();
-				parameters.set("rawsave-mode",  "1");
-				parameters.set("rawfname",  "/mnt/sdcard/test.raw");
-				camera.setParameters(parameters);
-			}
-			//startPreview();
-			jpegCallback = new PictureCallback() {
-
-				private String mJpegFilename = filename;
-				@Override public void onPictureTaken(byte[] data, Camera camera) {
-					try {
-						writeImageToDisc(mJpegFilename + ".JPG", data);
-					
-						Thread.sleep(200);
-					} catch (InterruptedException e) {
-						Toast.makeText(getContext(), "Error while saving JPEG file: " + e, Toast.LENGTH_LONG).show();
-					}
-				}
-			};
+		//if ( doJPEG ) {
+		if ( doRAW ) {
+			Camera.Parameters parameters = camera.getParameters();
+			parameters.set("rawsave-mode",  "1");
+			parameters.set("rawfname",  filename + ".raw");
+			camera.setParameters(parameters);
 		}
+		//startPreview();
+		jpegCallback = new PictureCallback() {
+
+			private String mJpegFilename = filename;
+			@Override public void onPictureTaken(byte[] data, Camera camera) {
+				try {
+					writeImageToDisc(mJpegFilename + ".JPG", data);
+
+					Thread.sleep(200);
+				} catch (InterruptedException e) {
+					Toast.makeText(getContext(), "Error while saving JPEG file: " + e, Toast.LENGTH_LONG).show();
+				}
+			}
+		};
+		//}
 		/*
 		if ( doRAW ) {
 			if ( doJPEG) { startPreview(); }
@@ -478,6 +493,7 @@ SurfaceView.OnClickListener */ {
 	 * release camera handler, called on application onResume()
 	 */
 	public void releaseCamera() {
+		MainActivity.logger.debug("preview.releaseCamera()");
 		if ( camera != null ) {
 			camera.release();
 			camera = null;
@@ -488,6 +504,7 @@ SurfaceView.OnClickListener */ {
 	 * reclaim camera, used usually on application onPause()
 	 */
 	public Camera reclaimCamera() {
+		MainActivity.logger.debug("preview.reclaimCamera()");
 		if ( camera == null ) {
 			camera = getCameraInstance();
 			if ( camera == null ) {

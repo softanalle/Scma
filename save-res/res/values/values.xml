@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+     <string-array name="led_colors">
+        <item>Green</item>
+        <item>Blue</item>
+        <item>Red</item>
+        <item>White</item>
+        <item>Yellow</item>
+        <item>NIR</item>
+    </string-array>
+    <string-array name="led_indexes">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+    </string-array>
+    <!-- 
+    <string-array name="led_indexes">
+        <item>RED</item>
+        <item>GREEN</item>
+        <item>BLUE</item>
+        <item>WHITE</item>
+        <item>NIR</item>
+        <item>YELLOW</item>
+    </string-array>
+     -->
+    <integer-array name="image_formats">
+        <item>256</item>
+        <item>17</item>
+        <item>4</item>
+    </integer-array>
+        
+    <string-array name="image_format_labels">
+        <item>JPEG</item>
+        <item>NV21</item>
+        <item>RGB 565</item>
+    </string-array>
+
+    <item format="string" name="pref_pulsewidth_default" type="string">500</item>
+    
+    <item format="string" name="pref_focusled_color" type="string">3</item>
+    
+    <string-array name="scale_factors">
+        <item>2</item>
+        <item>4</item>
+        <item>8</item>
+        <item>16</item>
+    </string-array>
+    
+    <string-array name="scale_factor_labels">
+        <item>&#189;</item>
+        <item>&#188;</item>
+        <item>1/8</item>
+        <item>1/16</item>
+    </string-array>    
+</resources>

@@ -5,8 +5,6 @@ package com.softanalle.scma;
 
 import android.app.Activity;
 import android.content.Intent;
-// import android.content.pm.ApplicationInfo;
-// import android.os.Build.VERSION;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.TextView;
@@ -25,7 +23,7 @@ public class SplashActivity extends Activity {
 		setContentView(R.layout.about_layout);
 
 		TextView topText = (TextView) findViewById(R.id.textTop);
-		topText.setText("1.0");
+		topText.setText(R.string.app_version_string);
 		
 		new Handler().postDelayed(new Runnable() {
 

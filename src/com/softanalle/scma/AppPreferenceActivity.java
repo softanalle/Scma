@@ -12,9 +12,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-import com.softanalle.scma.MainActivity;
-import com.softanalle.scma.R;
-
 /**
  * 
  */

@@ -24,16 +24,9 @@ package com.softanalle.scma;
 
 import android.net.Uri;
 import android.os.Bundle;
-// import android.app.Activity;
-// import android.app.Application;
 import android.view.Menu;
 
 import java.io.File;
-// import java.io.FileNotFoundException;
-// import java.io.FileOutputStream;
-// import java.io.IOException;
-
-//import ioio.lib.api.AnalogInput;
 import ioio.lib.api.DigitalOutput;
 import ioio.lib.api.IOIO;
 import ioio.lib.api.PwmOutput;
@@ -41,26 +34,13 @@ import ioio.lib.api.exception.ConnectionLostException;
 import ioio.lib.util.BaseIOIOLooper;
 import ioio.lib.util.IOIOLooper;
 import ioio.lib.util.android.IOIOActivity;
-// import android.annotation.TargetApi;
+
 import android.app.admin.DevicePolicyManager;
 import android.hardware.Camera;
 import android.hardware.Camera.AutoFocusCallback;
-import android.hardware.Camera.PictureCallback;
-import android.hardware.Camera.ShutterCallback;
-//import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
-import android.os.PowerManager;
-import android.text.Layout;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
-//import android.widget.SeekBar;
-//import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
@@ -68,44 +48,26 @@ import android.widget.ToggleButton;
 import com.google.code.microlog4android.Logger;
 import com.google.code.microlog4android.LoggerFactory;
 import com.google.code.microlog4android.config.PropertyConfigurator;
-//import com.softanalle.scmctrls.LedIndicator;
-//import com.softanalle.previewtest.Preview;
 import com.softanalle.scma.R;
 
 
 // camera stuff
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.concurrent.ThreadPoolExecutor;
 
-import android.hardware.Camera;
-import android.hardware.Camera.PictureCallback;
-import android.hardware.Camera.ShutterCallback;
-import android.os.Bundle;
-import android.os.Environment;
 import android.preference.PreferenceManager;
-//import android.preference.Preference;
-//import android.preference.PreferenceFragment;
-//import android.preference.PreferenceManager;
-import android.app.Activity;
+
+
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-import android.content.SyncResult;
+
 import android.content.pm.PackageManager;
 import android.content.res.AssetManager;
-//import android.content.SharedPreferences;
-//import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
-//import android.util.Log;
 import android.view.KeyEvent;
-//import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -113,9 +75,6 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 
 import org.apache.commons.io.FileUtils;
-//import org.apache.commons.io.IOUtils;
-
-//import sheetrock.panda.changelog.ChangeLog;
 
 public class MainActivity extends IOIOActivity 
 implements OnSharedPreferenceChangeListener 
@@ -149,9 +108,12 @@ implements OnSharedPreferenceChangeListener
 	//protected final String FILEMODE_RAW = "raw";
 
 	volatile boolean mShutdown = false;
-	private boolean saveModeJPEG = false;
+	//private boolean saveModeJPEG = false;
 	private boolean saveModeRAW = false;
 	private int mCurrentLedIndex = 0;
+	
+	// delay for IOIO looper
+	private static int delayCounter = 0;
 	
 	private boolean mImageSequenceComplete = false;
 	
@@ -178,7 +140,7 @@ implements OnSharedPreferenceChangeListener
 	private ToggleButton toggleButton_;
 	private static LedIndicator ledIndicator_;
 	private Button pictureButton_, focusButton_;
-	private int focusPulseWidth_ = defaultFocusPulseWidth;
+	//private int focusPulseWidth_ = defaultFocusPulseWidth;
 
 	public static String mStorageDir = "n/a";	
 
@@ -205,7 +167,7 @@ implements OnSharedPreferenceChangeListener
 	public static final String KEY_PREF_NIR_PULSEWIDTH = "conf_nir_pwm";
 	
 	public static final String KEY_PREF_FOCUS_PULSEWIDTH = "conf_focus_pwm";
-	public static final String KEY_PREF_SAVE_JPEG = "conf_write_jpeg";
+//	public static final String KEY_PREF_SAVE_JPEG = "conf_write_jpeg";
 	public static final String KEY_PREF_SAVE_RAW = "conf_write_raw";
 
 	public static final String KEY_PREF_PREVIEW_SCALE = "conf_preview_scale";
@@ -230,7 +192,7 @@ implements OnSharedPreferenceChangeListener
 	
     private Object lock_ = new Object();
     
-    private static final Logger logger = LoggerFactory.getLogger();
+    protected static final Logger logger = LoggerFactory.getLogger();
     
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -488,14 +450,14 @@ implements OnSharedPreferenceChangeListener
 				mPreview.startPreview();
 				
 				logger.debug("Take picture: " + imageFilename);
-				logger.debug("--store JPG: " + saveModeJPEG);
-				logger.debug("--store RAW: " + saveModeRAW);
-				mPreview.takePicture(saveModeJPEG, saveModeRAW, imageFilename);
-				
+				//logger.debug("--store JPG: " + saveModeJPEG);
+				logger.debug("--store RAW info: " + saveModeRAW);
+				mPreview.takePicture(saveModeRAW, imageFilename);
+				/*
 				if ( saveModeJPEG ) {
 					Thread.sleep(mRawPictureDelay);
 				}
-				
+				*/
 				// Thread.sleep(mLedWaitDelay);
 				
 				if ( saveModeRAW ) {
@@ -523,6 +485,11 @@ implements OnSharedPreferenceChangeListener
 			e.printStackTrace();
 		}
 		
+		if ( mImageSequenceComplete ) {
+			openImageAreaSelector();
+		}
+		
+
 	}
 	
 	/**
@@ -621,7 +588,6 @@ implements OnSharedPreferenceChangeListener
 			pwmOutput5_.setPulseWidth( 0 );
 			pwmOutput6_.setPulseWidth( 0 );
 						
-
 			
 			mFocusCount = 0;
 			mFocusOn = false;
@@ -634,70 +600,71 @@ implements OnSharedPreferenceChangeListener
 		
 		@Override
 		public void loop() throws ConnectionLostException, InterruptedException {
-		
-			ioio_.beginBatch();
-			try {
-			synchronized (lock_) {
-				if (!mShutdown) {
-					powout1_.write( powerState_ );
-					powout2_.write( powerState_ );			
-					
-				}
-			}
-			led_.write( !powerState_ );
-			
-			//Thread.sleep(5);
-			
-			synchronized ( lock_ ) {
-				if ( mFocusOn ) {
-					mFocusCount++;					
-					if ( mFocusCount < 20 ) {
-					mLedState[mFocusLedIndex] = true;
-					} else {
-						mLedState[mFocusLedIndex] = false;
-						mFocusOn = false;
-						mFocusCount = 0;
+
+			if ( delayCounter > 0) {
+				delayCounter--;
+			} else {
+				ioio_.beginBatch();
+				try {
+					synchronized (lock_) {
+						if (!mShutdown) {
+							powout1_.write( powerState_ );
+							powout2_.write( powerState_ );			
+						}
 					}
-				}
-				
-				pwmOutput1_.setPulseWidth( mLedState[0] == false ? 0 : mPulseWidth[0] );
-				pwmOutput2_.setPulseWidth( mLedState[1] == false ? 0 : mPulseWidth[1] );
-				pwmOutput3_.setPulseWidth( mLedState[2] == false ? 0 : mPulseWidth[2] );
-				pwmOutput4_.setPulseWidth( mLedState[3] == false ? 0 : mPulseWidth[3] );
-				pwmOutput5_.setPulseWidth( mLedState[4] == false ? 0 : mPulseWidth[4] );
-				pwmOutput6_.setPulseWidth( mLedState[5] == false ? 0 : mPulseWidth[5] );
+					
+					led_.write( !powerState_ );
+
+					//Thread.sleep(5);
+
+					synchronized ( lock_ ) {
+						if ( mFocusOn ) {
+							mFocusCount++;					
+							if ( mFocusCount < 20 ) {
+								mLedState[mFocusLedIndex] = true;
+							} else {
+								mLedState[mFocusLedIndex] = false;
+								mFocusOn = false;
+								mFocusCount = 0;
+							}
+						}
+
+						pwmOutput1_.setPulseWidth( mLedState[0] == false ? 0 : mPulseWidth[0] );
+						pwmOutput2_.setPulseWidth( mLedState[1] == false ? 0 : mPulseWidth[1] );
+						pwmOutput3_.setPulseWidth( mLedState[2] == false ? 0 : mPulseWidth[2] );
+						pwmOutput4_.setPulseWidth( mLedState[3] == false ? 0 : mPulseWidth[3] );
+						pwmOutput5_.setPulseWidth( mLedState[4] == false ? 0 : mPulseWidth[4] );
+						pwmOutput6_.setPulseWidth( mLedState[5] == false ? 0 : mPulseWidth[5] );
 
 
-				if ( mShutdown) {
-					// wait-time, required for making sure IOIO has turned power off from the (led)controller board
-					Thread.sleep(50);
-					powout1_.write( powerState_ );
-					powout2_.write( powerState_ );
+						if ( mShutdown) {
+							// wait-time, required for making sure IOIO has turned power off from the (led)controller board
+							//Thread.sleep(50);
+							delayCounter += 4;
+							powout1_.write( powerState_ );
+							powout2_.write( powerState_ );
+						}
+						led_.write( !powerState_ );
+					}
+				} finally {
+					ioio_.endBatch();
 				}
-				led_.write( !powerState_ );
 			}
-			} finally {
-				ioio_.endBatch();
-			}
-			
+
 			/*
 			 *  if we need (for some reason) to do softreset to IOIO
 			 */
 			if ( doIOIOreset ) {
 				ioio_.softReset();
 				doIOIOreset = false;
-				
+
 				logger.debug("IOIO reset completed");
 			}
-			
+
 			visualize(powerState_, mLedState);
 
-			if ( mImageSequenceComplete ) {
-				openImageAreaSelector();
-			}
-			
 			// sleep, ie. give other threads time to respond for default 10ms
-			Thread.sleep(20);
+			Thread.sleep(10);
 		}
 
 		/*
@@ -708,7 +675,14 @@ implements OnSharedPreferenceChangeListener
 		public void disconnected() {
 			logger.debug("IOIO.disconnected()");
 			enableUi(false);
-			showError("Connection error.", "Connection to led controller (IOIO) was lost."); 
+			
+			showError("Connection error.", "Connection to led controller (IOIO) was lost.");
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -761,7 +735,6 @@ implements OnSharedPreferenceChangeListener
 	}
 
 	
-
 	void showError(String err, String msg) {
 		logger.debug("showError('" + err + ", '" + msg + "')");
 		new AlertDialog.Builder(this)
@@ -867,7 +840,7 @@ implements OnSharedPreferenceChangeListener
 		}
 		
         try {
-        	saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
+        	//saveModeJPEG = sharedPref.getBoolean(KEY_PREF_SAVE_JPEG, true);
         	saveModeRAW = sharedPref.getBoolean(KEY_PREF_SAVE_RAW, false);
         	dump = "green";
         	mPulseWidth[LED_INDEX_GREEN] = Integer.parseInt(sharedPref.getString(KEY_PREF_GREEN_PULSEWIDTH, String.valueOf(mDefaultPulseWidth[LED_INDEX_GREEN])));
@@ -925,9 +898,9 @@ implements OnSharedPreferenceChangeListener
 			mPulseWidth[LED_INDEX_NIR] = sharedPreferences.getInt(KEY_PREF_NIR_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_NIR]);
 		}
 		
-		if (key.equalsIgnoreCase(KEY_PREF_SAVE_JPEG)) {
-			saveModeJPEG = sharedPreferences.getBoolean(KEY_PREF_SAVE_JPEG, true);
-		}
+		//if (key.equalsIgnoreCase(KEY_PREF_SAVE_JPEG)) {
+			//saveModeJPEG = sharedPreferences.getBoolean(KEY_PREF_SAVE_JPEG, true);
+		//}
 		if (key.equalsIgnoreCase(KEY_PREF_SAVE_RAW)) {
 			saveModeRAW = sharedPreferences.getBoolean(KEY_PREF_SAVE_RAW, false);
 		}		
@@ -1106,7 +1079,7 @@ implements OnSharedPreferenceChangeListener
 		case R.id.calibration:
 			logger.debug("Menu action: calibration: begin");
 			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, true);
-			mPreview.takeCalibrationPicture( saveModeJPEG, saveModeRAW, mStorageDir );
+			mPreview.takeCalibrationPicture( saveModeRAW, mStorageDir );
 			ledIndicator_.setLedState(LED_INDEX_CALIBRATE, false);
 			logger.debug("Menu action: calibration: done");
 			return true;

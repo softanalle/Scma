@@ -1,18 +1,5 @@
 Changelog
 
-1.0.24 Tommi Rintala 2014-01-01
-   * Checked that hardware is: SPRK0020
-   * checked that bootloader is: IOIO0400
-   * checked that firmware is: IOIO0330
-   * checked some IOIO time-out values
-   
-1.0.23 Tommi Rintala 2014-01-01
-   * removed non-essential includes
-   * removed non-essential graphics (smaller footprint)
-   * removed jpeg -option from menu, only RAW is reasonable option for user
-   * added more debug logging to Preview -class
-   
-
 1.0.22  Tommi Rintala, 2013-11-25
    * Removed changelog -class due to too large code size
    * Changed changelog to open changelog file with browser
