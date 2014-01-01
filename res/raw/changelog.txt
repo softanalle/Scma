@@ -1,5 +1,12 @@
 Changelog
 
+1.0.26 Tommi Rintala 2014-01-01
+   * change the order of components when showing image chooser
+    
+   
+1.0.25 Tommi Rintala 2014-01-01
+   * Removed some sleep -loops for stability
+   
 1.0.24 Tommi Rintala 2014-01-01
    * Checked that hardware is: SPRK0020
    * checked that bootloader is: IOIO0400

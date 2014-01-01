@@ -78,6 +78,7 @@ SurfaceView.OnClickListener */ {
 		
 		//mHolder.setType(SurfaceHolder.)
 		//Log.d(TAG, "create OK");
+		MainActivity.logger.debug("Preview() completed");
 	}
 
 	/*
@@ -86,7 +87,7 @@ SurfaceView.OnClickListener */ {
 	 */
 	public void surfaceCreated(SurfaceHolder holder) {
 		//Log.d(TAG, "surfaceCreated(holder)");
-		MainActivity.logger.debug("preview.surfaceCreated()", null);
+		MainActivity.logger.debug("preview.surfaceCreated()");
 		if ( camera == null ) {
 			Log.d(TAG, "-camera was null, opening");
 			// camera = getCameraInstance();
@@ -114,7 +115,8 @@ SurfaceView.OnClickListener */ {
 		//Log.d(TAG, "surfaceDestroyed(holder)");
 		MainActivity.logger.debug("preview.surfaceDestroyed()", null);
 		if ( camera != null ) {
-			Log.d(TAG, "-camera was not null, releasing");
+			//Log.d(TAG, "-camera was not null, releasing");
+			MainActivity.logger.debug("preview.surfaceDestroyed(): camera was not null, releasing");
 			stopPreview();
 			camera.release();
 			isPreview_ = false;
@@ -132,12 +134,14 @@ SurfaceView.OnClickListener */ {
 		MainActivity.logger.debug("preview.surfaceChanged()", null);
 		if (mHolder.getSurface() == null){
 			// preview surface does not exist
+			MainActivity.logger.debug("preview.surfaceChanged(): preview surface does not exist yet");
 			return;
 		}
 
 		// Log.d(TAG, "surfaceChanged(holder)");
 		if ( camera == null ) {
-			Log.d(TAG, "-camera was null, opening");
+			//Log.d(TAG, "-camera was null, opening");
+			MainActivity.logger.debug("preview.surfaceChanged(): camera was null, opening");
 			camera = getCameraInstance();
 		}
 
@@ -147,6 +151,7 @@ SurfaceView.OnClickListener */ {
 			isPreview_ = false;
 		} catch (Exception e){
 			// ignore: tried to stop a non-existent preview
+			MainActivity.logger.debug("preview.surfaceChanged(): tried to stop a non-existing preview");
 		}
 
 
@@ -154,7 +159,7 @@ SurfaceView.OnClickListener */ {
 		try {
 			if (camera != null) {
 
-
+				MainActivity.logger.debug("preview.surfaceChanged(): set camera parameters");
 				Camera.Parameters params = camera.getParameters();
 				params.setPreviewSize(width,  height);
 
@@ -166,6 +171,7 @@ SurfaceView.OnClickListener */ {
 					
 
 				// no compression!
+				
 				params.setJpegQuality(100);
 
 				List<Camera.Size> previewSizes = params.getSupportedPreviewSizes();
@@ -184,10 +190,13 @@ SurfaceView.OnClickListener */ {
 
 				if (supportedPictureFormats_.contains(ImageFormat.RGB_565)) {			
 					params.setPictureFormat(ImageFormat.RGB_565);
+					MainActivity.logger.debug("image format: RGB_565");
 				} else if ( supportedPictureFormats_.contains(ImageFormat.YV12)) {
 					params.setPictureFormat(ImageFormat.YV12);
+					MainActivity.logger.debug("image format: YV12");
 				} else {
 					params.setPictureFormat(ImageFormat.NV21);
+					MainActivity.logger.debug("image format: NV21");
 				}
 
 				// turn flash off
@@ -197,12 +206,14 @@ SurfaceView.OnClickListener */ {
 					params.setAutoWhiteBalanceLock(true);
 				} else {
 					Toast.makeText(getContext(), "Unable to lock AutoWhiteBalance", Toast.LENGTH_LONG).show();
+					MainActivity.logger.debug("preview.surfaceChanged(): unable to lock autoWhiteBalance");
 				}
 
 				if ( params. isAutoExposureLockSupported() ) {
 					params.setAutoExposureLock(true);
 				} else {
 					Toast.makeText(getContext(), "Unable to lock AutoExposure", Toast.LENGTH_LONG).show();
+					MainActivity.logger.debug("unable to lock AutoExposure");
 				}
 
 				// we don't work with GPS data
@@ -270,6 +281,7 @@ SurfaceView.OnClickListener */ {
 	public void startPreview() {
 		MainActivity.logger.debug("startPreview");
 		if ( camera != null && !isPreview_) {
+			MainActivity.logger.debug("preview.startPreview(): do stuff");
 			camera.startPreview();
 			isPreview_ = true;
 		}
@@ -281,6 +293,7 @@ SurfaceView.OnClickListener */ {
 	public void stopPreview() {
 		MainActivity.logger.debug("stopPreview");
 		if ( camera != null ) {
+			MainActivity.logger.debug("preview.stopPreview(): do stuff");
 			camera.stopPreview();
 			isPreview_ = false;
 		}
@@ -334,8 +347,10 @@ SurfaceView.OnClickListener */ {
 			outStream.close();
 			//Log.d(TAG, "writeImageToDisc - wrote bytes: " + data.length);
 			Toast.makeText(getContext(), filename + " - wrote bytes: " + data.length, Toast.LENGTH_SHORT).show();
+			MainActivity.logger.debug("preview.writeImageToDisc(" + filename + ")");
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
+			MainActivity.logger.debug("preview.writeImageToDisc(): FileNotFoundExeption: " + e.toString());
 			return false;
 		} catch (IOException e) {
 			MainActivity.logger.error("preview.writeImageToDisc(): " + e.toString());
@@ -362,6 +377,7 @@ SurfaceView.OnClickListener */ {
 			startPreview();
 			
 			if ( raw ) {
+				MainActivity.logger.debug("- write RAW image");
 				// set the raw-info data to image
 				Camera.Parameters parameters = camera.getParameters();
 				parameters.set("rawsave-mode",  "1");
@@ -374,12 +390,12 @@ SurfaceView.OnClickListener */ {
 
 				private String mJpegFilename = filename;
 				@Override public void onPictureTaken(byte[] data, Camera camera) {
-					try {
-						writeImageToDisc(mJpegFilename + ".JPG", data);					
-						Thread.sleep(200);
-					} catch (InterruptedException e) {
-						Toast.makeText(getContext(), "Error while saving JPEG file: " + e, Toast.LENGTH_LONG).show();
-					}
+					//try {
+					writeImageToDisc(mJpegFilename + ".JPG", data);					
+					//Thread.sleep(200);
+					//} catch (InterruptedException e) {
+					//Toast.makeText(getContext(), "Error while saving JPEG file: " + e, Toast.LENGTH_LONG).show();
+					//}
 				}
 			};
 
@@ -408,11 +424,13 @@ SurfaceView.OnClickListener */ {
 			*/
 			camera.takePicture(null,  rawCallback, jpegCallback);
 			isPreview_ = false;
+			/*
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
 				// if sleep fails, what can you do?
 			}
+			*/
 			startPreview();
 		}
 	}
@@ -483,6 +501,7 @@ SurfaceView.OnClickListener */ {
 
 	public ShutterCallback shutterCallback = new ShutterCallback() {
 		public void onShutter() {
+			MainActivity.logger.debug("preview.onShutter()");
 			//Log.d(TAG, "onShutter");
 		}
 	};

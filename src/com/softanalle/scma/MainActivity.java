@@ -90,6 +90,8 @@ implements OnSharedPreferenceChangeListener
 	private static final int IOIO_PIN_LED_GREEN  = 2;
 	private static final int IOIO_PIN_LED_BLUE   = 3;
 	private static final int IOIO_PIN_LED_RED    = 4;
+	
+
 
 	// if we need to do soft reset to IOIO, set this boolean to true
 	private boolean doIOIOreset = false;
@@ -486,6 +488,13 @@ implements OnSharedPreferenceChangeListener
 		}
 		
 		if ( mImageSequenceComplete ) {
+			ledIndicator_.setPowerState(false);
+			toggleButton_.setChecked(false);
+			pictureButton_.setEnabled(false);
+			focusButton_.setEnabled(true);
+			powerLedsOff();
+			mPreview.stopPreview();
+			
 			openImageAreaSelector();
 		}
 		
@@ -501,11 +510,7 @@ implements OnSharedPreferenceChangeListener
 			final String image_name = mImagePrefix;
 			@Override
 			public void run() {
-				ledIndicator_.setPowerState(false);
-				toggleButton_.setChecked(false);
-				pictureButton_.setEnabled(false);
-				focusButton_.setEnabled(true);
-				powerLedsOff();
+				
 				//mPreview.startPreview();
 
 				Intent intent = new Intent(getApplicationContext(), ImageActivity.class);
@@ -588,6 +593,14 @@ implements OnSharedPreferenceChangeListener
 			pwmOutput5_.setPulseWidth( 0 );
 			pwmOutput6_.setPulseWidth( 0 );
 						
+			logger.debug("Hardware: " + 
+					ioio_.getImplVersion(IOIO.VersionType.HARDWARE_VER));
+			logger.debug("Bootloader: " + 
+					ioio_.getImplVersion(IOIO.VersionType.BOOTLOADER_VER));
+			logger.debug("App firmware: " + 
+					ioio_.getImplVersion(IOIO.VersionType.APP_FIRMWARE_VER));
+			logger.debug("IOIO Lib: " + 
+					ioio_.getImplVersion(IOIO.VersionType.IOIOLIB_VER));
 			
 			mFocusCount = 0;
 			mFocusOn = false;
@@ -1011,7 +1024,7 @@ implements OnSharedPreferenceChangeListener
             break;
         case RESULT_IMAGE_ACTIVITY:
         	// TODO: do something here!
-        	String msg = data.getStringExtra(ARG_IMAGE_ACTIVITY_RESULT);
+        	//String msg = data.getStringExtra(ARG_IMAGE_ACTIVITY_RESULT);
         	break;
         }
  
