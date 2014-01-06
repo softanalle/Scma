@@ -24,6 +24,8 @@ package com.softanalle.scma;
 
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.Menu;
 
 import java.io.File;
@@ -45,6 +47,7 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 
+import com.google.code.microlog4android.Level;
 import com.google.code.microlog4android.Logger;
 import com.google.code.microlog4android.LoggerFactory;
 import com.google.code.microlog4android.config.PropertyConfigurator;
@@ -80,6 +83,13 @@ public class MainActivity extends IOIOActivity
 implements OnSharedPreferenceChangeListener 
  
 {
+	// messages
+	protected static final int MSG_IOIO_READY = 1;
+	protected static final int MSG_IMAGE_READY = 2;
+	
+	
+	protected static int _image_seq = -1;
+	
 	// IOIO pin settings
 	private static final int IOIO_PIN_BOARD1_UP = 6;
 	private static final int IOIO_PIN_BOARD2_UP = 5;
@@ -91,7 +101,7 @@ implements OnSharedPreferenceChangeListener
 	private static final int IOIO_PIN_LED_BLUE   = 3;
 	private static final int IOIO_PIN_LED_RED    = 4;
 	
-
+	private boolean hasIOIO = false;
 
 	// if we need to do soft reset to IOIO, set this boolean to true
 	private boolean doIOIOreset = false;
@@ -123,7 +133,7 @@ implements OnSharedPreferenceChangeListener
 
 	private final int defaultPulseWidth = 500; // PWM pulse width
 	//private final int mLedFlashTime = 30; // milliseconds the led takes to raise/shutdown
-	private final int mLedCount = 6; // how many leds actually there are!
+	private static final int mLedCount = 6; // how many leds actually there are!
 
 	private int mFocusLedIndex = 2; // led INDEX of focus color; default=3  
 	private int defaultFocusPulseWidth = 300; // PWM pulse width for focus 
@@ -147,7 +157,7 @@ implements OnSharedPreferenceChangeListener
 	public static String mStorageDir = "n/a";	
 
     // Splash screen timer
-    private static final int SPLASH_TIME_OUT = 3000;
+    protected static final int SPLASH_TIME_OUT = 3000;
 
     /*
      * TODO: Focus ledille oma pulsewidth asetus:
@@ -173,6 +183,8 @@ implements OnSharedPreferenceChangeListener
 	public static final String KEY_PREF_SAVE_RAW = "conf_write_raw";
 
 	public static final String KEY_PREF_PREVIEW_SCALE = "conf_preview_scale";
+
+	public static final String KEY_PREF_LOGLEVEL = "conf_log_level";
 	
 	private boolean powerState_ = false;
 	private String mImagePrefix = "";
@@ -369,9 +381,16 @@ implements OnSharedPreferenceChangeListener
 		mDPM = (DevicePolicyManager) getSystemService(Context.DEVICE_POLICY_SERVICE);
 		Log.d(TAG, "  getCameraDisabled(): " + mDPM.getCameraDisabled(null));
 
-		
+		// Display the fragment as the main content.
+		/*
+        getFragmentManager().beginTransaction()
+                .replace(android.R.id.content, new SettingsFragment())
+                .commit();
+    */
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
 		getSettings();
+		
 		/*
 		List<Integer> modes = mPreview.getSupportedPictureFormats();
 		String lista = "";
@@ -468,6 +487,10 @@ implements OnSharedPreferenceChangeListener
 											
 				Thread.sleep(mCameraRetryDelay);
 				
+				Message m = Message.obtain();
+				m.what = MSG_IMAGE_READY;
+				_messagehandler.handleMessage(m);
+				
 				mPulseWidth[index] = 0;
 				mLedState[index] = false;
 				
@@ -488,6 +511,7 @@ implements OnSharedPreferenceChangeListener
 		}
 		
 		if ( mImageSequenceComplete ) {
+			logger.debug("Image sequence completed - 2");
 			ledIndicator_.setPowerState(false);
 			toggleButton_.setChecked(false);
 			pictureButton_.setEnabled(false);
@@ -607,9 +631,13 @@ implements OnSharedPreferenceChangeListener
 			
 			enableUi(true);
 			logger.debug("IOIO.setup() done");
+			
+			Message m = Message.obtain();
+			m.what = MainActivity.MSG_IOIO_READY;
+			_messagehandler.handleMessage(m);
 		}
 
-		
+
 		
 		@Override
 		public void loop() throws ConnectionLostException, InterruptedException {
@@ -815,14 +843,28 @@ implements OnSharedPreferenceChangeListener
 		logger.debug("resetSettings()");
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         Toast.makeText(getApplicationContext(), "Settings reseted", Toast.LENGTH_LONG).show();
+        logger.debug("reset settings");
 	}
 
+	/*
+	 * load settings 
+	 */
 	private void getSettings() {
 		logger.debug("getSettings()");
         SharedPreferences sharedPref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+//        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 		String dump = "before";
 		File tmp = Environment.getExternalStorageDirectory();
+		try {
+			
+			Level loglevel = Level.valueOf(sharedPref.getString(KEY_PREF_LOGLEVEL, "DEBUG"));
+			
+			logger.setLevel(loglevel);
+			logger.debug("Set loglevel to: " + logger.getLevel().toString());
+		} catch (Exception e) {
+			showError("Exception while setting loglevel", e.toString());
+			
+		}
 		try {
 			mStorageDir = new File(tmp.getCanonicalPath() + "/SCM").getCanonicalPath();
 		
@@ -881,13 +923,32 @@ implements OnSharedPreferenceChangeListener
         }
 
 	}
+
+	protected Level parseLogLevel(String str) {
+		if ( str.equalsIgnoreCase("debug")) {
+			return Level.DEBUG;
+		}
+		if ( str.equalsIgnoreCase("error")) {
+			return Level.ERROR;
+		}
+		if ( str.equalsIgnoreCase("info")) {
+			return Level.INFO;
+		}
+		if ( str.equalsIgnoreCase("fatal")) {
+			return Level.FATAL;
+		}
+		if ( str.equalsIgnoreCase("off")) {
+			return Level.OFF;
+		}
+		return Level.DEBUG;
+	}
 	
 	/*
 	 * Respond to preference changes
 	 * @see android.content.SharedPreferences.OnSharedPreferenceChangeListener#onSharedPreferenceChanged(android.content.SharedPreferences, java.lang.String)
 	 */
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-		logger.debug("onSharedPreferenceChanged()");
+		logger.debug("onSharedPreferenceChanged(): " + key);
 		//Preference keyPref = findPreference(key);
 		if ( key.equalsIgnoreCase(KEY_PREF_FOCUSCOLOR)) {
 			mFocusLedIndex = sharedPreferences.getInt(KEY_PREF_FOCUSCOLOR, 3);
@@ -910,7 +971,10 @@ implements OnSharedPreferenceChangeListener
 		if ( key.equalsIgnoreCase(KEY_PREF_NIR_PULSEWIDTH)) {
 			mPulseWidth[LED_INDEX_NIR] = sharedPreferences.getInt(KEY_PREF_NIR_PULSEWIDTH, mDefaultPulseWidth[LED_INDEX_NIR]);
 		}
-		
+		if (key.equalsIgnoreCase(KEY_PREF_LOGLEVEL)) {
+			String level = sharedPreferences.getString(KEY_PREF_LOGLEVEL, "DEBUG");
+			logger.setLevel(parseLogLevel(level));			
+		}
 		//if (key.equalsIgnoreCase(KEY_PREF_SAVE_JPEG)) {
 			//saveModeJPEG = sharedPreferences.getBoolean(KEY_PREF_SAVE_JPEG, true);
 		//}
@@ -941,8 +1005,8 @@ implements OnSharedPreferenceChangeListener
 	 */
 	@Override
 	protected void onPause () {
-		super.onPause();
-		logger.debug("onPause()");
+		super.onPause();		
+		logger.debug("MainActivity.onPause()");
 		if ( mPreview != null ) {
 			mPreview.releaseCamera();
 		}
@@ -958,9 +1022,17 @@ implements OnSharedPreferenceChangeListener
 	@Override
 	protected void onResume() {
 		super.onResume();
-		logger.debug("onResume()");
+		logger.debug("MainActivity.onResume()");
 		if ( mPreview != null ) {
 			mPreview.reclaimCamera();
+		} else {
+			try {
+				mPreview = new Preview(this);	
+				FrameLayout tmp = (FrameLayout) findViewById(R.id.camera_preview);
+				tmp.addView(mPreview);
+			} catch (Exception e) {
+				logger.error("onResume: " + e.toString());
+			}
 		}
 		SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
 		sp.registerOnSharedPreferenceChangeListener(this);
@@ -1128,9 +1200,9 @@ implements OnSharedPreferenceChangeListener
 			t.run();
 			return true;
 		}
-		/*
+		//
 		case R.id.itemTest1: {
-			
+			logger.debug("Start areaselector test");
 			intent = new Intent(getApplicationContext(), ImageActivity.class);
 			intent.putExtra(ARG_WORKDIR, mStorageDir );
 			File f = new File( mStorageDir );
@@ -1144,10 +1216,35 @@ implements OnSharedPreferenceChangeListener
 			startActivity(intent);
 			return true;
 		}
-		*/
+		
 		default:
 			return super.onOptionsItemSelected(item);
 		}
 	}
 
+	public Handler _messagehandler = new Handler() {
+		@Override
+		public void handleMessage(Message msg) {
+			Log.d(TAG, String.format("Handler.handleMessage(): msg=%s", msg));
+			logger.debug("handleMessage: " + msg);
+			// This is where main activity thread receives messages
+			// Put here your handling of incoming messages posted by other threads
+			super.handleMessage(msg);
+
+			switch (msg.what) {
+			case MSG_IOIO_READY: {
+				hasIOIO = true;
+				break;
+			}
+		
+			case MSG_IMAGE_READY: {
+				_image_seq++;
+				break;
+			}
+			
+			
+			default:
+			}
+		}
+	};
 }

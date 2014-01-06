@@ -173,7 +173,8 @@ public class AreaSelector extends View {
 
 		int action = e.getAction() & MotionEvent.ACTION_MASK;
 
-		MainActivity.logger.debug("AreaSelector.onTouchEvent(" + action + ")");
+		Log.d(TAG, "onTouchEvent( [" + x + ", " + y + "] " + action + ")");
+		MainActivity.logger.debug("AreaSelector.onTouchEvent(" + x + ", " + y + " : " + action + ")");
 
 		switch (action) {
 		case MotionEvent.ACTION_MOVE: {
@@ -192,8 +193,6 @@ public class AreaSelector extends View {
 				// Remember this touch position for the next move event
 				mPreviousX = x;
 				mPreviousY = y;
-
-
 
 				invalidate();
 			}

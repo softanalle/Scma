@@ -108,8 +108,8 @@ public class LedIndicator extends View {
 				mLeds[i].getPaint().setColor(mOffColor);
 				int x = mLeft + 2 + i * mWidth;
 				int y = mTop + 2 ;
-				
-				mLedArea[i] = new Rect( mRight - mWidth, y, mRight, y + mHeight );
+				mLedArea[i] = new Rect( x, y, x + mWidth, y + mHeight );
+				//mLedArea[i] = new Rect( mRight - mWidth, y, mRight, y + mHeight );
 				mLeds[i].setBounds(mLedArea[i]);
 				// mLeds[i].setBounds(x, y, x + mWidth, y + mHeight);
 			}

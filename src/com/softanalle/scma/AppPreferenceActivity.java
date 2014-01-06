@@ -37,6 +37,7 @@ import android.widget.Toast;
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
 public class AppPreferenceActivity extends PreferenceActivity 
 implements OnSharedPreferenceChangeListener
 {
@@ -45,7 +46,7 @@ implements OnSharedPreferenceChangeListener
 	public void onCreate(Bundle savedInstanceState) {        
 		setTheme(android.R.style.Theme_Black_NoTitleBar_Fullscreen);
 		super.onCreate(savedInstanceState);        
-		
+		MainActivity.logger.debug("AppPreferenceActivity.onCreate()");
 		addPreferencesFromResource(R.xml.preferences);  
 		for (int i = 0; i < getPreferenceScreen().getPreferenceCount(); i++) {
             initSummary(getPreferenceScreen().getPreference(i));
@@ -54,6 +55,7 @@ implements OnSharedPreferenceChangeListener
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		MainActivity.logger.debug("AppPreferenceActivity.onCreateOptionsMenu()");
 		//menu.add(Menu.NONE, R.menu.menu, 0, "Settings");
 		menu.add(Menu.NONE, 0, 0, "Show current settings");
 		return super.onCreateOptionsMenu(menu);
@@ -62,6 +64,7 @@ implements OnSharedPreferenceChangeListener
 	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		MainActivity.logger.debug("AppPreferenceActivity.onOptionsItemSelected: " + item.toString());
 		switch (item.getItemId()) {
 		case 0:
 			// startActivity(new Intent(this, MainActivity.class));
@@ -84,13 +87,21 @@ implements OnSharedPreferenceChangeListener
             connectionPref.setSummary(sharedPreferences.getString(key, "Selected color"));
         }
         */
-        updatePrefSummary(findPreference(key));
+		MainActivity.logger.debug("AppPreferenceActivity.onSharedPreferenceChanged: " + key );
+		if (key.equals(MainActivity.KEY_PREF_LOGLEVEL)) {
+			MainActivity.logger.debug(" loglevel: " + key + " => " + sharedPreferences.getString(MainActivity.KEY_PREF_LOGLEVEL, "DEBUG"));
+			updatePrefSummary(findPreference(key));
+			SharedPreferences.Editor edit = sharedPreferences.edit();
+			//edit.putString(key, value);
+			edit.commit();
+		}
     }
 
 	@SuppressWarnings("deprecation")
 	@Override
     protected void onResume() {
         super.onResume();
+        MainActivity.logger.debug("AppPreferenceActivity.onResume");
         // Set up a listener whenever a key changes
         getPreferenceScreen().getSharedPreferences()
                 .registerOnSharedPreferenceChangeListener(this);
@@ -100,12 +111,14 @@ implements OnSharedPreferenceChangeListener
 	@Override
     protected void onPause() {
         super.onPause();
+        MainActivity.logger.debug("AppPreferenceActivity.onPause()");
         // Unregister the listener whenever a key changes
         getPreferenceScreen().getSharedPreferences()
                 .unregisterOnSharedPreferenceChangeListener(this);
     }
     
     private void initSummary(Preference p) {
+    	MainActivity.logger.debug("AppPreferenceActivity.initSummary()");
         if (p instanceof PreferenceCategory) {
             PreferenceCategory pCat = (PreferenceCategory) p;
             for (int i = 0; i < pCat.getPreferenceCount(); i++) {
@@ -117,6 +130,7 @@ implements OnSharedPreferenceChangeListener
     }
 
     private void updatePrefSummary(Preference p) {
+    	MainActivity.logger.debug("AppPreferenceActivity.updatePrefSummary()");
         if (p instanceof ListPreference) {
             ListPreference listPref = (ListPreference) p;
             p.setSummary("Currently selected: " + listPref.getEntry());

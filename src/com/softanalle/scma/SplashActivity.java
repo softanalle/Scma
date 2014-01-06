@@ -5,6 +5,7 @@ package com.softanalle.scma;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Bundle;
 import android.os.Handler;
 import android.widget.TextView;
@@ -14,16 +15,24 @@ import android.widget.TextView;
  *
  */
 public class SplashActivity extends Activity {
-	// Splash screen timer
-	private static int SPLASH_TIME_OUT = 10000;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.about_layout);
-
+		String versionName = "n/a";
+		int versionCode = 0;
+		
+		try {
+			versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+			versionCode = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
+		} catch (NameNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		TextView topText = (TextView) findViewById(R.id.textTop);
-		topText.setText(R.string.app_version_string);
+		topText.setText( "version: " + versionName + " (" + versionCode + ")");
 		
 		new Handler().postDelayed(new Runnable() {
 
@@ -42,6 +51,6 @@ public class SplashActivity extends Activity {
 				// close this activity
 				finish();
 			}
-		}, SPLASH_TIME_OUT);
+		}, MainActivity.SPLASH_TIME_OUT);
 	}
 }

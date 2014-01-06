@@ -188,12 +188,18 @@ SurfaceView.OnClickListener */ {
 
 				params.setFocusMode(Parameters.FOCUS_MODE_MACRO);
 
-				if (supportedPictureFormats_.contains(ImageFormat.RGB_565)) {			
+				if ( supportedPictureFormats_.contains(ImageFormat.JPEG)) {
+					params.setPictureFormat(ImageFormat.JPEG);
+					MainActivity.logger.debug("image format: JPEG");
+				} else if (supportedPictureFormats_.contains(ImageFormat.RGB_565)) {			
 					params.setPictureFormat(ImageFormat.RGB_565);
 					MainActivity.logger.debug("image format: RGB_565");
 				} else if ( supportedPictureFormats_.contains(ImageFormat.YV12)) {
 					params.setPictureFormat(ImageFormat.YV12);
 					MainActivity.logger.debug("image format: YV12");
+				} else if ( supportedPictureFormats_.contains(ImageFormat.YUY2)) {
+					MainActivity.logger.debug("image format: YU12");
+					params.setPictureFormat(ImageFormat.YUY2);
 				} else {
 					params.setPictureFormat(ImageFormat.NV21);
 					MainActivity.logger.debug("image format: NV21");
@@ -512,6 +518,7 @@ SurfaceView.OnClickListener */ {
 	 * release camera handler, called on application onResume()
 	 */
 	public void releaseCamera() {
+		stopPreview();
 		MainActivity.logger.debug("preview.releaseCamera()");
 		if ( camera != null ) {
 			camera.release();

@@ -5,26 +5,58 @@
         android:orderInCategory="100"
         android:showAsAction="never"
         android:title="@string/mn_scma_label"/>
-    <item android:id="@+id/calibration" android:orderInCategory="200" android:showAsAction="ifRoom" android:title="@string/mn_calibrate_label"></item><item
-	android:id="@+id/reset_settings"
-	android:visible="true"
-	android:enabled="true"
-	android:title="@string/mn_reset_label" android:orderInCategory="300">
+    <item
+        android:id="@+id/about_info"
+        android:orderInCategory="500"
+        android:showAsAction="never"
+        android:title="@string/mn_about_label">
     </item>
-    <item android:id="@+id/about_info"
-          android:showAsAction="never"
-          android:title="@string/mn_about_label"
-          android:orderInCategory="500"></item>
-    <item android:id="@+id/itemCopyAssets"
-          android:title="@string/mn_copyassets_label"
-          android:orderInCategory="800"></item>
-    <item android:id="@+id/resetIOIO"
-          android:title="@string/mn_resetioio_label"
-          android:orderInCategory="820"></item>
-    
-    <item android:id="@+id/changelog_full"
-          android:title="@string/mn_changelog_label"
-          android:orderInCategory="900">
-        </item>
+    <item android:id="@+id/adv_settings"
+        android:title="Advanced">
+        <menu>
+            <item
+                android:id="@+id/calibration"
+                android:orderInCategory="200"
+                android:showAsAction="never"
+                android:title="@string/mn_calibrate_label">
+            </item>
+            <item
+                android:id="@+id/reset_settings"
+                android:enabled="true"
+                android:orderInCategory="300"
+                android:showAsAction="never"
+                android:title="@string/mn_reset_label"
+                android:visible="true">
+            </item>
+            <item
+                android:id="@+id/resetIOIO"
+                android:orderInCategory="820"
+                android:showAsAction="never"
+                android:title="@string/mn_resetioio_label">
+            </item>
+        </menu>
+    </item>
+	<item
+	    android:id="@+id/adv2"
+	    android:title="Devel">
+	    <menu>
+	        <item
+	            android:id="@+id/itemCopyAssets"
+	            android:orderInCategory="800"
+	            android:showAsAction="never"
+	            android:title="@string/mn_copyassets_label">
+	        </item>
+	        <item
+	            android:id="@+id/changelog_full"
+	            android:orderInCategory="900"
+	            android:showAsAction="never"
+	            android:title="@string/mn_changelog_label">
+	        </item>
+	        <item
+	            android:id="@+id/itemTest1"
+	            android:title="Test Selector"
+	            ></item>
+	    </menu>
+	</item>
 
 </menu>

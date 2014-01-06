@@ -78,6 +78,7 @@ public class ImageActivity extends Activity {
 		
 		//String image_prefix = savedInstanceState.getString(MainActivity.ARG_IMAGE_PREFIX);
 		//String workingDir = savedInstanceState.getString(MainActivity.ARG_WORKDIR);
+		
 		if ( mImagePrefix == null ) {
 			mImagePrefix = "[name missing]";
 		}
@@ -111,6 +112,8 @@ public class ImageActivity extends Activity {
 		closeButton_.bringToFront();
 		resetButton_.bringToFront();
 		
+		areaSelector_.setFocusable(true);
+		
 		approveButton_.setOnClickListener(new OnClickListener() {
 			
 			@Override
@@ -130,7 +133,7 @@ public class ImageActivity extends Activity {
 				areaSelector_.reset();				
 			}
 		});
-		// loading of large image might take some time...
+		// loading of large image might take some time... so start it in new thread
 		Thread t = new Thread(new Runnable() {
 			final String wd = mWorkdir;
 			final String pr = mImagePrefix;
@@ -140,6 +143,8 @@ public class ImageActivity extends Activity {
 			}
 		});
 		t.run();
+		
+		MainActivity.logger.debug("ImageActivity.onCreate(): Started image loader thread");
 				
 		// Toast.makeText(getApplicationContext(), "Implement here image loading", Toast.LENGTH_LONG).show();
 		// Toast.makeText(getApplicationContext(), "Implement here image manipulation", Toast.LENGTH_LONG).show();
@@ -150,6 +155,7 @@ public class ImageActivity extends Activity {
 	
 	public Bitmap getResizedBitmap(Bitmap bm, int newHeight, int newWidth) {
 		 
+		MainActivity.logger.debug("ImageActivity.getResizedBitmap");
 		int width = bm.getWidth();		 
 		int height = bm.getHeight();
 		 
@@ -161,7 +167,7 @@ public class ImageActivity extends Activity {
 		 
 		// resize the bit map		 
 		mScaleMatrix.postScale(scaleWidth, scaleHeight);
-		 
+		MainActivity.logger.debug("- scale: " + scaleWidth + " x " + scaleHeight); 
 		// recreate the new Bitmap		 
 		Bitmap resizedBitmap = Bitmap.createBitmap(bm, 0, 0, width, height, mScaleMatrix, false);
 		 
@@ -176,7 +182,7 @@ public class ImageActivity extends Activity {
 	 * @param filename
 	 */
 	private void showImage(String workdir, String filename) {
-
+		MainActivity.logger.debug("ImageActivity.showImage(" + filename + ")");
 		mWidth = imageView_.getWidth();
 		mHeight = imageView_.getHeight();
 		
@@ -198,6 +204,7 @@ public class ImageActivity extends Activity {
 			imageView_.setImageBitmap(BitmapFactory.decodeFile(fullname, opts));
 
 		} else {
+			MainActivity.logger.error("File does not exist: " + fullname);
 			Toast.makeText(getApplicationContext(), "Image '" + fullname + "' load failed", Toast.LENGTH_LONG).show();
 			Log.e(TAG, "Image '" + fullname + "' load failed");
 		}

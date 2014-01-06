@@ -2,6 +2,7 @@ Changelog
 
 1.0.26 Tommi Rintala 2014-01-01
    * change the order of components when showing image chooser
+   * fix the menu for narrow display
     
    
 1.0.25 Tommi Rintala 2014-01-01

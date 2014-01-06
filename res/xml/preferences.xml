@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
-    <PreferenceCategory android:title="@string/conf_filemode_label" android:order="100">
-        <CheckBoxPreference android:key="conf_write_raw" 
-            android:title="@string/conf_writeraw_label" 
-            android:summaryOn="Save RAW image into JPEG envelope" 
-            android:defaultValue="false" 
-            android:summaryOff="Don't save RAW image info" android:dependency="@string/conf_writejpeg_label"/>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" ><PreferenceCategory
+        android:order="100"
+        android:title="@string/label_app_settings" >
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="conf_write_raw"
+            android:order="1"
+            android:summaryOff="Don&apos;t save RAW image info"
+            android:summaryOn="Save RAW image into JPEG envelope"
+            android:title="@string/conf_writeraw_label" >
+        </CheckBoxPreference>
+        <ListPreference android:key="conf_log_level" android:entryValues="@array/loglevels" android:defaultValue="DEBUG" android:order="10" android:entries="@array/loglevels" android:title="@string/label_log_level"/>
     </PreferenceCategory>
-    
-    <PreferenceCategory 
+<PreferenceCategory 
         android:title="@string/led_powers_label" 
-        android:order="200"><EditTextPreference 
+        android:order="200">
+        <EditTextPreference 
             android:title="@string/pw_red_label" 
             android:defaultValue="@string/pref_pulsewidth_default" 
             android:key="conf_red_pwm" 
@@ -33,7 +38,8 @@
             android:lines="1"
             android:maxLength="4"
             android:maxLines="1"
-            android:singleLine="true" android:summary="@string/conf_ledpwm_label"/>
+            android:singleLine="true" 
+            android:summary="@string/conf_ledpwm_label"/>
         <EditTextPreference 
             android:title="@string/pw_blue_label" 
             android:defaultValue="@string/pref_pulsewidth_default" 
@@ -98,10 +104,26 @@
             android:persistent="true" 
             android:summary="Seleted focus color" 
             android:order="310" 
-            android:defaultValue="@string/pref_focusled_color"/><EditTextPreference android:title="@string/pw_focus_label" android:defaultValue="@string/pref_pulsewidth_default" android:key="conf_focus_pwm" android:enabled="true" android:inputType="number" android:lines="1" android:maxLength="4" android:maxLines="1" android:singleLine="true" android:order="315" android:summary="@string/conf_ledpwm_label" />
+            android:defaultValue="@string/pref_focusled_color"/>
         
+        <EditTextPreference 
+            android:title="@string/pw_focus_label" 
+            android:defaultValue="@string/pref_pulsewidth_default" 
+            android:key="conf_focus_pwm" 
+            android:enabled="true" 
+            android:inputType="number" 
+            android:lines="1" 
+            android:maxLength="4" 
+            android:maxLines="1" 
+            android:singleLine="true" 
+            android:order="315" 
+            android:summary="@string/conf_ledpwm_label" />
         
-    </PreferenceCategory><PreferenceCategory android:title="Image preview" android:order="400">
+    </PreferenceCategory>
+    
+    <PreferenceCategory 
+        android:title="Image preview" 
+        android:order="400">
         <ListPreference 
             android:key="conf_preview_scale" 
             android:title="Preview image scale factor" 

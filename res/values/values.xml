@@ -55,4 +55,11 @@
         <item>1/8</item>
         <item>1/16</item>
     </string-array>    
+    <string-array name="loglevels">
+        <item>DEBUG</item>
+        <item>ERROR</item>
+        <item>INFO</item>
+        <item>FATAL</item>
+        <item>OFF</item>
+    </string-array>
 </resources>
